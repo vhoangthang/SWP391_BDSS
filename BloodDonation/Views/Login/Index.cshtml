@@ -1,0 +1,36 @@
+﻿@model BloodDonation.Models.LoginViewModel
+@{
+    Layout = null;
+}
+
+<div class="login-container">
+    <div class="login-box">
+        <h2>Đăng nhập</h2>
+        <p>Hoặc <a href="/Account/Register">Đăng ký tài khoản mới</a></p>
+
+        <form method="post" action="/Login/Index">
+            <div class="user-type">
+                <label><input type="radio" name="Role" value="Donor" checked /> Người hiến máu</label>
+                <label><input type="radio" name="Role" value="Staff" /> Nhân viên</label>
+                <label><input type="radio" name="Role" value="Admin" /> Admin</label>
+                <label><input type="radio" name="Role" value="MedicalCenter" /> Cơ sở y tế</label>
+            </div>
+
+            <input type="text" name="Username" placeholder="Tên đăng nhập" value="@Model?.Username" required />
+            <input type="password" name="Password" placeholder="Mật khẩu" required />
+
+            <div class="form-footer">
+                <label><input type="checkbox" name="RememberMe" /> Ghi nhớ đăng nhập</label>
+                <a href="/Account/ForgotPassword">Quên mật khẩu?</a>
+            </div>
+
+            <button type="submit">Đăng nhập</button>
+
+            <div style="color:red; margin-top:10px;">
+                @Html.ValidationSummary()
+            </div>
+        </form>
+    </div>
+</div>
+
+<link rel="stylesheet" href="/css/login.css" />

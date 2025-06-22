@@ -1,0 +1,197 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LifeBlood - Trang Chủ</title>
+    <link rel="stylesheet" href="/css/Homepage.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="logo">LifeBlood</div>
+        <button class="donate-now">HIẾN MÁU NGAY</button>
+        <nav class="nav-links">
+            <a asp-controller="BookingDayAndBloodType" asp-action="Index">Hiến Máu</a>
+            @if (ViewBag.IsLoggedIn == true && ViewBag.LatestAppointmentId != null)
+            {
+                <a asp-controller="DonationSummary" asp-action="Index" asp-route-appointmentId="@ViewBag.LatestAppointmentId" class="nav-link nav-history-link">Lịch Sử Hiến Máu</a>
+            }
+            <a href="#">Về Chúng Tôi</a>
+            <a href="#">Chứng nhận</a>
+            <a href="#">Tìm Điểm Hiến Máu</a>
+            <a href="#">Liên Hệ</a>
+            <a asp-controller="Profile" asp-action="Index">Profile</a>
+        </nav>
+        <div class="right-section">
+            <a href="DonorReceiveNotification.html">
+                <button class="notify-btn"><i class="fas fa-bell"></i></button>
+            </a>
+
+            @if (ViewBag.IsLoggedIn == true)
+            {
+                <span>Welcome!</span>
+                <a asp-controller="Login" asp-action="Logout"><button class="login-btn">Đăng xuất</button></a>
+            }
+            else
+            {
+                <a asp-controller="Login" asp-action="Index">
+                    <button class="login-btn">Đăng nhập</button>
+                </a>
+            }
+        </div>
+    </header>
+
+
+    <!-- Main Image and Donation Button -->
+    <section class="hero">
+        <div class="hero-overlay">
+            <h1>Trao Tặng Sự Sống</h1>
+            <p>Mỗi lần hiến máu có thể cứu sống 3 người. Đặt lịch hiến máu ngay hôm nay.</p>
+            <div class="hero-buttons">
+                @if (ViewBag.IsLoggedIn != null && ViewBag.IsLoggedIn == true)
+                {
+                    <a asp-controller="BookingDayAndBloodType" asp-action="Index">
+                        <button class="btn-red">Đặt Lịch Hiến Máu</button>
+                    </a>
+                }
+                else
+                {
+                    <button class="btn-red" onclick="alert('Bạn cần đăng nhập để đặt lịch hiến máu!')">Đặt Lịch Hiến Máu</button>
+                }
+
+                <button class="btn-outline">Tìm Điểm Hiến Máu Gần Bạn</button>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Lý Do Hiến Máu -->
+    <section class="reasons">
+        <h2>Tại Sao Nên Hiến Máu?</h2>
+        <div class="reason-cards">
+            <div class="card">
+                <h3>Nhanh Chóng & Dễ Dàng</h3>
+                <p>Quá trình hiến máu chỉ mất khoảng 10 phút.</p>
+            </div>
+            <div class="card">
+                <h3>Cứu Sống Người Khác</h3>
+                <p>Mỗi lần hiến máu có thể cứu sống 3 người.</p>
+            </div>
+            <div class="card">
+                <h3>Lợi Ích Sức Khỏe</h3>
+                <p>Hiến máu có thể giúp giảm nguy cơ bệnh tim mạch.</p>
+            </div>
+            <div class="card">
+                <h3>Tác Động Cộng Đồng</h3>
+                <p>Góp phần giúp cộng đồng luôn sẵn sàng hiến máu khi cần.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tìm Điểm Hiến Máu -->
+    <section class="search-location">
+        <h2>Tìm Điểm Hiến Máu</h2>
+        <div class="donation-section">
+            <div class="donation-left">
+                <h3>Đặt Lịch Hiến Máu</h3>
+                <p>Tìm điểm hiến máu hoặc trung tâm hiến máu gần bạn và đặt lịch để cứu sống người khác.</p>
+                <input type="text" placeholder="e.g. 10001 or New York, NY" />
+                <button class="btn-find">Tìm</button>
+                <div class="donation-links">
+                    <a href="#">📅 Đặt Lịch Hẹn</a>
+                    <a href="#">Xem Tất Cả Địa Điểm</a>
+                </div>
+            </div>
+
+            <div class="donation-right">
+                <h4>Nhu Cầu Khẩn Cấp</h4>
+                <p>Nguồn máu đang ở mức rất thấp.</p>
+                <div class="blood-levels">
+                    <div><span class="dot red"></span> A+</div>
+                    <div><span class="dot red"></span> A-</div>
+                    <div><span class="dot yellow"></span> B+</div>
+                    <div><span class="dot green"></span> B-</div>
+                    <div><span class="dot red"></span> O+</div>
+                    <div><span class="dot green"></span> O-</div>
+                    <div><span class="dot yellow"></span> AB+</div>
+                    <div><span class="dot red"></span> AB-</div>
+                </div>
+                <p class="update-time">Updated: Today at 9:00 AM</p>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Điều kiện -->
+    <section class="eligibility">
+        <h2>Điều Kiện Hiến Máu</h2>
+        <div class="conditions">
+            <div class="condition green">
+                <h3>Yêu Cầu Cơ Bản</h3>
+                <ul>
+                    <li>16-17 tuổi trở lên</li>
+                    <li>Cân nặng ≥ 50kg</li>
+                    <li>Sức khỏe tốt</li>
+                </ul>
+            </div>
+            <div class="condition yellow">
+                <h3>Tạm Thời Không Hiến Được</h3>
+                <ul>
+                    <li>Cảm cúm trong 24h</li>
+                    <li>Đang mang thai</li>
+                    <li>Đi xa về từ vùng dịch</li>
+                </ul>
+            </div>
+            <div class="condition red">
+                <h3>Không Thể Hiến Máu Nếu</h3>
+                <ul>
+                    <li>Nhiễm HIV</li>
+                    <li>Bệnh mãn tính</li>
+                    <li>Tiêm chích ma túy</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-cols">
+            <div>
+                <h4>LifeBlood</h4>
+                <p>Sứ mệnh của chúng tôi là đem lại sự sống nhờ những giọt máu.</p>
+            </div>
+            <div>
+                <h4>Liên Kết Nhanh</h4>
+                <ul>
+                    <li><a href="#">Đặt Lịch Hẹn</a></li>
+                    <li><a href="#">Tổ Chức Hiến Máu</a></li>
+                    <li><a href="#">Điều Kiện Hiến Máu</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Liên Hệ</h4>
+                <p>1800-1166</p>
+                <p>lienhe@lifeblood.org</p>
+            </div>
+            <div>
+                <h4>Đăng Ký Nhận Tin</h4>
+                <input type="email" placeholder="Email của bạn" />
+                <button>Đăng Ký</button>
+            </div>
+        </div>
+        <p class="copyright">© 2025 LifeBlood. Đã đăng ký bản quyền.</p>
+    </footer>
+</body>
+
+</html>
