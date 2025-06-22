@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing;
-using projectBlood.Models;
-using BloodDonationSupport.Models;
+using BloodDonation.Models;
 
-namespace projectBlood.Data
+namespace BloodDonation.Data
 {
     public class MyDbContext : DbContext
     {
