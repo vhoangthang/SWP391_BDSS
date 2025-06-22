@@ -32,3 +32,15 @@ C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\BloodDonation\obj\Debug\net8.
 C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\BloodDonation\obj\Debug\net8.0\BloodDonation.pdb
 C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\BloodDonation\obj\Debug\net8.0\BloodDonation.genruntimeconfig.cache
 C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\BloodDonation\obj\Debug\net8.0\ref\BloodDonation.dll
+C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\obj\Debug\net8.0\BloodDonation.GeneratedMSBuildEditorConfig.editorconfig
+C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\obj\Debug\net8.0\BloodDonation.AssemblyInfoInputs.cache
+C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\obj\Debug\net8.0\BloodDonation.AssemblyInfo.cs
+C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\obj\Debug\net8.0\BloodDonation.csproj.CoreCompileInputs.cache
+C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\obj\Debug\net8.0\BloodDonation.MvcApplicationPartsAssemblyInfo.cache
+C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\obj\Debug\net8.0\BloodDonation.RazorAssemblyInfo.cache
+C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\obj\Debug\net8.0\BloodDonation.RazorAssemblyInfo.cs
+C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\obj\Debug\net8.0\BloodDonation.sourcelink.json
+C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\obj\Debug\net8.0\BloodDonation.dll
+C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\obj\Debug\net8.0\refint\BloodDonation.dll
+C:\FPT\Semester 5\SWP391\SWP391_BDSS\BloodDonation\obj\Debug\net8.0\BloodDonation.pdb
