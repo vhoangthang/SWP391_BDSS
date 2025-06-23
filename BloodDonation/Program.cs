@@ -12,7 +12,7 @@ namespace BloodDonation
             var builder = WebApplication.CreateBuilder(args);
 
             // ✅ Kết nối DbContext
-            builder.Services.AddDbContext<MyDbContext>(options =>
+            builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // ✅ Đăng ký Repository
