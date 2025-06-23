@@ -2,7 +2,6 @@
 using BloodDonation.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using BloodDonation.Models;
 using System;
 using System.Linq;
 
@@ -10,10 +9,10 @@ namespace BloodDonation.Controllers
 {
     public class LoginController : Controller
     {
-        private readonly MyDbContext _context;
+        private readonly AppDbContext _context;
         private readonly ILogger<LoginController> _logger;
 
-        public LoginController(MyDbContext context, ILogger<LoginController> logger)
+        public LoginController(AppDbContext context, ILogger<LoginController> logger)
         {
             _context = context;
             _logger = logger;
