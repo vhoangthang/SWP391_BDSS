@@ -1,0 +1,59 @@
+/* DonationSummary styles */
+.donation-summary-container {
+    max-width: 700px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 32px 24px;
+}
+.donation-summary-container h1 {
+    color: #d80027;
+    margin-bottom: 24px;
+    text-align: center;
+}
+.donation-summary-container h2 {
+    color: #333;
+    margin-top: 28px;
+    margin-bottom: 12px;
+}
+.donation-summary-container ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 18px;
+}
+.donation-summary-container ul li {
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+}
+.donation-summary-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    margin-bottom: 24px;
+}
+.donation-summary-container th, .donation-summary-container td {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    text-align: left;
+}
+.donation-summary-container th {
+    background: #f8d7da;
+    color: #d80027;
+}
+.donation-summary-container tr:nth-child(even) {
+    background: #f9f9f9;
+}
+.delete-btn {
+    background: #d80027;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.6rem 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.delete-btn:hover {
+    background: #a3001b;
+} 
