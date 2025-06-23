@@ -6,5 +6,6 @@
         public const string Rejected = "Rejected";
         public const string Completed = "Completed";
         public const string Cancelled = "Cancelled";
+        public const string Approved = "Approved";
     }
 }
