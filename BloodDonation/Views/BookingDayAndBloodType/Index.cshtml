@@ -1,0 +1,45 @@
+﻿@model BloodDonation.Models.BookAppointmentViewModel
+@{
+    ViewBag.Title = "Đặt lịch hiến máu";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+<!-- Main Content: Đặt lịch hiến máu -->
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="bg-white p-5 rounded shadow">
+                <h2 class="text-center text-danger mb-4">Đặt lịch hiến máu</h2>
+                <form asp-action="Index" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Chọn ngày</label>
+                        <input asp-for="AppointmentDate" type="date" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-dd")" max="2026-12-31" id="appointmentDate" />
+                        <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Chọn khung giờ</label>
+                        <select asp-for="TimeSlot" class="form-control">
+                            <option value="">-- Chọn khung giờ --</option>
+                            <option value="Sáng">Sáng (07:00 - 11:00)</option>
+                            <option value="Chiều">Chiều (13:00 - 17:00)</option>
+                        </select>
+                        <span asp-validation-for="TimeSlot" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nhóm máu</label>
+                        <select asp-for="BloodTypeID" class="form-control" asp-items="ViewBag.BloodTypes"></select>
+                        <span asp-validation-for="BloodTypeID" class="text-danger"></span>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-danger btn-lg rounded-pill">Tiếp tục</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Main Content -->
+
+@section Scripts {
+    <script src="/js/BloodDonationBooking.js"></script>
+}
