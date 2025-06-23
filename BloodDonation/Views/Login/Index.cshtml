@@ -9,13 +9,6 @@
         <p>Hoặc <a href="/Account/Register">Đăng ký tài khoản mới</a></p>
 
         <form method="post" action="/Login/Index">
-            <div class="user-type">
-                <label><input type="radio" name="Role" value="Donor" checked /> Người hiến máu</label>
-                <label><input type="radio" name="Role" value="Staff" /> Nhân viên</label>
-                <label><input type="radio" name="Role" value="Admin" /> Admin</label>
-                <label><input type="radio" name="Role" value="MedicalCenter" /> Cơ sở y tế</label>
-            </div>
-
             <input type="text" name="Username" placeholder="Tên đăng nhập" value="@Model?.Username" required />
             <input type="password" name="Password" placeholder="Mật khẩu" required />
 
