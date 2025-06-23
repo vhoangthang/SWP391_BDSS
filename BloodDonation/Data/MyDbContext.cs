@@ -3,15 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using System.Drawing;
 using BloodDonation.Models;
 
-<<<<<<< HEAD
-=======
-
->>>>>>> e0407c6adb1e695f4b0ef65e74630f585920bb2a
 namespace BloodDonation.Data
 {
-    public class AppDbContext : DbContext
+    public class MyDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options)
+        public MyDbContext(DbContextOptions<MyDbContext> options)
             : base(options)
         {
         }
