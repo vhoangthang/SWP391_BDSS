@@ -1,0 +1,44 @@
+﻿@model BloodDonation.Models.BloodRequest
+@{
+    ViewData["Title"] = "Xử lý yêu cầu nhận máu";
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+}
+<div class="container mt-4">
+    <h4 class="mb-4 fw-bold">🛠️ Xử lý yêu cầu nhận máu</h4>
+
+    <div class="card shadow-sm">
+        <div class="card-header fw-bold">Thông tin yêu cầu</div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-4">Cơ sở y tế</dt>
+                <dd class="col-sm-8">@Model.MedicalCenter?.Name</dd>
+
+                <dt class="col-sm-4">Ngày yêu cầu</dt>
+                <dd class="col-sm-8">@Model.RequestDate.ToString("yyyy-MM-dd")</dd>
+
+                <dt class="col-sm-4">Nhóm máu</dt>
+                <dd class="col-sm-8">@Model.BloodType?.Type</dd>
+
+                <dt class="col-sm-4">Số lượng yêu cầu (ml)</dt>
+                <dd class="col-sm-8">@Model.Quantity</dd>
+
+                @* <dt class="col-sm-4">Mức độ ưu tiên</dt> *@
+                @* <dd class="col-sm-8">@Model.Priority</dd> *@
+
+                @* <dt class="col-sm-4">Thông tin bệnh nhân</dt> *@
+                @* <dd class="col-sm-8">@Model.PatientInfo</dd> *@
+            </dl>
+
+            <form asp-action="CompleteBloodRequest" asp-controller="Staff" method="post">
+                <input type="hidden" name="id" value="@Model.BloodRequestID" />
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Ghi chú xử lý</label>
+                    <textarea name="Note" class="form-control" rows="3" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success" onclick="return confirm('Xác nhận đã xử lý yêu cầu này?')">✅ Đánh dấu hoàn tất</button>
+            </form>
+        </div>
+    </div>
+</div>
