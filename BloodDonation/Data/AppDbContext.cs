@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Drawing;
 using BloodDonation.Models;
 
-
 namespace BloodDonation.Data
 {
     public class AppDbContext : DbContext
