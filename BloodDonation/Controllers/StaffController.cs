@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using projectBlood.Data;
-using projectBlood.Models;
+using BloodDonation.Data;
+using BloodDonation.Models;
 using System;
 using System.Linq;
 using System.Text.Json;
 
 
-namespace projectBlood.Controllers
+namespace BloodDonation.Controllers
 {
     public class StaffController : Controller
     {
