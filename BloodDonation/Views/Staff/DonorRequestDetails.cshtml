@@ -1,0 +1,207 @@
+﻿@model BloodDonation.Models.DonationAppointment
+
+@{
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+    ViewData["Title"] = "Chi tiết đăng ký hiến máu";
+    var donor = Model.Donor;
+}
+
+<div class="container mt-4">
+    <h4 class="mb-4 fw-bold">🩸 Chi tiết đăng ký hiến máu</h4>
+
+    <div class="row">
+        <!-- Thông tin người hiến máu -->
+        <div class="col-md-7">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header fw-bold">Thông tin người hiến máu</div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">👤 Họ và tên</dt>
+                        <dd class="col-sm-8">@donor.Name</dd>
+
+                        <dt class="col-sm-4">📧 Email</dt>
+                        <dd class="col-sm-8">@donor.Account?.Email</dd>
+
+                        <dt class="col-sm-4">🗓 Ngày sinh</dt>
+                        <dd class="col-sm-8">@donor.DateOfBirth?.ToString("yyyy-MM-dd")</dd>
+
+                        <dt class="col-sm-4">📞 Số điện thoại</dt>
+                        <dd class="col-sm-8">@donor.ContactNumber</dd>
+
+                        <dt class="col-sm-4">📍 Địa chỉ</dt>
+                        <dd class="col-sm-8">@donor.Address</dd>
+
+                        <dt class="col-sm-4">🧬 Nhóm máu</dt>
+                        <dd class="col-sm-8">@donor.BloodType?.Type</dd>
+
+                        <dt class="col-sm-4">🆔 CCCD</dt>
+                        <dd class="col-sm-8">@donor.CCCD</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Thông tin sức khỏe -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header fw-bold">Thông tin sức khỏe</div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">📄 Tiền sử bệnh</dt>
+                        <dd class="col-sm-8">
+                            <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#healthHistoryModal">
+                                Xem tiểu sử bệnh án
+                            </button>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header fw-bold">Thông tin yêu cầu</div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">📅 Ngày yêu cầu</dt>
+                        <dd class="col-sm-8">@Model.AppointmentDate.ToString("yyyy-MM-dd") ?? "Không có"</dd>
+
+                        <dt class="col-sm-4">🩸 Nhóm máu</dt>
+                        <dd class="col-sm-8">@Model.BloodType?.Type</dd>
+
+                        <dt class="col-sm-4">📌 Trạng thái</dt>
+                        <dd class="col-sm-8">
+                            @switch (Model.Status)
+                            {
+                                case "Pending":
+                                    <span class="badge bg-warning text-dark">⏳ Chờ xác nhận</span>
+                                    ; break;
+                                case "Confirmed":
+                                    <span class="badge bg-primary">✔️ Đã xác nhận</span>
+                                    ; break;
+                                case "Rejected":
+                                    <span class="badge bg-danger">❌ Từ chối</span>
+                                    ; break;
+                                case "Completed":
+                                    <span class="badge bg-success">✅ Hoàn tất</span>
+                                    ; break;
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Xử lý xác nhận -->
+        <div class="col-md-5">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header fw-bold">Xác nhận hiến máu</div>
+                <div class="card-body">
+                    @if (Model.Status == "Pending" || Model.Status == "Confirmed")
+                    {
+                        <form method="post" asp-action="ConfirmDonation" asp-controller="Staff">
+                            <input type="hidden" name="AppointmentID" value="@Model.AppointmentID" />
+
+                            <div class="mb-2">Đủ điều kiện hiến máu?</div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="IsEligible" id="eligible" value="true" checked />
+                                <label class="form-check-label text-success fw-bold" for="eligible">✔️ Đủ điều kiện</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="IsEligible" id="notEligible" value="false" />
+                                <label class="form-check-label text-danger fw-bold" for="notEligible">❌ Không đủ</label>
+                            </div>
+
+                            <div class="mt-3">
+                                <label>Lượng máu dự kiến hiến (cc)</label>
+                                <input type="number" name="QuantityDonated" class="form-control" value="1" />
+                            </div>
+
+                            <div class="mt-4 d-flex justify-content-between">
+                                <div>
+                                    <button type="submit" name="action" value="reject" class="btn btn-danger">Từ chối</button>
+                                    <button type="submit" name="action" value="confirm" class="btn btn-primary">Xác nhận</button>
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" name="action" value="completed" class="btn btn-success" onclick="return confirm('Xác nhận đã hoàn tất hiến máu?')">✅ Hoàn tất</button>
+                                </div>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <strong>🔒 Thông báo:</strong> Đơn hiến máu đã được xử lý với trạng thái <span class="fw-bold">@Model.Status</span>. Không thể thay đổi nữa.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+@section Modal {
+    @{
+        var survey = ViewData["HealthSurvey"] as Dictionary<string, bool>;
+        var questionMap = new Dictionary<string, string>
+                {
+                    ["1_AnhChiDaTungHienMauChua"] = "1. Anh/Chị đã từng hiến máu chưa?",
+                    ["2_HienTaiAnhChiCoMacBenhLyKhong"] = "2. Hiện tại Anh/Chị có mắc bệnh lý không?",
+                    ["3_TruocDayAnhChiCoMacCacBenhLietKeKhong"] = "3. Trước đây có mắc các bệnh liệt kê không?",
+                    ["4_KhoiBenhSauMacCacBenh12Thang"] = "4. Khỏi bệnh sau khi mắc bệnh trong 12 tháng?",
+                    ["4_DuocTruyenMauHoacGayGhepMo"] = "5. Được truyền máu hoặc ghép mô?",
+                    ["4_TiemVaccine"] = "6. Tiêm vaccine gần đây?",
+                    ["5_KhoiBenhSauMacCacBenh6Thang"] = "7. Khỏi bệnh sau mắc bệnh 6 tháng?",
+                    ["6_KhoiBenhSauMacCacBenh1Thang"] = "8. Khỏi bệnh sau mắc bệnh 1 tháng?",
+                    ["7_BiCumCamLanhHoNhucDauSotDauHong14Ngay"] = "9. Có triệu chứng cảm cúm trong 14 ngày?",
+                    ["8_DungThuocKhangSinhKhangVirus"] = "10. Đang dùng kháng sinh/virus?",
+                    ["8_DungThuocKhangSinhKhangViemAspirinCorticoide7Ngay"] = "11. Đang dùng Aspirin/Corticoid 7 ngày?",
+                    ["9_HienChiDangMangThaiHoacCoThai12ThangTruoc"] = "12. Mang thai hiện tại hoặc 12 tháng trước?",
+                    ["9_ChamDutThaiKy12ThangGanDay"] = "13. Chấm dứt thai kỳ 12 tháng gần đây?",
+                    ["10_AnhChiSanSangHienMauNeuDuDieuKien"] = "14. Sẵn sàng hiến máu nếu đủ điều kiện?"
+                };
+    }
+
+    <div class="modal fade" id="healthHistoryModal" tabindex="-1" aria-labelledby="healthHistoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="healthHistoryModalLabel">🩺 Tiểu sử bệnh án</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    @if (survey != null)
+                    {
+                        <table class="table table-bordered table-hover table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Câu hỏi</th>
+                                    <th class="text-center">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in questionMap)
+                                {
+                                    <tr>
+                                        <td>@item.Value</td>
+                                        <td class="text-center">
+                                            @if (survey.TryGetValue(item.Key, out var value) && value)
+                                            {
+                                                <span class="text-success fw-bold">✅ Có</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-danger fw-bold">❌ Không</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted fst-italic">Không có thông tin khảo sát sức khỏe.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
