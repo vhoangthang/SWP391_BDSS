@@ -125,8 +125,11 @@
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <div class="navbar-nav ms-auto py-0">
                     <a asp-controller="Home" asp-action="Index" class="nav-item nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Home" && ViewContext.RouteData.Values["action"].ToString() == "Index" ? "active" : "")">Trang chủ</a>
-                    <a asp-controller="Home" asp-action="About" class="nav-item nav-link @(ViewContext.RouteData.Values["action"].ToString() == "About" ? "active" : "")">Giới thiệu</a>
-                    <a asp-controller="Service" asp-action="Index" class="nav-item nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Service" ? "active" : "")">Dịch vụ</a>
+                    @if (ViewBag.IsLoggedIn == true)
+                    {
+                        <a asp-controller="DonationSummary" asp-action="Index" class="nav-link nav-history-link">Lịch Sử Hiến Máu</a>
+                    }
+                    <a asp-controller="Certificate" asp-action="Index" class="nav-item nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Service" ? "active" : "")">Chứng nhận</a>
                     <a asp-controller="Blog" asp-action="Index" class="nav-item nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Blog" ? "active" : "")">Tin tức</a>
                     <a href="/FAQ.html" class="nav-item nav-link">Hỏi đáp</a>
                     <div class="nav-item dropdown">
@@ -135,7 +138,7 @@
                         </a>
                         <div class="dropdown-menu m-0">
                             <a asp-controller="Feature" asp-action="Index" class="dropdown-item">Tính năng</a>
-                            <a asp-controller="Team" asp-action="Index" class="dropdown-item">Đội ngũ</a>
+                            <a asp-controller="Certificate" asp-action="Index" class="dropdown-item">Chứng nhận</a>
                             <a asp-controller="Testimonial" asp-action="Index" class="dropdown-item">Cảm nhận</a>
                             <a asp-controller="Offer" asp-action="Index" class="dropdown-item">Lợi ích</a>
                             <a asp-controller="Faq" asp-action="Index" class="dropdown-item">FAQs</a>
@@ -214,7 +217,7 @@
                             <h4 class="text-white"><i class="fas fa-tint me-3"></i>Hiến Máu</h4>
                         </a>
                         <p class="mb-4">Lan tỏa yêu thương, kết nối sự sống.</p>
-                        <div class="d-flex">
+                        @* <div class="d-flex">
                             <a href="#" class="bg-danger d-flex rounded align-items-center py-2 px-3 me-2">
                                 <i class="fas fa-apple-alt text-white"></i>
                                 <div class="ms-3">
@@ -229,7 +232,7 @@
                                     <h6 class="text-white">Google Play</h6>
                                 </div>
                             </a>
-                        </div>
+                        </div> *@
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-6 col-xl-2">
