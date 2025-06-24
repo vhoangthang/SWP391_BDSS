@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Thông Báo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/notification.css" asp-append-version="true" />
+</head>
+
+<div class="notification-container">
+    <div class="notification-header">
+        <i class="fas fa-bell icon"></i>
+        <h2>Thông Báo Của Bạn</h2>
+    </div>
+
+    <div class="notification-list">
+        <!-- Ví dụ về thông báo khẩn cấp -->
+        <div class="notification-item unread">
+            <div class="icon-wrapper">
+                <i class="fas fa-tint"></i>
+            </div>
+            <div class="content">
+                <p><strong>[Khẩn cấp]</strong> Bệnh viện A cần nhóm máu O tại TP.HCM.</p>
+                <div class="notification-actions">
+                     <a href="#" class="btn btn-sm btn-danger">Xác nhận hiến máu</a>
+                </div>
+            </div>
+            <div class="timestamp">
+                5 phút trước
+            </div>
+        </div>
+
+        <!-- Ví dụ về thông báo xác nhận -->
+        <div class="notification-item">
+            <div class="icon-wrapper">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="content">
+                <p>Lịch hẹn hiến máu của bạn vào ngày 20/6 lúc 13:00 đã được xác nhận.</p>
+            </div>
+            <div class="timestamp">
+                2 giờ trước
+            </div>
+        </div>
+        
+        <!-- Ví dụ về thông báo thông tin -->
+        <div class="notification-item">
+            <div class="icon-wrapper">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="content">
+                <p>Cảm ơn bạn đã cập nhật thông tin cá nhân.</p>
+            </div>
+            <div class="timestamp">
+                1 ngày trước
+            </div>
+        </div>
+
+        <!-- Ví dụ về thông báo cảnh báo -->
+        <div class="notification-item">
+            <div class="icon-wrapper">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="content">
+                <p>Vui lòng cập nhật lại địa chỉ của bạn trước lần hiến máu tiếp theo.</p>
+            </div>
+            <div class="timestamp">
+                3 ngày trước
+            </div>
+        </div>
+    </div>
+</div>
