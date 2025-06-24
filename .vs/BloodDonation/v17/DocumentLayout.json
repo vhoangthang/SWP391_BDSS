@@ -1,0 +1,152 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\FPT\\Semester 5\\SWP391\\SWP391_BDSS\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{BC4F4809-D4D8-45EB-962B-1C82749CC881}|BloodDonation\\BloodDonation.csproj|c:\\fpt\\semester 5\\swp391\\swp391_bdss\\blooddonation\\wwwroot\\css\\donationbookingform_v2.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{BC4F4809-D4D8-45EB-962B-1C82749CC881}|BloodDonation\\BloodDonation.csproj|solutionrelative:blooddonation\\wwwroot\\css\\donationbookingform_v2.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BC4F4809-D4D8-45EB-962B-1C82749CC881}|BloodDonation\\BloodDonation.csproj|c:\\fpt\\semester 5\\swp391\\swp391_bdss\\blooddonation\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BC4F4809-D4D8-45EB-962B-1C82749CC881}|BloodDonation\\BloodDonation.csproj|solutionrelative:blooddonation\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BC4F4809-D4D8-45EB-962B-1C82749CC881}|BloodDonation\\BloodDonation.csproj|c:\\fpt\\semester 5\\swp391\\swp391_bdss\\blooddonation\\controllers\\staffcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BC4F4809-D4D8-45EB-962B-1C82749CC881}|BloodDonation\\BloodDonation.csproj|solutionrelative:blooddonation\\controllers\\staffcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BC4F4809-D4D8-45EB-962B-1C82749CC881}|BloodDonation\\BloodDonation.csproj|c:\\fpt\\semester 5\\swp391\\swp391_bdss\\blooddonation\\controllers\\logincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BC4F4809-D4D8-45EB-962B-1C82749CC881}|BloodDonation\\BloodDonation.csproj|solutionrelative:blooddonation\\controllers\\logincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BC4F4809-D4D8-45EB-962B-1C82749CC881}|BloodDonation\\BloodDonation.csproj|c:\\fpt\\semester 5\\swp391\\swp391_bdss\\blooddonation\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BC4F4809-D4D8-45EB-962B-1C82749CC881}|BloodDonation\\BloodDonation.csproj|solutionrelative:blooddonation\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BC4F4809-D4D8-45EB-962B-1C82749CC881}|BloodDonation\\BloodDonation.csproj|c:\\fpt\\semester 5\\swp391\\swp391_bdss\\blooddonation\\controllers\\bookingdayandbloodtypecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BC4F4809-D4D8-45EB-962B-1C82749CC881}|BloodDonation\\BloodDonation.csproj|solutionrelative:blooddonation\\controllers\\bookingdayandbloodtypecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BC4F4809-D4D8-45EB-962B-1C82749CC881}|BloodDonation\\BloodDonation.csproj|c:\\fpt\\semester 5\\swp391\\swp391_bdss\\blooddonation\\repository\\donorrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BC4F4809-D4D8-45EB-962B-1C82749CC881}|BloodDonation\\BloodDonation.csproj|solutionrelative:blooddonation\\repository\\donorrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "DonationBookingForm_v2.css",
+              "DocumentMoniker": "C:\\FPT\\Semester 5\\SWP391\\SWP391_BDSS\\BloodDonation\\wwwroot\\css\\DonationBookingForm_v2.css",
+              "RelativeDocumentMoniker": "BloodDonation\\wwwroot\\css\\DonationBookingForm_v2.css",
+              "ToolTip": "C:\\FPT\\Semester 5\\SWP391\\SWP391_BDSS\\BloodDonation\\wwwroot\\css\\DonationBookingForm_v2.css",
+              "RelativeToolTip": "BloodDonation\\wwwroot\\css\\DonationBookingForm_v2.css",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-06-23T11:13:14.707Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\FPT\\Semester 5\\SWP391\\SWP391_BDSS\\BloodDonation\\Program.cs",
+              "RelativeDocumentMoniker": "BloodDonation\\Program.cs",
+              "ToolTip": "C:\\FPT\\Semester 5\\SWP391\\SWP391_BDSS\\BloodDonation\\Program.cs",
+              "RelativeToolTip": "BloodDonation\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-23T09:24:15.121Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "LoginController.cs",
+              "DocumentMoniker": "C:\\FPT\\Semester 5\\SWP391\\SWP391_BDSS\\BloodDonation\\Controllers\\LoginController.cs",
+              "RelativeDocumentMoniker": "BloodDonation\\Controllers\\LoginController.cs",
+              "ToolTip": "C:\\FPT\\Semester 5\\SWP391\\SWP391_BDSS\\BloodDonation\\Controllers\\LoginController.cs",
+              "RelativeToolTip": "BloodDonation\\Controllers\\LoginController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-23T09:09:28.102Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "C:\\FPT\\Semester 5\\SWP391\\SWP391_BDSS\\BloodDonation\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "BloodDonation\\Controllers\\HomeController.cs",
+              "ToolTip": "C:\\FPT\\Semester 5\\SWP391\\SWP391_BDSS\\BloodDonation\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "BloodDonation\\Controllers\\HomeController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-23T09:09:24.319Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "BookingDayAndBloodTypeController.cs",
+              "DocumentMoniker": "C:\\FPT\\Semester 5\\SWP391\\SWP391_BDSS\\BloodDonation\\Controllers\\BookingDayAndBloodTypeController.cs",
+              "RelativeDocumentMoniker": "BloodDonation\\Controllers\\BookingDayAndBloodTypeController.cs",
+              "ToolTip": "C:\\FPT\\Semester 5\\SWP391\\SWP391_BDSS\\BloodDonation\\Controllers\\BookingDayAndBloodTypeController.cs",
+              "RelativeToolTip": "BloodDonation\\Controllers\\BookingDayAndBloodTypeController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-23T09:09:18.19Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "DonorRepository.cs",
+              "DocumentMoniker": "C:\\FPT\\Semester 5\\SWP391\\SWP391_BDSS\\BloodDonation\\Repository\\DonorRepository.cs",
+              "RelativeDocumentMoniker": "BloodDonation\\Repository\\DonorRepository.cs",
+              "ToolTip": "C:\\FPT\\Semester 5\\SWP391\\SWP391_BDSS\\BloodDonation\\Repository\\DonorRepository.cs",
+              "RelativeToolTip": "BloodDonation\\Repository\\DonorRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-23T09:07:28.457Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "StaffController.cs",
+              "DocumentMoniker": "C:\\FPT\\Semester 5\\SWP391\\SWP391_BDSS\\BloodDonation\\Controllers\\StaffController.cs",
+              "RelativeDocumentMoniker": "BloodDonation\\Controllers\\StaffController.cs",
+              "ToolTip": "C:\\FPT\\Semester 5\\SWP391\\SWP391_BDSS\\BloodDonation\\Controllers\\StaffController.cs",
+              "RelativeToolTip": "BloodDonation\\Controllers\\StaffController.cs",
+              "ViewState": "AgIAAGgAAAAAAAAAAAAkwHUAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-23T09:06:17.83Z"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 1113,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
