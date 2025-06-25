@@ -32,57 +32,61 @@
             <tbody>
                 @foreach (var req in Model)
                 {
-                    <tr>
-                        <td>
-                            <strong>@req.MedicalCenter?.Name</strong><br />
-                        </td>
-                        <td class="text-center">@req.BloodType?.Type</td>
-                        <td class="text-center">@req.RequestDate.ToString("yyyy-MM-dd")</td>
-                        <td class="text-center">@req.Quantity</td>
-                        <td class="text-center">
-                            @if (req.IsEmergency)
-                            {
-                                <span class="badge bg-danger">🚨 Khẩn cấp</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-secondary">Thông thường</span>
-                            }
-                        </td>
-                        <td class="text-center">
-                            @switch (req.Status)
-                            {
-                                case "Pending":
-                                    <span class="badge bg-warning text-dark">⏳ Chờ duyệt</span>
-                                    ; break;
-                                case "Approved":
-                                    <span class="badge bf-comfirm"><span class="check-circle">✔</span> Đã duyệt</span>
-                                    ; break;
-                                case "Completed":
-                                    <span class="badge bg-success">✅ Hoàn tất</span>
-                                    ; break;
-                                case "Rejected":
-                                    <span class="badge bg-danger">❌ Từ chối</span>
-                                    ; break;
-                                default:
-                                    <span class="badge bg-secondary">@req.Status</span>
-                                    ; break;
-                            }
-                        </td>
-                        <td class="text-center">
-                            @if (req.Status == "Completed")
-                            {
-                                <button class="btn btn-outline-secondary btn-sm" disabled>Đã xử lý</button>
-                            }
-                            else
-                            {
-                                <a href="@Url.Action("ProcessBloodRequest", "Staff", new { id = req.BloodRequestID })" class="btn btn-outline-danger btn-sm">
-                                    Xử lý
-                                </a>
-                            }
-                        </td>
-                    </tr>
+                    if (req.Status == "Approved" || req.Status == "Completed")
+                    {
+                        <tr>
+                            <td>
+                                <strong>@req.MedicalCenter?.Name</strong><br />
+                            </td>
+                            <td class="text-center">@req.BloodType?.Type</td>
+                            <td class="text-center">@req.RequestDate.ToString("yyyy-MM-dd")</td>
+                            <td class="text-center">@req.Quantity</td>
+                            <td class="text-center">
+                                @if (req.IsEmergency)
+                                {
+                                    <span class="badge bg-danger">🚨 Khẩn cấp</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Thông thường</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @switch (req.Status)
+                                {
+                                    case "Pending":
+                                        <span class="badge bg-warning text-dark">⏳ Chờ duyệt</span>
+                                        ; break;
+                                    case "Approved":
+                                        <span class="badge bf-comfirm"><span class="check-circle">✔</span> Đã duyệt</span>
+                                        ; break;
+                                    case "Completed":
+                                        <span class="badge bg-success">✅ Hoàn tất</span>
+                                        ; break;
+                                    case "Rejected":
+                                        <span class="badge bg-danger">❌ Từ chối</span>
+                                        ; break;
+                                    default:
+                                        <span class="badge bg-secondary">@req.Status</span>
+                                        ; break;
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (req.Status == "Completed")
+                                {
+                                    <button class="btn btn-outline-secondary btn-sm" disabled>Đã xử lý</button>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("ProcessBloodRequest", "Staff", new { id = req.BloodRequestID })" class="btn btn-outline-danger btn-sm">
+                                        Xử lý
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
                 }
+
             </tbody>
         </table>
     </div>
