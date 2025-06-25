@@ -27,7 +27,7 @@ namespace BloodDonation.Controllers
         public ActionResult Logout()
         {
             HttpContext.Session.Clear(); // Xóa toàn bộ session
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Home"); // Chuyển về trang chủ
         }
 
         // POST: Login

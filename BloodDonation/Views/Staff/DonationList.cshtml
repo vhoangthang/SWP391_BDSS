@@ -41,18 +41,21 @@
                         <td class="text-center">@item.TimeSlot</td>
                         <td>Quận @item.Donor?.Address</td>
                         <td class="text-center">
-                            @switch (item.Status)
+                            @switch (item.Status?.ToLower())
                             {
-                                case "Pending":
+                                case "pending":
                                     <span class="badge bg-warning text-dark">⏳ Chờ xác nhận</span>
                                     ; break;
-                                case "Confirmed":
-                                    <span class="badge bf-comfirm"><span class="check-circle">✔</span> Đã xác nhận</span>
+                                case "confirmed":
+                                    <span class="badge bg-primary">✔ Đã xác nhận</span>
                                     ; break;
-                                case "Completed":
+                                case "approved":
+                                    <span class="badge bg-info text-dark">🟦 Đã duyệt</span>
+                                    ; break;
+                                case "completed":
                                     <span class="badge bg-success">✅ Hoàn tất</span>
                                     ; break;
-                                case "Rejected":
+                                case "rejected":
                                     <span class="badge bg-danger">❌ Từ chối</span>
                                     ; break;
                                 default:
