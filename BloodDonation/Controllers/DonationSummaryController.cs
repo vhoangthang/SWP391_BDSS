@@ -81,18 +81,32 @@ namespace BloodDonation.Controllers
             var appointment = _context.DonationAppointments.FirstOrDefault(a => a.AppointmentID == appointmentId);
             if (appointment != null)
             {
-                var surveys = _context.HealthSurveys
-                    .Where(h => h.AppointmentID != null && h.AppointmentID == appointmentId)
-                    .ToList();
-                if (surveys.Any())
+                if (appointment.Status == "Completed")
                 {
-                    _context.HealthSurveys.RemoveRange(surveys);
+                    // Không cho xóa, có thể trả về thông báo hoặc đơn giản là không làm gì
+                    return RedirectToAction("Index");
                 }
-
-                _context.DonationAppointments.Remove(appointment);
-                _context.SaveChanges();
+                else if (appointment.Status == "Pending")
+                {
+                    // Xóa như cũ
+                    var surveys = _context.HealthSurveys
+                        .Where(h => h.AppointmentID != null && h.AppointmentID == appointmentId)
+                        .ToList();
+                    if (surveys.Any())
+                    {
+                        _context.HealthSurveys.RemoveRange(surveys);
+                    }
+                    _context.DonationAppointments.Remove(appointment);
+                    _context.SaveChanges();
+                }
+                else if (appointment.Status == "Confirmed")
+                {
+                    // Chuyển trạng thái sang Cancelled
+                    appointment.Status = "Cancelled";
+                    _context.SaveChanges();
+                }
             }
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index");
         }
     }
 }
