@@ -34,6 +34,8 @@ namespace BloodDonation.Models
 
         public string Status { get; set; }
 
+        public Decimal QuantityDonated { get; set; }
+
         public string HealthSurvey { get; set; }
 
         public DonationCertificate DonationCertificate { get; set; }

@@ -19,9 +19,19 @@ namespace BloodDonation.Controllers
             _context = context;
         }
 
+        // Helper method to check staff login
+        private bool IsStaffLoggedIn()
+        {
+            var username = HttpContext.Session.GetString("Username");
+            var role = HttpContext.Session.GetString("Role");
+            return !string.IsNullOrEmpty(username) && role?.ToLower() == "staff";
+        }
+
         // Hiển thị danh sách các yêu cầu đăng ký hiến máu
         public IActionResult DonationList()
         {
+            if (!IsStaffLoggedIn())
+                return RedirectToAction("Index", "Login");
             var appointments = _context.DonationAppointments
            .Include(a => a.Donor)
            .Include(a => a.MedicalCenter)
@@ -34,6 +44,8 @@ namespace BloodDonation.Controllers
 
         public IActionResult DonorRequestDetails(int id)
         {
+            if (!IsStaffLoggedIn())
+                return RedirectToAction("Index", "Login");
             // Lấy appointment theo ID (AppointmentID)
             var appointment = _context.DonationAppointments
                 .Include(x => x.Donor)
@@ -70,6 +82,8 @@ namespace BloodDonation.Controllers
 
         public IActionResult BloodInventory()
         {
+            if (!IsStaffLoggedIn())
+                return RedirectToAction("Index", "Login");
             var inventories = _context.BloodInventories
                 .Include(b => b.BloodType)
                 .ToList();
@@ -85,46 +99,66 @@ namespace BloodDonation.Controllers
 
         //Xác nhận yêu cầu hiến máu và cập nhật kho máu
         [HttpPost]
-        public IActionResult ConfirmDonation(int AppointmentID, bool IsEligible, decimal QuantityDonated, string action)
+        public IActionResult ConfirmDonation(int AppointmentID, string IsEligible, decimal QuantityDonated, string action)
         {
+            if (!IsStaffLoggedIn())
+                return RedirectToAction("Index", "Login");
             try
             {
+                var appointment = _context.DonationAppointments.FirstOrDefault(a => a.AppointmentID == AppointmentID);
+
+                if (appointment == null)
+                {
+                    TempData["Error"] = "❌ Không tìm thấy lịch hẹn.";
+                    return RedirectToAction("DonationList");
+                }
+
                 string normalizedAction = action?.ToLowerInvariant();
-                string sql = null;
+                bool isEligible = IsEligible == "true";
 
-                if (normalizedAction == "completed")
+                switch (normalizedAction)
                 {
-                    // Cập nhật trạng thái Completed và gán số lượng máu hiến (QuantityDonated)
-                    sql = @"
-                UPDATE DonationAppointment
-                SET Status = 'Completed',
-                    QuantityDonated = {1}
-                WHERE AppointmentID = {0} AND BloodTypeID IS NOT NULL AND Status != 'Completed'";
-                }
-                else if (normalizedAction == "confirm" && IsEligible)
-                {
-                    sql = @"
-                UPDATE DonationAppointment
-                SET Status = 'Confirmed',
-                    AppointmentDate = GETDATE()
-                WHERE AppointmentID = {0}";
-                }
-                else if (normalizedAction == "reject")
-                {
-                    sql = "UPDATE DonationAppointment SET Status = 'Rejected' WHERE AppointmentID = {0}";
+                    case "completed":
+                        if (appointment.Status != "Completed" && appointment.BloodTypeID > 0)
+                        {
+                            appointment.Status = "Completed";
+                            appointment.QuantityDonated = QuantityDonated;
+                        }
+                        else
+                        {
+                            TempData["Error"] = "⚠️ Lịch hẹn đã hoàn thành hoặc thiếu thông tin nhóm máu.";
+                            return RedirectToAction("DonationList");
+                        }
+                        break;
+
+                    case "confirm":
+                        if (isEligible)
+                        {
+                            appointment.Status = "Confirmed";
+                            appointment.AppointmentDate = DateTime.Now;
+                        }
+                        else
+                        {
+                            TempData["Error"] = "❌ Người hiến máu không đủ điều kiện.";
+                            return RedirectToAction("DonationList");
+                        }
+                        break;
+
+                    case "reject":
+                        appointment.Status = "Rejected";
+                        break;
+
+                    case "approve":
+                        appointment.Status = "Approved";
+                        break;
+
+                    default:
+                        TempData["Error"] = "❌ Hành động không hợp lệ.";
+                        return RedirectToAction("DonationList");
                 }
 
-                if (!string.IsNullOrEmpty(sql))
-                {
-                    int rows = _context.Database.ExecuteSqlRaw(sql, AppointmentID, QuantityDonated);
-                    TempData["Message"] = rows > 0
-                        ? "✅ Trạng thái đã được cập nhật."
-                        : "⚠️ Không có bản ghi nào được cập nhật. Có thể trạng thái đã là Completed.";
-                }
-                else
-                {
-                    TempData["Error"] = "❌ Hành động không hợp lệ.";
-                }
+                _context.SaveChanges();
+                TempData["Message"] = "✅ Trạng thái đã được cập nhật.";
             }
             catch (Exception ex)
             {
@@ -137,6 +171,8 @@ namespace BloodDonation.Controllers
 
         public IActionResult BloodRequestList()
         {
+            if (!IsStaffLoggedIn())
+                return RedirectToAction("Index", "Login");
             var approvedRequests = _context.BloodRequests
                 .Include(r => r.MedicalCenter)
                 .Include(r => r.BloodType)
@@ -148,6 +184,8 @@ namespace BloodDonation.Controllers
 
         public IActionResult ProcessBloodRequest(int id)
         {
+            if (!IsStaffLoggedIn())
+                return RedirectToAction("Index", "Login");
             var request = _context.BloodRequests
         .Include(r => r.MedicalCenter)
         .Include(r => r.BloodType)
@@ -162,6 +200,8 @@ namespace BloodDonation.Controllers
         [HttpPost]
         public IActionResult CompleteBloodRequest(int id, string note)
         {
+            if (!IsStaffLoggedIn())
+                return RedirectToAction("Index", "Login");
             var request = _context.BloodRequests
                 .Include(r => r.BloodType)
                 .FirstOrDefault(r => r.BloodRequestID == id);
@@ -172,15 +212,19 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("BloodRequestList");
             }
 
-            // Giả sử chỉ có 1 ngân hàng máu (BloodBankID = 1)
-            int bloodBankId = 1;
+            // ❌ Nếu trạng thái không phải Approved thì không xử lý
+            if (!string.Equals(request.Status, "Approved", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "⚠️ Chỉ xử lý các yêu cầu có trạng thái 'Approved'.";
+                return RedirectToAction("BloodRequestList");
+            }
 
+            int bloodBankId = 1; // Mặc định
             var inventory = _context.BloodInventories
                 .FirstOrDefault(b => b.BloodTypeID == request.BloodTypeID && b.BloodBankID == bloodBankId);
 
             if (inventory != null && inventory.Quantity >= request.Quantity)
             {
-                // Trừ lượng máu
                 inventory.Quantity -= request.Quantity;
                 inventory.LastUpdated = DateTime.Now;
 
@@ -193,14 +237,14 @@ namespace BloodDonation.Controllers
                 TempData["Info"] = "⚠️ Kho máu không đủ. Yêu cầu chuyển sang trạng thái chờ.";
             }
 
-            //request.Note = note;
             _context.SaveChanges();
-
             return RedirectToAction("BloodRequestList");
         }
 
         public IActionResult AppointmentDetail(int id)
         {
+            if (!IsStaffLoggedIn())
+                return RedirectToAction("Index", "Login");
             var appointment = _context.DonationAppointments
                 .Include(a => a.Donor)
                 .Include(a => a.BloodType)

@@ -51,7 +51,7 @@
                 </div>
                 <div class="profile-info-item">
                     <span class="profile-info-label">Trạng thái</span>
-                    <span class="profile-status" @(Model.IsAvailable == true ? "text-success" : "text-danger")">
+                    <span class="profile-status @(Model.IsAvailable == true ? "text-success" : "text-danger")">
                         @(Model.IsAvailable == true ? "Sẵn sàng" : "Không sẵn sàng")
                     </span>
                 </div>
