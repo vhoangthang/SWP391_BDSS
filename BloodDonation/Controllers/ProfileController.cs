@@ -63,8 +63,13 @@ namespace BloodDonation.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Donor donor)
-
         {
+            // Xóa lỗi validation cho các trường navigation
+            ModelState.Remove("Account");
+            ModelState.Remove("BloodType");
+            ModelState.Remove("DonorBloodRequests");
+            ModelState.Remove("DonationAppointments");
+
             if (!ModelState.IsValid)
             {
                 ViewBag.BloodTypes = new SelectList(_context.BloodTypes.ToList(), "BloodTypeID", "Type", donor.BloodTypeID);
