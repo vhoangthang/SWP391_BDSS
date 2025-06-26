@@ -1,0 +1,110 @@
+@model List<BloodDonation.Models.BloodRequest>
+@{
+    ViewBag.Title = "Danh sách yêu cầu nhận máu";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-danger"><i class="fas fa-clipboard-list"></i> Danh sách yêu cầu nhận máu của trung tâm</h2>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nhóm máu</th>
+                    <th>Số lượng (CC)</th>
+                    <th>Ngày yêu cầu</th>
+                    <th>Lý do</th>
+                    <th>Mức độ</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var request in Model)
+                {
+                    <tr>
+                        <td>@request.BloodRequestID</td>
+                        <td><span class="badge bg-info">@request.BloodType?.Type</span></td>
+                        <td>@request.Quantity</td>
+                        <td>
+                            @if (request.RequestDate.TimeOfDay.TotalMinutes == 0)
+                            {
+                                @request.RequestDate.ToString("dd/MM/yyyy")
+                            }
+                            else
+                            {
+                                @request.RequestDate.ToString("dd/MM/yyyy HH:mm")
+                            }
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(request.Reason))
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#reasonModal" data-reason="@request.Reason">
+                                    <i class="fas fa-eye"></i> Xem lý do
+                                </button>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>
+                            @if (request.IsEmergency)
+                            {
+                                <span class="emergency-badge">🚨 Khẩn cấp</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Thông thường</span>
+                            }
+                        </td>
+                        <td>
+                            <span class="status-badge">@request.Status</span>
+                            @if (request.Status == "Pending")
+                            {
+                                <form asp-action="CancelBloodRequest" asp-controller="MedicalCenter" method="post" style="display:inline;">
+                                    <input type="hidden" name="id" value="@request.BloodRequestID" />
+                                    <button type="submit" class="btn btn-sm btn-danger ms-2" onclick="return confirm('Bạn có chắc muốn huỷ yêu cầu này?');">
+                                        <i class="fas fa-times"></i> Huỷ
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Reason Modal -->
+<div class="modal fade" id="reasonModal" tabindex="-1" aria-labelledby="reasonModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reasonModalLabel">Chi tiết lý do</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="reasonText"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var reasonModal = document.getElementById('reasonModal');
+        if (reasonModal) {
+            reasonModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var reason = button.getAttribute('data-reason');
+                var reasonText = document.getElementById('reasonText');
+                reasonText.textContent = reason;
+            });
+        }
+    </script>
+} 
