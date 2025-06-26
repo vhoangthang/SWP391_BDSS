@@ -188,7 +188,7 @@
                                                 <span class="status-badge @statusClass">@request.Status</span>
                                             </td>
                                             <td>
-                                                @if (request.Status != "Completed")
+                                                @if (request.Status != "Completed" && request.Status != "Canceled")
                                                 {
                                                     <select class="form-select form-select-sm" onchange="updateStatus(@request.BloodRequestID, this.value)">
                                                         <option value="Pending" selected="@(request.Status == "Pending")">Chờ duyệt</option>
@@ -196,9 +196,13 @@
                                                         <option value="Rejected" selected="@(request.Status == "Rejected")">Từ chối</option>
                                                     </select>
                                                 }
-                                                else
+                                                else if (request.Status == "Completed")
                                                 {
                                                     <span class="text-success fw-bold"><i class="fas fa-check-circle"></i> Đã hoàn tất</span>
+                                                }
+                                                else if (request.Status == "Canceled")
+                                                {
+                                                    <span class="text-danger fw-bold"><i class="fas fa-ban"></i> Đã huỷ</span>
                                                 }
                                             </td>
                                         </tr>
