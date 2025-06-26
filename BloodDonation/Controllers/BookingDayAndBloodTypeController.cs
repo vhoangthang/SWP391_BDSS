@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using BloodDonation.Data;
 
-namespace BloodDonationSupport.Controllers
+namespace BloodDonation.Controllers
 {
     public class BookingDayAndBloodTypeController : Controller
     {
