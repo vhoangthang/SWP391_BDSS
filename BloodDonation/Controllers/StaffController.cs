@@ -103,6 +103,7 @@ namespace BloodDonation.Controllers
         {
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
+
             try
             {
                 var appointment = _context.DonationAppointments.FirstOrDefault(a => a.AppointmentID == AppointmentID);
@@ -119,27 +120,44 @@ namespace BloodDonation.Controllers
                 switch (normalizedAction)
                 {
                     case "completed":
-                        if (appointment.Status != "Completed" && appointment.BloodTypeID > 0)
+                        if (appointment.Status == "Completed")
                         {
-                            appointment.Status = "Completed";
-                            appointment.QuantityDonated = QuantityDonated;
+                            TempData["Error"] = "⚠️ Lịch hẹn đã hoàn thành trước đó.";
+                            return RedirectToAction("DonationList");
+                        }
 
-                            // Cập nhật kho máu
-                            var bloodInventory = _context.BloodInventories.FirstOrDefault(b => b.BloodTypeID == appointment.BloodTypeID);
-                            if (bloodInventory != null)
-                            {
-                                bloodInventory.Quantity += QuantityDonated;
-                            }
-                            else
-                            {
-                                TempData["Error"] = "❌ Không tìm thấy kho máu phù hợp.";
-                                return RedirectToAction("DonationList");
-                            }
+                        if (appointment.BloodTypeID <= 0)
+                        {
+                            TempData["Error"] = "⚠️ Thiếu thông tin nhóm máu.";
+                            return RedirectToAction("DonationList");
+                        }
+
+                        if (QuantityDonated <= 0)
+                        {
+                            TempData["Error"] = "⚠️ Số lượng máu hiến phải lớn hơn 0.";
+                            return RedirectToAction("DonationList");
+                        }
+
+                        appointment.Status = "Completed";
+                        appointment.QuantityDonated = QuantityDonated;
+
+                        // ✅ Cập nhật hoặc tạo mới kho máu
+                        var inventory = _context.BloodInventories.FirstOrDefault(b => b.BloodTypeID == appointment.BloodTypeID);
+                        if (inventory != null)
+                        {
+                            inventory.Quantity += QuantityDonated;
+                            inventory.LastUpdated = DateTime.Now;
                         }
                         else
                         {
-                            TempData["Error"] = "⚠️ Lịch hẹn đã hoàn thành hoặc thiếu thông tin nhóm máu.";
-                            return RedirectToAction("DonationList");
+                            var newInventory = new BloodInventory
+                            {
+                                BloodTypeID = appointment.BloodTypeID,
+                                BloodBankID = 1, // TODO: Lấy đúng BloodBankID nếu có logic, tạm mặc định là 1
+                                Quantity = QuantityDonated,
+                                LastUpdated = DateTime.Now
+                            };
+                            _context.BloodInventories.Add(newInventory);
                         }
                         break;
 
@@ -169,16 +187,20 @@ namespace BloodDonation.Controllers
                         return RedirectToAction("DonationList");
                 }
 
+                // ✅ Lưu thay đổi
                 _context.SaveChanges();
                 TempData["Message"] = "✅ Trạng thái đã được cập nhật.";
             }
             catch (Exception ex)
             {
                 TempData["Error"] = $"❌ Lỗi xảy ra: {ex.Message}";
+                Console.WriteLine($"[ERROR] ConfirmDonation: {ex.Message}");
             }
 
             return RedirectToAction("DonationList");
         }
+
+
 
 
         public IActionResult BloodRequestList()
