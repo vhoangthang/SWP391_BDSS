@@ -125,5 +125,51 @@ namespace BloodDonation.Controllers
 
             return View("Index", model);
         }
+
+        // Hiển thị danh sách yêu cầu nhận máu của trung tâm y tế hiện tại
+        public IActionResult BloodRequestList()
+        {
+            var medicalCenterId = HttpContext.Session.GetInt32("MedicalCenterID");
+            if (!medicalCenterId.HasValue)
+            {
+                _logger.LogWarning("MedicalCenterID not found in session, redirecting to login");
+                return RedirectToAction("Index", "Login");
+            }
+            var requests = _context.BloodRequests
+                .Include(r => r.BloodType)
+                .Where(r => r.MedicalCenterID == medicalCenterId.Value)
+                .OrderByDescending(r => r.RequestDate)
+                .ToList();
+            return View(requests);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CancelBloodRequest(int id)
+        {
+            var medicalCenterId = HttpContext.Session.GetInt32("MedicalCenterID");
+            if (!medicalCenterId.HasValue)
+            {
+                _logger.LogWarning("MedicalCenterID not found in session, redirecting to login");
+                return RedirectToAction("Index", "Login");
+            }
+            var request = _context.BloodRequests.FirstOrDefault(r => r.BloodRequestID == id && r.MedicalCenterID == medicalCenterId.Value);
+            if (request == null)
+            {
+                TempData["Error"] = "Không tìm thấy yêu cầu hoặc bạn không có quyền huỷ.";
+                return RedirectToAction("BloodRequestList");
+            }
+            if (request.Status == "Pending")
+            {
+                request.Status = "Canceled";
+                _context.SaveChanges();
+                TempData["Success"] = "Đã huỷ yêu cầu thành công.";
+            }
+            else
+            {
+                TempData["Error"] = "Chỉ có thể huỷ yêu cầu khi trạng thái là Pending.";
+            }
+            return RedirectToAction("BloodRequestList");
+        }
     }
 }
