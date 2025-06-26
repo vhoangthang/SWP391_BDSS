@@ -159,6 +159,26 @@ namespace BloodDonation.Controllers
                             };
                             _context.BloodInventories.Add(newInventory);
                         }
+
+                        // *** TẠO CERTIFICATE ***
+                        var existingCertificate = _context.DonationCertificates
+                            .FirstOrDefault(c => c.AppointmentID == appointment.AppointmentID);
+                        if (existingCertificate == null)
+                        {
+                            var donor = _context.Donors.FirstOrDefault(d => d.DonorID == appointment.DonorID);
+                            var bloodType = _context.BloodTypes.FirstOrDefault(b => b.BloodTypeID == appointment.BloodTypeID);
+                            var medicalCenter = _context.MedicalCenters.FirstOrDefault(m => m.MedicalCenterID == appointment.MedicalCenterID);
+
+                            string details = $"Chứng chỉ hiến máu cho {(donor?.Name ?? "Người hiến máu")}, nhóm máu {bloodType?.Type ?? "?"}, hiến {appointment.QuantityDonated}ml tại {medicalCenter?.Name ?? "cơ sở y tế"} ngày {appointment.AppointmentDate:dd/MM/yyyy}.";
+
+                            var certificate = new DonationCertificate
+                            {
+                                AppointmentID = appointment.AppointmentID,
+                                IssueDate = DateTime.Now,
+                                CertificateDetails = details
+                            };
+                            _context.DonationCertificates.Add(certificate);
+                        }
                         break;
 
                     case "confirm":
