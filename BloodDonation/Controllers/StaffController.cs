@@ -123,6 +123,18 @@ namespace BloodDonation.Controllers
                         {
                             appointment.Status = "Completed";
                             appointment.QuantityDonated = QuantityDonated;
+
+                            // Cập nhật kho máu
+                            var bloodInventory = _context.BloodInventories.FirstOrDefault(b => b.BloodTypeID == appointment.BloodTypeID);
+                            if (bloodInventory != null)
+                            {
+                                bloodInventory.Quantity += QuantityDonated;
+                            }
+                            else
+                            {
+                                TempData["Error"] = "❌ Không tìm thấy kho máu phù hợp.";
+                                return RedirectToAction("DonationList");
+                            }
                         }
                         else
                         {
