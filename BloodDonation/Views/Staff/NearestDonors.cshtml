@@ -1,0 +1,110 @@
+@{
+    ViewData["Title"] = "Tìm người hiến máu gần nhất";
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+    var bloodBanks = ViewBag.BloodBanks as List<BloodDonation.Models.BloodBank>;
+    var selectedBankId = ViewBag.SelectedBankId as int?;
+    var donorDistances = ViewBag.DonorDistances;
+    var error = ViewBag.Error as string;
+}
+
+<div class="container mt-4">
+    <h3 class="fw-bold mb-3">🔍 Tìm người hiến máu gần nhất</h3>
+    
+    <hr />
+
+    @if (bloodBanks != null)
+    {
+        <form method="get" class="mb-4">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Chọn kho máu:</label>
+                    <select name="bloodBankId" class="form-select" required>
+                        <option value="">-- Chọn kho máu --</option>
+                        @foreach (var bank in bloodBanks)
+                        {
+                            <option value="@bank.BloodBankID" selected="@(selectedBankId == bank.BloodBankID ? "selected" : null)">
+                                @bank.Name (@bank.Location)
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Hoặc nhập địa chỉ kho máu:</label>
+                    <input type="text" name="customAddress" class="form-control" placeholder="Nhập địa chỉ kho máu tuỳ ý..." value="@ViewBag.CustomAddress" />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-danger">Tìm kiếm</button>
+                </div>
+            </div>
+        </form>
+    }
+
+    @if (selectedBankId != null && bloodBanks != null)
+    {
+        var selectedBank = bloodBanks.FirstOrDefault(b => b.BloodBankID == selectedBankId);
+        if (selectedBank != null)
+        {
+            <div class="mb-3">
+                <span class="fw-bold">Kho máu đang chọn:</span>
+                <span class="text-primary">@selectedBank.Name</span>
+                <span class="text-muted">(@selectedBank.Location)</span>
+                @if (!string.IsNullOrEmpty(ViewBag.CustomAddress as string))
+                {
+                    <span class="badge bg-info text-dark ms-2">Địa chỉ tuỳ chỉnh: @ViewBag.CustomAddress</span>
+                }
+            </div>
+        }
+    }
+
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+    else if (donorDistances != null)
+    {
+        var donors = donorDistances as IEnumerable<dynamic>;
+        if (donors.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Tên người hiến máu</th>
+                            <th>Địa chỉ</th>
+                            <th>Số điện thoại</th>
+                            <th>Nhóm máu</th>
+                            <th>Khoảng cách (km)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int idx = 1;
+                            foreach (var item in donors)
+                            {
+                                var donor = item.Donor;
+                                <tr>
+                                    <td>@idx</td>
+                                    <td>@donor.Name</td>
+                                    <td>@donor.Address</td>
+                                    <td>@donor.ContactNumber</td>
+                                    <td>@donor.BloodType?.Type</td>
+                                    <td>@(item.Distance.ToString("0.00"))</td>
+                                </tr>
+                                idx++;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">Không tìm thấy người hiến máu phù hợp.</div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info">Vui lòng chọn kho máu để tìm kiếm người hiến máu gần nhất.</div>
+    }
+</div> 
