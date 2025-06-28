@@ -10,12 +10,6 @@
     <div class="form-container sign-up-container">
         <form action="/Account/Register" method="get">
             <h1>Tạo tài khoản</h1>
-            <div class="social-container">
-                <a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="social"><i class="fab fa-google-plus-g"></i></a>
-                <a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>
-            </div>
-            <span>hoặc sử dụng email để đăng ký</span>
             <input type="text" placeholder="Tên đăng nhập" name="Username" />
             <input type="email" placeholder="Email" name="Email" />
             <input type="password" placeholder="Mật khẩu" name="Password" />
@@ -25,12 +19,6 @@
     <div class="form-container sign-in-container">
         <form method="post" action="/Login/Index">
             <h1>Đăng nhập</h1>
-            <div class="social-container">
-                <a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="social"><i class="fab fa-google-plus-g"></i></a>
-                <a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>
-            </div>
-            <span>hoặc sử dụng tài khoản của bạn</span>
             <input type="text" name="Username" placeholder="Tên đăng nhập" value="@Model?.Username" required />
             <input type="password" name="Password" placeholder="Mật khẩu" required />
             <a href="/Account/ForgotPassword">Quên mật khẩu?</a>
@@ -56,14 +44,6 @@
     </div>
 </div>
 
-<footer>
-    <p>
-        Created with <i class="fa fa-heart"></i> by
-        <a target="_blank" href="https://florin-pop.com">Florin Pop</a>
-        - Read how I created this and how you can join the challenge
-        <a target="_blank" href="https://www.florin-pop.com/blog/2019/03/double-slider-sign-in-up-form/">here</a>.
-    </p>
-</footer>
 
 <script>
     const signUpButton = document.getElementById('signUp');
