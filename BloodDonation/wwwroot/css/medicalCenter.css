@@ -10,14 +10,15 @@
 }
 
 .sidebar {
-    width: 250px;
-    background-color: #fff;
-    padding: 20px;
-    border-right: 1px solid #dee2e6;
+    background: #fff !important;
+    min-height: 100vh;
+    color: #dc3545 !important;
+    padding: 20px 0;
+    border-right: 1px solid #eee;
 }
 
     .sidebar h2 {
-        color: #dc3545;
+        color: #dc3545 !important;
         font-size: 1.2rem;
         font-weight: bold;
         margin-bottom: 20px;
@@ -34,31 +35,34 @@
     }
 
     .sidebar-menu a {
-        display: flex;
-        align-items: center;
-        padding: 10px;
-        color: #343a40;
+        color: #dc3545 !important;
         text-decoration: none;
+        padding: 12px 20px;
+        display: block;
         border-radius: 5px;
+        transition: all 0.3s ease;
+        font-weight: 500;
     }
 
         .sidebar-menu a.active,
         .sidebar-menu a:hover {
             background-color: #ffebee;
+            color: #b71c1c;
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
             color: #dc3545;
         }
 
-        .sidebar-menu a .icon {
-            margin-right: 10px;
-        }
-
-    .sidebar-menu .notification-badge {
-        margin-left: auto;
-        background-color: #dc3545;
+    .notification-badge {
+        background: #dc3545;
         color: #fff;
         font-size: 0.8rem;
         padding: 2px 6px;
         border-radius: 50%;
+        margin-left: 8px;
     }
 
 .main-content {
@@ -230,4 +234,11 @@
     position: absolute;
     bottom: -20px;
     left: 0;
+}
+
+/* Ưu tiên cao cho sidebar MedicalCenter */
+.sidebar-menu a,
+.sidebar-menu a .icon,
+.sidebar h2 {
+    color: #dc3545 !important;
 }
