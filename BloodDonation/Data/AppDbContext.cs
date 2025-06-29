@@ -26,6 +26,7 @@ namespace BloodDonation.Data
 
         public DbSet<HealthSurvey> HealthSurveys { get; set; }
 
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
