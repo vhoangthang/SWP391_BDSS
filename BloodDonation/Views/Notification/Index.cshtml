@@ -1,4 +1,5 @@
-﻿@{
+﻿@model List<BloodDonation.Models.Notification>
+@{
     ViewData["Title"] = "Thông Báo";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -15,59 +16,46 @@
     </div>
 
     <div class="notification-list">
-        <!-- Ví dụ về thông báo khẩn cấp -->
-        <div class="notification-item unread">
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var n in Model)
+            {
+                var icon = "fa-info-circle";
+                var iconClass = "";
+                if (!string.IsNullOrEmpty(n.Type))
+                {
+                    switch (n.Type.ToLower())
+                    {
+                        case "emergency": icon = "fa-tint"; iconClass = "danger"; break;
+                        case "confirmed": icon = "fa-check-circle"; iconClass = "success"; break;
+                        case "warning": icon = "fa-exclamation-triangle"; iconClass = "warning"; break;
+                        default: icon = "fa-info-circle"; iconClass = "info"; break;
+                    }
+                }
+                var unreadClass = n.IsRead ? "" : "unread";
+        <div class="notification-item @unreadClass">
             <div class="icon-wrapper">
-                <i class="fas fa-tint"></i>
+                <i class="fas @icon"></i>
             </div>
             <div class="content">
-                <p><strong>[Khẩn cấp]</strong> Bệnh viện A cần nhóm máu O tại TP.HCM.</p>
-                <div class="notification-actions">
-                     <a href="#" class="btn btn-sm btn-danger">Xác nhận hiến máu</a>
+                <p>@n.Message</p>
+            </div>
+            <div class="timestamp">
+                @n.SentAt.ToString("dd/MM/yyyy HH:mm")
+            </div>
+        </div>
+            }
+        }
+        else
+        {
+            <div class="notification-item">
+                <div class="icon-wrapper">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="content">
+                    <p>Bạn chưa có thông báo nào.</p>
                 </div>
             </div>
-            <div class="timestamp">
-                5 phút trước
-            </div>
-        </div>
-
-        <!-- Ví dụ về thông báo xác nhận -->
-        <div class="notification-item">
-            <div class="icon-wrapper">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="content">
-                <p>Lịch hẹn hiến máu của bạn vào ngày 20/6 lúc 13:00 đã được xác nhận.</p>
-            </div>
-            <div class="timestamp">
-                2 giờ trước
-            </div>
-        </div>
-        
-        <!-- Ví dụ về thông báo thông tin -->
-        <div class="notification-item">
-            <div class="icon-wrapper">
-                <i class="fas fa-info-circle"></i>
-            </div>
-            <div class="content">
-                <p>Cảm ơn bạn đã cập nhật thông tin cá nhân.</p>
-            </div>
-            <div class="timestamp">
-                1 ngày trước
-            </div>
-        </div>
-
-        <!-- Ví dụ về thông báo cảnh báo -->
-        <div class="notification-item">
-            <div class="icon-wrapper">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <div class="content">
-                <p>Vui lòng cập nhật lại địa chỉ của bạn trước lần hiến máu tiếp theo.</p>
-            </div>
-            <div class="timestamp">
-                3 ngày trước
-            </div>
-        </div>
+        }
     </div>
 </div>
