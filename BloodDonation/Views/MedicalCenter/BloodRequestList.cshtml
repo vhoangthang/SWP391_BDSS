@@ -81,6 +81,7 @@
                                 <th>Ngày yêu cầu</th>
                                 <th>Lý do</th>
                                 <th>Mức độ</th>
+                                <th>Tương hợp</th>
                                 <th>Trạng thái</th>
                             </tr>
                         </thead>
@@ -121,6 +122,23 @@
                                         else
                                         {
                                             <span class="badge bg-secondary">Thông thường</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (request.IsCompatible.HasValue)
+                                        {
+                                            @if (request.IsCompatible.Value)
+                                            {
+                                                <span class="badge bg-success"><i class="fas fa-check"></i> Tương hợp</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger"><i class="fas fa-times"></i> Không tương hợp</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning"><i class="fas fa-question"></i> Chưa kiểm tra</span>
                                         }
                                     </td>
                                     <td>
