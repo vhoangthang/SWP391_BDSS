@@ -20,7 +20,7 @@ namespace BloodDonation.Controllers
             { "4_TiemVaccine", "4.3 Gần đây anh/chị có tiêm vaccine không?" },
             { "5_KhoiBenhSauMacCacBenh6Thang", "5. Trong 06 tháng gần đây, anh/chị có khỏi bệnh sau các bệnh truyền nhiễm, viêm tủy không?" },
             { "6_KhoiBenhSauMacCacBenh1Thang", "6. Trong 01 tháng gần đây, anh/chị có khỏi bệnh viêm tiết niệu, viêm phổi, rubella không?" },
-            { "7_BiCumCamLanhHoNhucDauHong14Ngay", "7. Trong 14 ngày gần đây, anh/chị có bị cảm, sốt, đau họng không?" },
+            { "7_BiCumCamLanhHoNhucDauSotDauHong14Ngay", "7. Trong 14 ngày gần đây, anh/chị có bị cảm, sốt, đau họng không?" },
             { "8_DungThuocKhangSinhKhangViêmAspirinCorticoide7Ngay", "8. Trong 07 ngày gần đây, anh/chị có dùng thuốc kháng sinh, aspirin, corticoid không?" },
             { "9_CauHoiDanhChoPhuNu", "9. Câu hỏi dành cho phụ nữ:" },
             { "10_AnhChiSanSangHienMauNeuDuDieuKien", "10. Anh/chị có sẵn sàng hiến máu mọi lúc khi cần không?" }
