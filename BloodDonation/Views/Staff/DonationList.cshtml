@@ -5,6 +5,45 @@
     ViewData["Title"] = "Đăng ký hiến máu";
 }
 
+<style>
+    .bdss-badge-soft {
+        display: inline-block;
+        padding: 0.35em 1.1em;
+        font-size: 1em;
+        font-weight: 500;
+        border-radius: 2em;
+        background: #e0e7ff;
+        color: #373a47;
+        letter-spacing: 0.02em;
+        box-shadow: none;
+        border: none;
+    }
+    .bdss-badge-soft-danger {
+        background: #fde8e8;
+        color: #b91c1c;
+    }
+    .bdss-badge-soft-warning {
+        background: #fef9c3;
+        color: #b45309;
+    }
+    .bdss-badge-soft-success {
+        background: #d1fae5;
+        color: #047857;
+    }
+    .bdss-badge-soft-secondary {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+    .bdss-badge-soft-primary {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+    .bdss-badge-soft-info {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+</style>
+
 <div class="container mt-4">
     <h2 class="mb-2 fw-bold">🩸 Danh sách đăng ký hiến máu</h2>
     <p class="text-muted">Quản lý và xử lý các đơn đăng ký hiến máu</p>
@@ -44,23 +83,17 @@
                             @switch (item.Status?.ToLower())
                             {
                                 case "pending":
-                                    <span class="badge bg-warning text-dark">⏳ Chờ xác nhận</span>
-                                    ; break;
+                                    <span class="bdss-badge-soft bdss-badge-soft-warning">Chờ xác nhận</span>; break;
                                 case "confirmed":
-                                    <span class="badge bg-primary">✔ Đã xác nhận</span>
-                                    ; break;
+                                    <span class="bdss-badge-soft bdss-badge-soft-primary">Đã xác nhận</span>; break;
                                 case "approved":
-                                    <span class="badge bg-info text-dark">🟦 Đã duyệt</span>
-                                    ; break;
+                                    <span class="bdss-badge-soft bdss-badge-soft-primary">Đã duyệt</span>; break;
                                 case "completed":
-                                    <span class="badge bg-success">✅ Hoàn tất</span>
-                                    ; break;
+                                    <span class="bdss-badge-soft bdss-badge-soft-success">Hoàn thành</span>; break;
                                 case "rejected":
-                                    <span class="badge bg-danger">❌ Từ chối</span>
-                                    ; break;
+                                    <span class="bdss-badge-soft bdss-badge-soft-danger">Từ chối</span>; break;
                                 default:
-                                    <span class="badge bg-secondary">@item.Status</span>
-                                    ; break;
+                                    <span class="bdss-badge-soft bdss-badge-soft-secondary">@item.Status</span>; break;
                             }
                         </td>
                         <td class="text-center">
