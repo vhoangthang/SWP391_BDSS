@@ -309,7 +309,7 @@ namespace BloodDonation.Controllers
             }
 
             _context.SaveChanges();
-            return RedirectToAction("BloodRequestList");
+            return RedirectToAction("BloodRequestDetails");
         }
 
         public IActionResult AppointmentDetail(int id)
@@ -334,6 +334,102 @@ namespace BloodDonation.Controllers
             ViewData["HealthSurvey"] = surveyDict;
 
             return View(appointment);
+        }
+
+        // Hiển thị chi tiết yêu cầu máu
+        public IActionResult BloodRequestDetails(int id)
+        {
+            if (!IsStaffLoggedIn())
+                return RedirectToAction("Index", "Login");
+
+            var bloodRequest = _context.BloodRequests
+                .Include(x => x.MedicalCenter)
+                .Include(x => x.BloodType)
+                .FirstOrDefault(x => x.BloodRequestID == id);
+
+            if (bloodRequest == null)
+            {
+                return NotFound();
+            }
+
+            // Lấy thông tin kho máu cho nhóm máu yêu cầu
+            var bloodInventory = _context.BloodInventories
+                .Include(b => b.BloodType)
+                .Include(b => b.BloodBank)
+                .FirstOrDefault(b => b.BloodTypeID == bloodRequest.BloodTypeID);
+
+            // Lấy tất cả nhóm máu để chọn loại tương hợp
+            var allBloodTypes = _context.BloodTypes.ToList();
+
+            // Lấy thông tin kho máu cho tất cả nhóm máu
+            var allBloodInventories = _context.BloodInventories
+                .Include(b => b.BloodType)
+                .Include(b => b.BloodBank)
+                .ToList();
+
+            // Lấy người hiến máu gần nhất (cùng nhóm máu, sẵn sàng)
+            var nearbyDonors = _context.Donors
+                .Include(d => d.Account)
+                .Where(d => d.BloodTypeID == bloodRequest.BloodTypeID && d.IsAvailable == true)
+                .OrderByDescending(d => d.IsAvailable)
+                .Take(5)
+                .ToList();
+            ViewBag.NearbyDonors = nearbyDonors;
+
+            ViewBag.BloodInventory = bloodInventory;
+            ViewBag.AllBloodTypes = allBloodTypes;
+            ViewBag.AllBloodInventories = allBloodInventories;
+
+            return View(bloodRequest);
+        }
+
+        // Xử lý yêu cầu máu trực tiếp từ trang chi tiết
+        [HttpPost]
+        public IActionResult ProcessBloodRequestFromDetails(int bloodRequestId, string action, int? selectedBloodTypeId = null, decimal? quantity = null)
+        {
+            if (!IsStaffLoggedIn())
+                return RedirectToAction("Index", "Login");
+
+            var bloodRequest = _context.BloodRequests
+                .Include(x => x.MedicalCenter)
+                .Include(x => x.BloodType)
+                .FirstOrDefault(x => x.BloodRequestID == bloodRequestId);
+
+            if (bloodRequest == null)
+            {
+                TempData["Error"] = "Không tìm thấy yêu cầu máu.";
+                return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
+            }
+
+            switch (action.ToLower())
+            {
+                case "approve":
+                    bloodRequest.Status = "Approved";
+                    TempData["Message"] = "Yêu cầu đã được duyệt.";
+                    break;
+                case "reject":
+                    bloodRequest.Status = "Rejected";
+                    TempData["Message"] = "Yêu cầu đã bị từ chối.";
+                    break;
+                case "complete":
+                    bloodRequest.Status = "Completed";
+                    TempData["Message"] = "Yêu cầu đã được hoàn thành.";
+                    // Cập nhật kho máu nếu có chọn nhóm máu và số lượng
+                    if (selectedBloodTypeId.HasValue && quantity.HasValue)
+                    {
+                        var inventory = _context.BloodInventories
+                            .FirstOrDefault(b => b.BloodTypeID == selectedBloodTypeId.Value);
+                        if (inventory != null)
+                        {
+                            inventory.Quantity -= quantity.Value;
+                            inventory.LastUpdated = DateTime.Now;
+                        }
+                    }
+                    break;
+            }
+
+            _context.SaveChanges();
+            return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
         }
 
         // Hiển thị danh sách người hiến máu gần nhất
@@ -416,12 +512,16 @@ namespace BloodDonation.Controllers
             }
 
             // Lấy tọa độ các donor
-            var donorCoords = new List<(Donor donor, (double lat, double lon)? coord)>();
-            foreach (var donor in donors)
+            var geocodeTasks = donors.Select(async donor =>
             {
                 var coord = await GeocodeAsync(donor.Address);
-                donorCoords.Add((donor, coord));
-            }
+                return (donor, coord);
+            }).ToList();
+
+            // Chờ tất cả task hoàn tất
+            var donorCoords = (await Task.WhenAll(geocodeTasks)).ToList();
+
+
             // Lọc donor có tọa độ hợp lệ
             var validDonors = donorCoords.Where(x => x.coord != null).ToList();
             if (!validDonors.Any())
