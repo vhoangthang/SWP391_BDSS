@@ -42,5 +42,6 @@ namespace BloodDonation.Models
 
         public ICollection<DonorBloodRequest> DonorBloodRequests { get; set; }
         public ICollection<DonationAppointment> DonationAppointments { get; set; }
+        public ICollection<Notification> Notifications { get; set; }
     }
 }
