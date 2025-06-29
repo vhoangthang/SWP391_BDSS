@@ -9,6 +9,12 @@
         formData[input.name] = input.value;
     });
 
+    // Lấy tất cả input checkbox đã chọn
+    const checkedCheckboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+    checkedCheckboxes.forEach(input => {
+        formData[input.name] = input.value;
+    });
+
     // Kiểm tra các trường hợp không đủ điều kiện hiến máu
     if (
         formData["3_TruocDayAnhChiCoMacCacBenhLietKeKhong"] === "true" ||
