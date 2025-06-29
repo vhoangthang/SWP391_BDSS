@@ -31,6 +31,10 @@ namespace BloodDonation.Models
         [Column(TypeName = "DECIMAL(10,2)")]
         public decimal Quantity { get; set; }
 
+        [Column(TypeName = "NVARCHAR(50)")]
+        [MaxLength(50)]
+        public string? BloodGiven { get; set; }
+
         public bool IsEmergency { get; set; }
 
         public bool? IsCompatible { get; set; }
