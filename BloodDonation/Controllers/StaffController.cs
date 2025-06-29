@@ -211,6 +211,22 @@ namespace BloodDonation.Controllers
                         return RedirectToAction("DonationList");
                 }
 
+                // Thêm notification nếu trạng thái là Confirmed hoặc Rejected
+                if (appointment.Status == "Confirmed" || appointment.Status == "Rejected")
+                {
+                    var notification = new Notification
+                    {
+                        DonorID = appointment.DonorID,
+                        Message = $"Đơn hiến máu của bạn đã chuyển sang trạng thái: {appointment.Status}",
+                        SentAt = DateTime.Now,
+                        IsRead = false,
+                        Type = "AppointmentStatus",
+                        IsConfirmed = false,
+                        AccountID = null
+                    };
+                    _context.Notifications.Add(notification);
+                }
+
                 // ✅ Lưu thay đổi
                 _context.SaveChanges();
                 TempData["Message"] = "✅ Trạng thái đã được cập nhật.";
