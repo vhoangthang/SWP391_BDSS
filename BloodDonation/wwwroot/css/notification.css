@@ -1,0 +1,83 @@
+body {
+    background-color: #f4f7f6;
+}
+
+.notification-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.notification-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.notification-header h2 {
+    font-weight: 700;
+    color: #333;
+}
+
+.notification-header .icon {
+    font-size: 2rem;
+    color: #dc3545; /* Bootstrap danger color */
+}
+
+.notification-list {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.notification-item {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notification-item.unread {
+    background-color: #fff9e6;
+    font-weight: bold;
+}
+
+.notification-item .icon-wrapper {
+    margin-right: 20px;
+    font-size: 1.5rem;
+}
+
+.notification-item .icon-wrapper .fa-check-circle { color: #28a745; } /* success */
+.notification-item .icon-wrapper .fa-exclamation-triangle { color: #ffc107; } /* warning */
+.notification-item .icon-wrapper .fa-info-circle { color: #17a2b8; } /* info */
+.notification-item .icon-wrapper .fa-tint { color: #dc3545; } /* danger/blood */
+
+
+.notification-item .content p {
+    margin: 0;
+    color: #555;
+}
+
+.notification-item .timestamp {
+    margin-left: auto;
+    font-size: 0.85rem;
+    color: #888;
+    white-space: nowrap;
+}
+
+.notification-actions {
+    margin-top: 10px;
+}
+
+.notification-actions .btn {
+    margin-right: 10px;
+} 

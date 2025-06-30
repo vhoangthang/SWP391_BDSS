@@ -1,0 +1,62 @@
+@model BloodDonation.Models.Donor
+@{
+    ViewData["Title"] = "Hồ Sơ Người Hiến Máu";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="/css/profile.css" />
+</head>
+<body>
+    <div class="profile-card">
+        <div class="profile-header">
+            <h2>Hồ Sơ Người Hiến Máu</h2>
+            <a asp-action="Edit" class="btn btn-primary">Cập nhật thông tin</a>
+        </div>
+        <div class="profile-info-flex">
+            <div class="profile-info-col">
+                <div class="profile-info-item">
+                    <span class="profile-info-label"><i class="fa fa-user"></i> Họ và Tên</span>
+                    <span class="profile-info-value">@Model.Name</span>
+                </div>
+                <div class="profile-info-item">
+                    <span class="profile-info-label"><i class="fa fa-calendar"></i> Ngày Sinh</span>
+                    <span class="profile-info-value">@(Model.DateOfBirth?.ToShortDateString() ?? "Chưa cung cấp")</span>
+                </div>
+                <div class="profile-info-item">
+                    <span class="profile-info-label"><i class="fa fa-phone"></i> Số Điện Thoại</span>
+                    <span class="profile-info-value">@(Model.ContactNumber ?? "Chưa cung cấp")</span>
+                </div>
+            </div>
+            <div class="profile-info-col">
+                <div class="profile-info-item">
+                    <span class="profile-info-label"><i class="fa fa-envelope"></i> Email</span>
+                    <span class="profile-info-value">@ViewBag.Email</span>
+                </div>
+                <div class="profile-info-item">
+                    <span class="profile-info-label"><i class="fa fa-map-marker"></i> Địa Chỉ</span>
+                    <span class="profile-info-value">@(Model.Address ?? "Chưa cung cấp")</span>
+                </div>
+                <div class="profile-info-item">
+                    <span class="profile-info-label">Nhóm Máu</span>
+                    <span class="profile-info-value">@Model.BloodType?.Type</span>
+                </div>
+            </div>
+            <div class="profile-info-col profile-info-col-right">
+                <div class="profile-info-item">
+                    <span class="profile-info-label">Điều kiện</span>
+                    <span class="profile-condition-badge">Đủ điều kiện</span>
+                </div>
+                <div class="profile-info-item">
+                    <span class="profile-info-label">Trạng thái</span>
+                    <span class="profile-status @(Model.IsAvailable == true ? "text-success" : "text-danger")">
+                        @(Model.IsAvailable == true ? "Sẵn sàng" : "Không sẵn sàng")
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

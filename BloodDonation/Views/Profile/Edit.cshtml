@@ -1,0 +1,84 @@
+@model BloodDonation.Models.Donor
+@{
+    ViewData["Title"] = "Chỉnh sửa hồ sơ";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="/css/profile.css" />
+</head>
+<body>
+    <div class="profile-edit-container">
+        <h2>@ViewData["Title"]</h2>
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="DonorID" />
+            <input type="hidden" asp-for="AccountID" />
+
+            <div class="form-group">
+                <label asp-for="Name">Họ và Tên</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="DateOfBirth">Ngày Sinh</label>
+                <input asp-for="DateOfBirth" type="date" class="form-control" />
+                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Gender">Giới Tính</label>
+                <select asp-for="Gender" class="form-control">
+                    <option value="">Chọn giới tính</option>
+                    <option value="M">Nam</option>
+                    <option value="F">Nữ</option>
+                </select>
+                <span asp-validation-for="Gender" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ContactNumber">Số Điện Thoại</label>
+                <input asp-for="ContactNumber" class="form-control" />
+                <span asp-validation-for="ContactNumber" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Address">Địa Chỉ</label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="BloodTypeID">Nhóm Máu</label>
+                <select asp-for="BloodTypeID" class="form-control" asp-items="ViewBag.BloodTypes"></select>
+                <span asp-validation-for="BloodTypeID" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="IsAvailable">Trạng Thái</label>
+                <select asp-for="IsAvailable" class="form-control">
+                    <option value="">Chọn trạng thái</option>
+                    <option value="true">Sẵn sàng</option>
+                    <option value="false">Không sẵn sàng</option>
+                </select>
+                <span asp-validation-for="IsAvailable" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CCCD">CCCD</label>
+                <input asp-for="CCCD" class="form-control" />
+                <span asp-validation-for="CCCD" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Cập nhật</button>
+            <a href="/Profile/Index" class="btn btn-secondary">Hủy</a>
+        </form>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html> 

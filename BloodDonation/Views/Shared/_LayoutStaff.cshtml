@@ -1,0 +1,89 @@
+﻿@{
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - Blood Bank Staff</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/Staff.css" />
+    <style>
+        .modal {
+            z-index: 2000 !important;
+            position: fixed !important;
+        }
+
+        .modal-backdrop {
+            z-index: 1990 !important;
+            opacity: 0.5 !important;
+        }
+
+        body.modal-open {
+            overflow: hidden !important;
+        }
+
+        /* Nếu modal nằm trong .main hoặc .container-fluid */
+        .container-fluid, .main {
+            position: relative !important;
+            z-index: auto !important;
+            overflow: visible !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar d-flex flex-column justify-content-between">
+                <div>
+                    <h5 class="mb-4 text-danger fw-bold">🩸 Blood Bank Staff</h5>
+
+                    <a href="@Url.Action("DonationList", "Staff")"
+                       class="nav-link @(currentAction == "DonationList" ? "active" : "")">
+                        📋 Danh sách hiến máu
+                    </a>
+
+                    <a href="@Url.Action("BloodRequestList", "Staff")"
+                       class="nav-link @(currentAction == "BloodRequestList" ? "active" : "")">
+                        📨 Yêu cầu nhận máu
+                    </a>
+
+                    <a href="@Url.Action("BloodInventory", "Staff")"
+                       class="nav-link @(currentAction == "BloodInventory" ? "active" : "")">
+                        🧊 Kho máu
+                    </a>
+
+                    <a href="@Url.Action("NearestDonors", "Staff")"
+                       class="nav-link @(currentAction == "NearestDonors" ? "active" : "")">
+                        🔍 Tìm người hiến máu gần nhất
+                    </a>
+                </div>
+
+                <div>
+                    <a class="logout" href="@Url.Action("Logout", "Login")"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                </div>
+            </div>
+
+            <!-- Main content -->
+            <div class="col-md-10 main fade-in" id="main-content">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+    @RenderSection("Modal", required: false)
+    <!-- Scripts -->
+    <script src="~/js/site.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const modal = document.getElementById('healthHistoryModal');
+        if (modal) {
+            modal.addEventListener('shown.bs.modal', () => {
+                console.log("✔ Modal đã mở đúng");
+            });
+        }
+    </script>
+</body>
+</html>

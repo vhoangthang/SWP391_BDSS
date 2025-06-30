@@ -1,0 +1,61 @@
+﻿@model List<BloodDonation.Models.Notification>
+@{
+    ViewData["Title"] = "Thông Báo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/notification.css" asp-append-version="true" />
+</head>
+
+<div class="notification-container">
+    <div class="notification-header">
+        <i class="fas fa-bell icon"></i>
+        <h2>Thông Báo Của Bạn</h2>
+    </div>
+
+    <div class="notification-list">
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var n in Model)
+            {
+                var icon = "fa-info-circle";
+                var iconClass = "";
+                if (!string.IsNullOrEmpty(n.Type))
+                {
+                    switch (n.Type.ToLower())
+                    {
+                        case "emergency": icon = "fa-tint"; iconClass = "danger"; break;
+                        case "confirmed": icon = "fa-check-circle"; iconClass = "success"; break;
+                        case "warning": icon = "fa-exclamation-triangle"; iconClass = "warning"; break;
+                        default: icon = "fa-info-circle"; iconClass = "info"; break;
+                    }
+                }
+                var unreadClass = n.IsRead ? "" : "unread";
+        <div class="notification-item @unreadClass">
+            <div class="icon-wrapper">
+                <i class="fas @icon"></i>
+            </div>
+            <div class="content">
+                <p>@n.Message</p>
+            </div>
+            <div class="timestamp">
+                @n.SentAt.ToString("dd/MM/yyyy HH:mm")
+            </div>
+        </div>
+            }
+        }
+        else
+        {
+            <div class="notification-item">
+                <div class="icon-wrapper">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="content">
+                    <p>Bạn chưa có thông báo nào.</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>

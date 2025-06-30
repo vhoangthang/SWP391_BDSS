@@ -1,0 +1,51 @@
+@model List<BloodDonation.Models.DonationCertificate>
+@{
+    ViewData["Title"] = "Chứng Nhận Của Tôi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/certificate.css" asp-append-version="true" />
+</head>
+
+<div class="container mt-5 mb-5">
+    <div class="text-center mb-5">
+        <h2><i class="fas fa-award text-success"></i> Giấy Chứng Nhận Hiến Máu Của Bạn</h2>
+        <p class="lead text-muted">Cảm ơn bạn đã đóng góp cho cộng đồng. Dưới đây là danh sách các chứng nhận của bạn.</p>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="text-center">
+            <p>Bạn chưa có chứng nhận nào.</p>
+            <a asp-controller="BookingDayAndBloodType" asp-action="Index" class="btn btn-danger mt-3">
+                <i class="fas fa-tint"></i> Hiến máu ngay
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var cert in Model)
+            {
+                <div class="col-md-6">
+                    <div class="certificate-card">
+                        <div class="card-header">
+                            <h5>Chứng nhận ngày: @cert.IssueDate.ToString("dd/MM/yyyy")</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>@cert.CertificateDetails</p>
+                            <hr>
+                            <p class="text-muted small">
+                                <strong>Lịch hẹn:</strong> @cert.Appointment.AppointmentDate.ToString("dd/MM/yyyy")
+                                <br>
+                                <strong>Tại:</strong> @cert.Appointment.MedicalCenter.Name
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div> 

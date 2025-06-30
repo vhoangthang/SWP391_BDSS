@@ -1,0 +1,91 @@
+﻿@{
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phiếu đăng ký hiến máu</title>
+    <link rel="stylesheet" href="/css/DonationBookingForm_v2.css">
+
+</head>
+<body>
+    <h1>Phiếu đăng ký hiến máu</h1>
+    <div class="form-container">
+        <form id="donationForm">
+            <!-- Các câu hỏi -->
+            <div class="question">
+                <label>1. Anh/chị từng hiến máu chưa?</label>
+                <div><input type="radio" name="1_AnhChiDaTungHienMauChua" value="true" required> Có</div>
+                <div><input type="radio" name="1_AnhChiDaTungHienMauChua" value="false" required> Không</div>
+            </div>
+
+            <div class="question">
+                <label>2. Hiện tại, anh/chị có mắc bệnh lý nào không?</label>
+                <div><input type="radio" name="2_HienTaiAnhChiCoMacBenhLyKhong" value="true" required> Có</div>
+                <div><input type="radio" name="2_HienTaiAnhChiCoMacBenhLyKhong" value="false" required> Không</div>
+            </div>
+
+            <div class="question">
+                <label>
+                    3. Trước đây, anh/chị có từng mắc một trong các bệnh:viêm gan siêu vi B, C, HIV, gậy nén, phì đại tiên liệt
+                    tuyến, sốc phản vệ, tai biến mạch máu não, nhồi máu cơ tim, lupus ban đỏ, động kinh, ung thư, hen, được cấy ghép mô tạng?
+                </label>
+                <div><input type="radio" name="3_TruocDayAnhChiCoMacCacBenhLietKeKhong" value="true"> Có</div>
+                <div><input type="radio" name="3_TruocDayAnhChiCoMacCacBenhLietKeKhong" value="false"> Không</div>
+                <div><input type="radio" name="3_TruocDayAnhChiCoMacCacBenhLietKeKhong" value="Bệnh Khác"> Bệnh khác</div>
+            </div>
+
+            <div class="question">
+                <label>4. Trong 12 tháng gần đây, anh/chị có:</label>
+                <div><input type="checkbox" name="4_KhoiBenhSauMacCacBenh12Thang" value="true"> Khỏi bệnh sau sốt rét, giang mai, lao, phẫu thuật?</div>
+                <div><input type="checkbox" name="4_DuocTruyenMauHoacGayGhepMo" value="true"> Được truyền máu hoặc ghép mô?</div>
+                <div><input type="checkbox" name="4_TiemVaccine" value="true"> Tiêm vaccine?</div>
+            </div>
+
+            <div class="question">
+                <label>5. Trong 06 tháng gần đây, anh/chị có khỏi bệnh sau các bệnh truyền nhiễm, viêm tủy không?:</label>
+                <div><input type="radio" name="5_KhoiBenhSauMacCacBenh6Thang" value="true"> Có</div>
+                <div><input type="radio" name="5_KhoiBenhSauMacCacBenh6Thang" value="false"> Không</div>
+            </div>
+
+            <div class="question">
+                <label>6. Trong 01 tháng gần đây, anh/chị có khỏi bệnh viêm tiết niệu, viêm phổi, rubella không?:</label>
+                <div><input type="radio" name="6_KhoiBenhSauMacCacBenh1Thang" value="true"> Có</div>
+                <div><input type="radio" name="6_KhoiBenhSauMacCacBenh1Thang" value="false"> Không</div>
+            </div>
+
+            <div class="question">
+                <label>7. Trong 14 ngày gần đây, anh/chị có bị cảm, sốt, đau họng không:</label>
+                <div><input type="radio" name="7_BiCumCamLanhHoNhucDauSotDauHong14Ngay" value="true" required> Có</div>
+                <div><input type="radio" name="7_BiCumCamLanhHoNhucDauSotDauHong14Ngay" value="false" required> Không</div>
+            </div>
+
+            <div class="question">
+                <label>8. Trong 07 ngày gần đây, anh/chị có dùng thuốc kháng sinh, aspirin, corticoid không?</label>
+                <div><input type="radio" name="8_DungThuocKhangSinhKhangViêmAspirinCorticoide7Ngay" value="true"> Có</div>
+                <div><input type="radio" name="8_DungThuocKhangSinhKhangViêmAspirinCorticoide7Ngay" value="false"> Không</div>
+            </div>
+
+            <div class="question">
+                <label>9. Câu hỏi dành cho phụ nữ:</label>
+                <div><input type="radio" name="9_CauHoiDanhChoPhuNu" value="true"> Đang mang thai hoặc nuôi con dưới 12 tháng tuổi?</div>
+                <div><input type="radio" name="9_CauHoiDanhChoPhuNu" value="false"> Chấm dứt thai kỳ trong 12 tháng gần đây</div>
+            </div>
+
+            <div class="question">
+                <label>10. Anh/chị có sẵn sàng hiến máu mọi lúc khi cần không?</label>
+                <div><input type="radio" name="10_AnhChiSanSangHienMauNeuDuDieuKien" value="true" required> Trạng thái Sẵn sàng</div>
+                <div><input type="radio" name="10_AnhChiSanSangHienMauNeuDuDieuKien" value="false" required> Trạng thái Không sẵn sàng</div>
+            </div>
+
+            <button type="submit" class="submit-btn">Gửi đăng ký</button>
+        </form>
+    </div>
+
+    <script src="/js/DonationBookingForm.js"></script>
+</body>
+</html>

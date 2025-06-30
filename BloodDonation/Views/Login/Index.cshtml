@@ -1,0 +1,60 @@
+﻿@model BloodDonation.Models.LoginViewModel
+@{
+    Layout = null;
+}
+
+<link rel="stylesheet" href="/css/fontawesome.min.css" />
+<link rel="stylesheet" href="/css/login.css" />
+
+<div class="container" id="container">
+    <div class="form-container sign-up-container">
+        <form action="/Account/Register" method="get">
+            <h1>Tạo tài khoản</h1>
+            <input type="text" placeholder="Tên đăng nhập" name="Username" />
+            <input type="email" placeholder="Email" name="Email" />
+            <input type="password" placeholder="Mật khẩu" name="Password" />
+            <button type="submit">Đăng ký</button>
+        </form>
+    </div>
+    <div class="form-container sign-in-container">
+        <form method="post" action="/Login/Index">
+            <h1>Đăng nhập</h1>
+            <input type="text" name="Username" placeholder="Tên đăng nhập" value="@Model?.Username" required />
+            <input type="password" name="Password" placeholder="Mật khẩu" required />
+            <a href="/Account/ForgotPassword">Quên mật khẩu?</a>
+            <button type="submit">Đăng nhập</button>
+            <div style="color:red; margin-top:10px;">
+                @Html.ValidationSummary()
+            </div>
+        </form>
+    </div>
+    <div class="overlay-container">
+        <div class="overlay">
+            <div class="overlay-panel overlay-left">
+                <h1>Chào mừng trở lại!</h1>
+                <p>Để kết nối với chúng tôi, vui lòng đăng nhập bằng thông tin cá nhân của bạn</p>
+                <button class="ghost" id="signIn">Đăng nhập</button>
+            </div>
+            <div class="overlay-panel overlay-right">
+                <h1>Xin chào, bạn mới!</h1>
+                <p>Nhập thông tin cá nhân và bắt đầu hành trình với chúng tôi</p>
+                <button class="ghost" id="signUp">Đăng ký</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    const signUpButton = document.getElementById('signUp');
+    const signInButton = document.getElementById('signIn');
+    const container = document.getElementById('container');
+
+    signUpButton.addEventListener('click', () => {
+        container.classList.add('right-panel-active');
+    });
+
+    signInButton.addEventListener('click', () => {
+        container.classList.remove('right-panel-active');
+    });
+</script>

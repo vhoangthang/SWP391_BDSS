@@ -1,0 +1,93 @@
+﻿@model List<BloodDonation.Models.BloodRequest>
+
+@{
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+    ViewData["Title"] = "Yêu cầu nhận máu";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-2 fw-bold">📨 Yêu cầu nhận máu</h2>
+    <p class="text-muted">Quản lý các yêu cầu nhận máu từ cơ sở y tế</p>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" class="form-control" placeholder="🔍 Tìm kiếm..." />
+        </div>
+    </div>
+
+    <div class="table-responsive shadow-sm rounded bg-white">
+        <table class="table table-hover table-borderless align-middle mb-0">
+            <thead class="table-light text-center">
+                <tr>
+                    <th>Thông tin cơ sở</th>
+                    <th>Nhóm máu</th>
+                    <th>Ngày yêu cầu</th>
+                    <th>Số lượng (CC)</th>
+                    <th>Mức độ</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var req in Model)
+                {
+                    if (req.Status == "Approved" || req.Status == "Completed")
+                    {
+                        <tr>
+                            <td>
+                                <strong>@req.MedicalCenter?.Name</strong><br />
+                            </td>
+                            <td class="text-center">@req.BloodType?.Type</td>
+                            <td class="text-center">@req.RequestDate.ToString("yyyy-MM-dd")</td>
+                            <td class="text-center">@req.Quantity</td>
+                            <td class="text-center">
+                                @if (req.IsEmergency)
+                                {
+                                    <span class="badge bg-danger">🚨 Khẩn cấp</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Thông thường</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @switch (req.Status)
+                                {
+                                    case "Pending":
+                                        <span class="badge bg-warning text-dark">⏳ Chờ duyệt</span>
+                                        ; break;
+                                    case "Approved":
+                                        <span class="badge bf-comfirm"><span class="check-circle">✔</span> Đã duyệt</span>
+                                        ; break;
+                                    case "Completed":
+                                        <span class="badge bg-success">✅ Hoàn tất</span>
+                                        ; break;
+                                    case "Rejected":
+                                        <span class="badge bg-danger">❌ Từ chối</span>
+                                        ; break;
+                                    default:
+                                        <span class="badge bg-secondary">@req.Status</span>
+                                        ; break;
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (req.Status == "Completed")
+                                {
+                                    <button class="btn btn-outline-secondary btn-sm" disabled>Đã xử lý</button>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("ProcessBloodRequest", "Staff", new { id = req.BloodRequestID })" class="btn btn-outline-danger btn-sm">
+                                        Xử lý
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>

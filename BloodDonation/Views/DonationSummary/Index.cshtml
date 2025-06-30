@@ -1,0 +1,125 @@
+@model BloodDonation.Models.DonationSummaryViewModel
+
+<link rel="stylesheet" href="/css/DonationSummary.css" />
+
+@{
+    ViewData["Title"] = "Tóm tắt đăng ký hiến máu";
+    var donor = Model.Donor;
+    var appointments = Model.Appointments;
+    var questions = ViewBag.HealthSurveyQuestions as Dictionary<string, string>;
+
+    string hienThiTraLoi(string value) {
+        if (value == "true") return "Có";
+        if (value == "false") return "Không";
+        return value;
+    }
+}
+
+<div class="donation-summary-container">
+    <h1>Tóm tắt đăng ký hiến máu</h1>
+
+    <h2>Thông tin cá nhân</h2>
+    <ul>
+        <li><strong>Họ và tên:</strong> @donor?.Name</li>
+        <li><strong>Ngày sinh:</strong> @(donor?.DateOfBirth?.ToShortDateString() ?? "Chưa cung cấp")</li>
+        <li><strong>Giới tính:</strong> @(donor?.Gender == "M" ? "Nam" : donor?.Gender == "F" ? "Nữ" : "Chưa cung cấp")</li>
+        <li><strong>Số điện thoại:</strong> @donor?.ContactNumber</li>
+        <li><strong>Email:</strong> @donor?.Account?.Email</li>
+        <li><strong>Địa chỉ:</strong> @donor?.Address</li>
+        <li><strong>CCCD:</strong> @donor?.CCCD</li>
+    </ul>
+
+    <h2>Danh sách phiếu đăng ký hiến máu</h2>
+    
+    @if (appointments != null && appointments.Any())
+    {
+        @foreach (var appointment in appointments)
+        {
+            <div class="appointment-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; background-color: #f9f9f9;">
+                <h3>Phiếu đăng ký #@appointment.AppointmentID</h3>
+                
+                <div class="appointment-info">
+                    <ul>
+                        <li><strong>Ngày hẹn:</strong> @appointment.AppointmentDate.ToShortDateString()</li>
+                        <li><strong>Khung giờ:</strong> @appointment.TimeSlot</li>
+                        <li><strong>Nhóm máu:</strong> @appointment.BloodType?.Type</li>
+                        <li><strong>Địa điểm:</strong> @appointment.MedicalCenter?.Name</li>
+                        <li><strong>Trạng thái:</strong> @appointment.Status</li>
+                    </ul>
+                </div>
+
+                @if (!string.IsNullOrEmpty(appointment.HealthSurvey))
+                {
+                    <h4>Kết quả khảo sát sức khỏe</h4>
+                    var answers = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(appointment.HealthSurvey);
+                    <table style="width: 100%; margin-top: 10px;">
+                        <thead>
+                            <tr>
+                                <th>Câu hỏi</th>
+                                <th>Câu trả lời</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var q in questions)
+                            {
+                                if (q.Key == "9_CauHoiDanhChoPhuNu")
+                                {
+                                    <tr>
+                                        <td>@q.Value</td>
+                                        <td>
+                                            @if (answers.ContainsKey(q.Key))
+                                            {
+                                                if (answers[q.Key] == "true")
+                                                {
+                                                    @:Đang mang thai hoặc nuôi con dưới 12 tháng tuổi?
+                                                }
+                                                else if (answers[q.Key] == "false")
+                                                {
+                                                    @:Chấm dứt thai kỳ trong 12 tháng gần đây
+                                                }
+                                                else
+                                                {
+                                                    @:Không trả lời
+                                                }
+                                            }
+                                            else
+                                            {
+                                                @:Không trả lời
+                                            }
+                                        </td>
+                                    </tr>
+                                    continue;
+                                }
+                                <tr>
+                                    <td>@q.Value</td>
+                                    <td>
+                                        @(answers.ContainsKey(q.Key) ? hienThiTraLoi(answers[q.Key]) : "Không trả lời")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                @if (appointment.Status == "Pending" || appointment.Status == "Confirmed")
+                {
+                    <form asp-action="Delete" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="appointmentId" value="@appointment.AppointmentID" />
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn xóa phiếu này?');">Xóa</button>
+                    </form>
+                }
+                else
+                {
+                    <div style="margin-top: 16px; text-align: right; color: #dc3545; font-weight: bold;">
+                        Bạn không thể xoá phiếu này.
+                    </div>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <p>Bạn chưa có phiếu đăng ký hiến máu nào.</p>
+    }
+</div> 
