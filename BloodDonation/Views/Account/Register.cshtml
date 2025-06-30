@@ -1,0 +1,93 @@
+﻿@model BloodDonation.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <div class="card shadow rounded">
+                <div class="card-body p-4">
+                    <h3 class="text-center mb-4">@ViewData["Title"]</h3>
+
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success text-center">@TempData["Success"]</div>
+                    }
+
+                    <form asp-action="Register" method="post" novalidate>
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">Email:</label>
+                            <div class="input-group">
+                                <input asp-for="Email" id="email" class="form-control" />
+                                <button type="button" class="btn btn-outline-secondary" onclick="sendCode()">Gửi mã</button>
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label">Mật khẩu:</label>
+                            <input asp-for="Password" class="form-control" type="password" />
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="VerificationCode" class="form-label">Mã xác minh:</label>
+                            <input asp-for="VerificationCode" class="form-control" />
+                            <span asp-validation-for="VerificationCode" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Đăng ký</button>
+                        </div>
+                    </form>
+
+                    <div id="sendCodeMessage" class="mt-3 text-center fw-semibold"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        async function sendCode() {
+            const email = document.getElementById("email").value;
+            const messageEl = document.getElementById("sendCodeMessage");
+            messageEl.innerText = "";
+            messageEl.classList.remove("text-danger", "text-success");
+
+            if (!email) {
+                messageEl.innerText = "Vui lòng nhập email trước khi gửi mã.";
+                messageEl.classList.add("text-danger");
+                return;
+            }
+
+            try {
+                const response = await fetch('/Account/SendVerificationCode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    messageEl.classList.add("text-success");
+                    messageEl.innerText = "Mã xác minh đã được gửi đến email.";
+                } else {
+                    messageEl.classList.add("text-danger");
+                    messageEl.innerText = "Gửi mã thất bại: " + (data.message || "Vui lòng thử lại.");
+                }
+            } catch (err) {
+                messageEl.classList.add("text-danger");
+                messageEl.innerText = "Lỗi khi gửi yêu cầu đến máy chủ.";
+            }
+        }
+    </script>
+
+
+}
