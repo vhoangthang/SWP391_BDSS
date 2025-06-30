@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="~/css/notification.css" asp-append-version="true" />
 </head>
 
+
 <div class="notification-container">
     <div class="notification-header">
         <i class="fas fa-bell icon"></i>
@@ -33,17 +34,22 @@
                     }
                 }
                 var unreadClass = n.IsRead ? "" : "unread";
-        <div class="notification-item @unreadClass">
-            <div class="icon-wrapper">
-                <i class="fas @icon"></i>
-            </div>
-            <div class="content">
-                <p>@n.Message</p>
-            </div>
-            <div class="timestamp">
-                @n.SentAt.ToString("dd/MM/yyyy HH:mm")
-            </div>
-        </div>
+                <div class="notification-item @unreadClass" data-id="@n.NotificationID" style="cursor:pointer;">
+                    <div class="icon-wrapper">
+                        <i class="fas @icon"></i>
+                    </div>
+                    <div class="content">
+                        <p>@n.Message
+                            @if (!n.IsRead)
+                            {
+                                <span class="notification-dot"></span>
+                            }
+                        </p>
+                    </div>
+                    <div class="timestamp">
+                        @n.SentAt.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
             }
         }
         else
@@ -59,3 +65,25 @@
         }
     </div>
 </div>
+
+@section Scripts {
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(function() {
+        $(".notification-item.unread").on("click", function() {
+            var $item = $(this);
+            var id = $item.data("id");
+            $.post("/Notification/MarkAsRead", { id: id }, function(res) {
+                if (res.success) {
+                    $item.removeClass("unread");
+                    $item.find(".notification-dot").remove();
+                    // Giảm badge
+                    var $badge = $("#notificationBadge");
+                    var count = parseInt($badge.text()) || 0;
+                    if (count > 0) $badge.text(count - 1);
+                }
+            });
+        });
+    });
+</script>
+}
