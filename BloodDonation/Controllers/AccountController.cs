@@ -25,7 +25,7 @@ namespace BloodDonation.Controllers
 
             // TODO: Lưu thông tin tài khoản vào DB
             TempData["Success"] = "Đăng ký thành công!";
-            return RedirectToAction("Login");
+            return RedirectToAction("Index", "Login");
         }
 
         [HttpPost]
