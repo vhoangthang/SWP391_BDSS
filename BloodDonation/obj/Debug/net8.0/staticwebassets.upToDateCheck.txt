@@ -10,6 +10,7 @@ wwwroot\css\login.css
 wwwroot\css\medicalCenter.css
 wwwroot\css\notification.css
 wwwroot\css\profile.css
+wwwroot\css\select2.min.css
 wwwroot\css\site.css
 wwwroot\css\Staff.css
 wwwroot\css\style.css
@@ -18,6 +19,7 @@ wwwroot\js\admin.js
 wwwroot\js\BloodDonationBooking.js
 wwwroot\js\DonationBookingForm.js
 wwwroot\js\main.js
+wwwroot\js\select2.min.js
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
@@ -76,6 +78,14 @@ wwwroot\lib\jquery\dist\jquery.js
 wwwroot\lib\jquery\dist\jquery.min.js
 wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
+wwwroot\lib\lightbox\css\lightbox.min.css
+wwwroot\lib\lightbox\images\close.png
+wwwroot\lib\lightbox\images\loading.gif
+wwwroot\lib\lightbox\images\next.png
+wwwroot\lib\lightbox\images\prev.png
+wwwroot\lib\lightbox\js\lightbox.min.js
+wwwroot\lib\wow\wow.js
+wwwroot\lib\wow\wow.min.js
 wwwroot\scss\bootstrap.scss
 wwwroot\scss\bootstrap\scss\bootstrap-grid.scss
 wwwroot\scss\bootstrap\scss\bootstrap-reboot.scss

@@ -45,6 +45,17 @@
                                 <span class="notification-dot"></span>
                             }
                         </p>
+                        @if (n.Type == "Invite" && !n.IsConfirmed)
+                        {
+                            <form asp-action="ConfirmDonation" asp-controller="Notification" method="post" style="display:inline;">
+                                <input type="hidden" name="notificationId" value="@n.NotificationID" />
+                                <button type="submit" class="btn btn-success btn-sm mt-2">Xác nhận đi hiến máu</button>
+                            </form>
+                        }
+                        else if (n.Type == "Invite" && n.IsConfirmed)
+                        {
+                            <span class="text-success">Đã xác nhận</span>
+                        }
                     </div>
                     <div class="timestamp">
                         @n.SentAt.ToString("dd/MM/yyyy HH:mm")
