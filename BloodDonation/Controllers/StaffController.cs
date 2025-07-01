@@ -360,6 +360,7 @@ namespace BloodDonation.Controllers
                 inventory.LastUpdated = DateTime.Now;
 
                 request.Status = "Completed";
+                request.BloodGiven = selectedBloodType.Type;
                 TempData["Message"] = "✅ Yêu cầu đã được xử lý và cập nhật kho máu.";
             }
             else
@@ -532,6 +533,7 @@ namespace BloodDonation.Controllers
                         inventory.Quantity -= quantity.Value;
                         inventory.LastUpdated = DateTime.Now;
                         bloodRequest.Status = "Completed";
+                        bloodRequest.BloodGiven = selectedBloodType.Type;
                         TempData["Message"] = "Yêu cầu đã được hoàn thành và kho máu đã được cập nhật.";
                     }
                     else

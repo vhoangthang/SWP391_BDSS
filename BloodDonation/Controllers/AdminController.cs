@@ -84,13 +84,6 @@ namespace BloodDonation.Controllers
                 .Select(b => b.BloodType.Type)
                 .ToListAsync();
 
-            // Gán IsCompatible cho mỗi yêu cầu
-            foreach (var request in bloodRequests)
-            {
-                request.IsCompatible = availableBloodTypes.Any(donor =>
-                    CheckCompatibility(donor, request.BloodType?.Type));
-            }
-
             return View(bloodRequests);
         }
 

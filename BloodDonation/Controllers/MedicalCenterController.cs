@@ -75,9 +75,6 @@ namespace BloodDonation.Controllers
 
                     _logger.LogInformation($"Found BloodType: ID={bloodType.BloodTypeID}, Type={bloodType.Type}");
 
-                    var compatibleTypes = BloodDonation.Controllers.StaffController.GetCompatibleBloodTypes(bloodType.Type);
-                    bool isCompatible = !(compatibleTypes.Count == 1 && compatibleTypes[0] == bloodType.Type);
-
                     var bloodRequest = new BloodRequest
                     {
                         MedicalCenterID = medicalCenterId.Value,
@@ -86,7 +83,7 @@ namespace BloodDonation.Controllers
                         RequestDate = DateTime.Now,
                         Quantity = model.Quantity,
                         IsEmergency = model.ReceptionType == "emergencyReception",
-                        IsCompatible = isCompatible,
+                        IsCompatible = model.Compatibility == "Tương hợp",
                         Status = BloodRequestStatus.Pending
                     };
 
