@@ -171,5 +171,24 @@ namespace BloodDonation.Controllers
             }
             return RedirectToAction("BloodRequestList");
         }
+
+        public IActionResult MedicalCenterNotifications()
+        {
+            var username = HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+                return RedirectToAction("Index", "Login");
+
+            var medicalCenterAccount = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "medicalcenter");
+            if (medicalCenterAccount == null)
+                return RedirectToAction("Index", "Login");
+
+            var notifications = _context.Notifications
+                .Include(n => n.Donor)
+                .Where(n => n.AccountID == medicalCenterAccount.AccountID)
+                .OrderByDescending(n => n.SentAt)
+                .ToList();
+
+            return View("MedicalCenterNotifications", notifications);
+        }
     }
 }

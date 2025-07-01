@@ -2,7 +2,6 @@ wwwroot\css\admin.css
 wwwroot\css\blooddonationBooking.css
 wwwroot\css\bootstrap.min.css
 wwwroot\css\certificate.css
-wwwroot\css\DonationBookingForm_v2.css
 wwwroot\css\DonationSummary.css
 wwwroot\css\fontawesome.min.css
 wwwroot\css\Homepage.css
@@ -168,3 +167,4 @@ wwwroot\scss\bootstrap\scss\_transitions.scss
 wwwroot\scss\bootstrap\scss\_type.scss
 wwwroot\scss\bootstrap\scss\_utilities.scss
 wwwroot\scss\bootstrap\scss\_variables.scss
+wwwroot\css\DonationBookingForm_v2.css

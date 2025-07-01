@@ -84,6 +84,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVkaWNhbENlbnRlclxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/study/Summer_2025/Swp391/ProjectGit/SWP391_BDSS/BloodDonation/Views/MedicalCenter/MedicalCenterNotifications.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVkaWNhbENlbnRlclxNZWRpY2FsQ2VudGVyTm90aWZpY2F0aW9ucy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/study/Summer_2025/Swp391/ProjectGit/SWP391_BDSS/BloodDonation/Views/Notification/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTm90aWZpY2F0aW9uXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -142,6 +146,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/study/Summer_2025/Swp391/ProjectGit/SWP391_BDSS/BloodDonation/Views/Staff/NearestDonors.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RhZmZcTmVhcmVzdERvbm9ycy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/study/Summer_2025/Swp391/ProjectGit/SWP391_BDSS/BloodDonation/Views/Staff/NearestDonorsWithin20km.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RhZmZcTmVhcmVzdERvbm9yc1dpdGhpbjIwa20uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/study/Summer_2025/Swp391/ProjectGit/SWP391_BDSS/BloodDonation/Views/Staff/ProcessBloodRequest.cshtml]

@@ -66,12 +66,13 @@ namespace BloodDonation.Controllers
                 IsRead = false,
                 Type = "Invite",
                 IsConfirmed = false,
-                AccountID = donor.AccountID
+                AccountID = donor.AccountID,
+                BloodRequestID = bloodRequestId
             };
             _context.Notifications.Add(notification);
             _context.SaveChanges();
 
-            return RedirectToAction("NearestDonors", "Staff", new { bloodRequestId });
+            return RedirectToAction("NearestDonorsWithin20km", "Staff", new { bloodRequestId = bloodRequestId });
         }
 
         [HttpPost]
@@ -94,8 +95,8 @@ namespace BloodDonation.Controllers
 
             if (bloodRequest != null)
             {
-                // Gửi thông báo cho tất cả staff cùng MedicalCenter
-                var staffAccounts = _context.Accounts.Where(a => a.Role.ToLower() == "staff" && a.MedicalCenterID == bloodRequest.MedicalCenterID).ToList();
+                // Gửi thông báo cho tất cả staff (không lọc theo MedicalCenterID)
+                var staffAccounts = _context.Accounts.Where(a => a.Role.ToLower() == "staff").ToList();
                 foreach (var staffAccount in staffAccounts)
                 {
                     var staffNotification = new Notification
