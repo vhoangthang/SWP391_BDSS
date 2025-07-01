@@ -125,9 +125,9 @@
                                         }
                                     </td>
                                     <td>
-                                        @if (request.IsCompatible.HasValue)
+                                        @if (request.IsCompatible)
                                         {
-                                            @if (request.IsCompatible.Value)
+                                            @if (request.IsCompatible)
                                             {
                                                 <span class="badge bg-success"><i class="fas fa-check"></i> Tương hợp</span>
                                             }
