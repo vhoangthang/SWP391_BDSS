@@ -266,7 +266,7 @@
                             {
                                 <tr>
                                     <td>@donor.Name</td>
-                                    <td>@donor.Type</td>
+                                    
                                     <td>@donor.ContactNumber</td>
                                     <td>@donor.Address</td>
                                 </tr>
@@ -317,13 +317,20 @@
                     <form method="post" action="@Url.Action("ProcessBloodRequestFromDetails", "Staff")">
                         <input type="hidden" name="bloodRequestId" value="@Model.BloodRequestID" />
                         <select name="selectedBloodTypeId" class="form-select mb-3">
-                            @foreach (var type in ViewBag.CompatibleBloodTypes as List<string>)
+                            @if (ViewBag.CompatibleBloodTypes != null)
                             {
-                                var bloodType = (ViewBag.AllBloodInventories as List<BloodDonation.Models.BloodInventory>)?.FirstOrDefault(b => b.BloodType.Type == type)?.BloodType;
-                                if (bloodType != null)
+                                foreach (var type in ViewBag.CompatibleBloodTypes as List<string>)
                                 {
-                                    <option value="@bloodType.BloodTypeID">@type</option>
+                                    var bloodType = (ViewBag.AllBloodInventories as List<BloodDonation.Models.BloodInventory>)?.FirstOrDefault(b => b.BloodType.Type == type)?.BloodType;
+                                    if (bloodType != null)
+                                    {
+                                        <option value="@bloodType.BloodTypeID">@type</option>
+                                    }
                                 }
+                            }
+                            else
+                            {
+                                <option disabled>Không có nhóm máu tương thích</option>
                             }
                         </select>
                         <span class="bdss-label">Ghi chú xử lý</span>
