@@ -179,43 +179,7 @@
     </div>
 
     <div class="row g-4">
-        <!-- Card thông tin yêu cầu (bệnh nhân) -->
         <div class="col-lg-8">
-            <div class="bdss-card">
-                <div class="bdss-title">
-                    Thông tin yêu cầu
-                    @if (Model.IsEmergency)
-                    {
-                        <span class="bdss-badge-soft bdss-badge-soft-danger" style="font-size:1em;margin-left:1em;">Khẩn cấp</span>
-                    }
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <span class="bdss-label">Tên bệnh nhân</span>
-                        <span class="bdss-value">@Model.Reason</span>
-                    </div>
-                    <div class="col-md-6">
-                        <span class="bdss-label">Tuổi</span>
-                        <span class="bdss-value">--</span>
-                    </div>
-                    <div class="col-md-6">
-                        <span class="bdss-label">Giới tính</span>
-                        <span class="bdss-value">--</span>
-                    </div>
-                    <div class="col-md-6">
-                        <span class="bdss-label">Mã hồ sơ</span>
-                        <span class="bdss-value">--</span>
-                    </div>
-                    <div class="col-md-6">
-                        <span class="bdss-label">Chẩn đoán</span>
-                        <span class="bdss-value">--</span>
-                    </div>
-                    <div class="col-md-6">
-                        <span class="bdss-label">Tiền sử truyền máu</span>
-                        <span class="bdss-value">Không</span>
-                    </div>
-                </div>
-            </div>
             <div class="bdss-card">
                 <div class="bdss-title" style="font-size:1.2em; margin-bottom:1em;">Chi tiết yêu cầu máu</div>
                 <div class="row">
@@ -224,29 +188,27 @@
                         <span class="bdss-value">@Model.BloodType?.Type</span>
                     </div>
                     <div class="col-md-6">
-                        <span class="bdss-label">Nhóm máu tương thích</span>
-                        <span class="bdss-value">O+, O-</span>
+                        <span class="bdss-label">Lý do</span>
+                        <span class="bdss-value">@Model.Reason</span>
                     </div>
                     <div class="col-md-6">
                         <span class="bdss-label">Lượng máu cần</span>
-                        <span class="bdss-value">@Model.Quantity ml</span>
-                    </div>
-                    <div class="col-md-6">
-                        <span class="bdss-label">Thành phần máu</span>
-                        <span class="bdss-value">@Model.BloodGiven</span>
+                        <span class="bdss-value">@Model.Quantity CC</span>
                     </div>
                     <div class="col-md-6">
                         <span class="bdss-label">Thời gian cần</span>
                         <span class="bdss-value">@Model.RequestDate.ToString("yyyy-MM-dd HH:mm")</span>
                     </div>
                     <div class="col-md-6">
-                        <span class="bdss-label">Yêu cầu đặc biệt</span>
-                        <span class="bdss-value">Không</span>
-                    </div>
-                    <div class="col-md-6">
                         <span class="bdss-label">Tương hợp</span>
                         <span class="bdss-value">
                             @(Model.IsCompatible ? "Có" : "Không")
+                        </span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="bdss-label">Mức độ</span>
+                        <span class="bdss-value">
+                            @(Model.IsEmergency ? "Khẩn cấp" : "Thông thường")
                         </span>
                     </div>
                 </div>
@@ -305,17 +267,13 @@
         <!-- Card thông tin bệnh viện bên phải -->
         <div class="col-lg-4">
             <div class="bdss-card">
-                <div class="bdss-title" style="font-size:1.2em; margin-bottom:1.2em;">Thông tin bệnh viện</div>
-                <span class="bdss-label">Bệnh viện</span>
+                <div class="bdss-title" style="font-size:1.2em; margin-bottom:1.2em;">Thông tin cơ sở y tế</div>
+                <span class="bdss-label">Cơ sở y tế</span>
                 <span class="bdss-value">@Model.MedicalCenter?.Name</span>
                 <span class="bdss-label">Địa chỉ</span>
                 <span class="bdss-value">@Model.MedicalCenter?.Location</span>
                 <span class="bdss-label">Số điện thoại liên hệ</span>
                 <span class="bdss-value">@Model.MedicalCenter?.ContactNumber</span>
-                <span class="bdss-label">Khoa yêu cầu</span>
-                <span class="bdss-value">--</span>
-                <span class="bdss-label">Bác sĩ phụ trách</span>
-                <span class="bdss-value">--</span>
             </div>
             <div class="bdss-card">
                 <div class="bdss-title" style="font-size:1.2em; margin-bottom:1.2em;">Trạng thái</div>
@@ -366,7 +324,6 @@
                         else
                         {
                             <button type="submit" name="action" value="complete" class="bdss-btn-blue">Hoàn thành đơn</button>
-                            <button type="submit" name="action" value="reject" class="bdss-btn-red">Từ chối yêu cầu</button>
                         }
                     </form>
                 </div>
