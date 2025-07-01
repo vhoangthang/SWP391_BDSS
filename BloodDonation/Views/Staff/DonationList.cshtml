@@ -7,7 +7,9 @@
 
 <style>
     .bdss-badge-soft {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4em;
         padding: 0.35em 1.1em;
         font-size: 1em;
         font-weight: 500;
@@ -42,6 +44,45 @@
         background: #e0f2fe;
         color: #0284c7;
     }
+    .bdss-table-card {
+        background: #fff;
+        border-radius: 1.2rem;
+        box-shadow: 0 2px 16px 0 rgba(0,0,0,0.07);
+        border: none;
+        padding: 0.5rem 0.5rem 1.5rem 0.5rem;
+    }
+    .bdss-table th, .bdss-table td {
+        vertical-align: middle !important;
+        border: none !important;
+    }
+    .bdss-table thead th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: #22223b;
+        border-bottom: 1.5px solid #e5e7eb !important;
+    }
+    .bdss-table tbody tr:not(:last-child) {
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .bdss-link-red {
+        color: #ef4444;
+        font-weight: 500;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .bdss-link-red:hover {
+        color: #b91c1c;
+        text-decoration: underline;
+    }
+    .bdss-name {
+        font-weight: 700;
+        font-size: 1.08em;
+        color: #22223b;
+    }
+    .bdss-phone {
+        font-size: 0.98em;
+        color: #64748b;
+    }
 </style>
 
 <div class="container mt-4">
@@ -50,15 +91,15 @@
 
     <div class="row mb-3">
         <div class="col-md-4">
-            <input type="text" class="form-control" placeholder="🔍 Tìm kiếm..." />
+            <input type="text" class="form-control" placeholder="Tìm kiếm..." />
         </div>
     </div>
 
-    <div class="table-responsive shadow-sm rounded bg-white">
-        <table class="table table-hover table-borderless align-middle mb-0">
-            <thead class="table-light text-center">
+    <div class="bdss-table-card">
+        <table class="table bdss-table align-middle mb-0">
+            <thead>
                 <tr>
-                    <th>Người hiến máu</th>
+                    <th>Người đăng ký</th>
                     <th>Nhóm máu</th>
                     <th>Ngày đăng ký</th>
                     <th>Thời gian</th>
@@ -72,8 +113,8 @@
                 {
                     <tr>
                         <td>
-                            <strong>@item.Donor?.Name</strong><br />
-                            <small class="text-muted">@item.Donor?.ContactNumber</small>
+                            <div class="bdss-name">@item.Donor?.Name</div>
+                            <div class="bdss-phone">@item.Donor?.ContactNumber</div>
                         </td>
                         <td class="text-center">@item.BloodType?.Type</td>
                         <td class="text-center">@item.AppointmentDate.ToString("yyyy-MM-dd")</td>
@@ -83,21 +124,21 @@
                             @switch (item.Status?.ToLower())
                             {
                                 case "pending":
-                                    <span class="bdss-badge-soft bdss-badge-soft-warning">Chờ xác nhận</span>; break;
+                                    <span class="bdss-badge-soft bdss-badge-soft-warning"><span style="font-size:1.1em;">&#x23F3;</span> Chờ xác nhận</span>; break;
                                 case "confirmed":
-                                    <span class="bdss-badge-soft bdss-badge-soft-primary">Đã xác nhận</span>; break;
+                                    <span class="bdss-badge-soft bdss-badge-soft-primary"><span style="font-size:1.1em;">&#x2714;</span> Đã xác nhận</span>; break;
                                 case "approved":
-                                    <span class="bdss-badge-soft bdss-badge-soft-primary">Đã duyệt</span>; break;
+                                    <span class="bdss-badge-soft bdss-badge-soft-primary"><span style="font-size:1.1em;">&#x2714;</span> Đã duyệt</span>; break;
                                 case "completed":
-                                    <span class="bdss-badge-soft bdss-badge-soft-success">Hoàn thành</span>; break;
+                                    <span class="bdss-badge-soft bdss-badge-soft-success"><span style="font-size:1.1em;">&#x2714;</span> Hoàn thành</span>; break;
                                 case "rejected":
-                                    <span class="bdss-badge-soft bdss-badge-soft-danger">Từ chối</span>; break;
+                                    <span class="bdss-badge-soft bdss-badge-soft-danger"><span style="font-size:1.1em;">&#x2716;</span> Từ chối</span>; break;
                                 default:
                                     <span class="bdss-badge-soft bdss-badge-soft-secondary">@item.Status</span>; break;
                             }
                         </td>
                         <td class="text-center">
-                            <a href="@Url.Action("DonorRequestDetails", "Staff", new { id = item.AppointmentID })" class="btn btn-outline-danger btn-sm">
+                            <a href="@Url.Action("DonorRequestDetails", "Staff", new { id = item.AppointmentID })" class="bdss-link-red">
                                 Xem chi tiết
                             </a>
                         </td>
