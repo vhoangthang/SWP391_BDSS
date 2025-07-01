@@ -20,30 +20,37 @@
         box-shadow: none;
         border: none;
     }
+
     .bdss-badge-soft-danger {
         background: #fde8e8;
         color: #b91c1c;
     }
+
     .bdss-badge-soft-warning {
         background: #fef9c3;
         color: #b45309;
     }
+
     .bdss-badge-soft-success {
         background: #d1fae5;
         color: #047857;
     }
+
     .bdss-badge-soft-secondary {
         background: #f3f4f6;
         color: #6b7280;
     }
+
     .bdss-badge-soft-primary {
         background: #dbeafe;
         color: #2563eb;
     }
+
     .bdss-badge-soft-info {
         background: #e0f2fe;
         color: #0284c7;
     }
+
     .bdss-table-card {
         background: #fff;
         border-radius: 1.2rem;
@@ -51,29 +58,35 @@
         border: none;
         padding: 0.5rem 0.5rem 1.5rem 0.5rem;
     }
+
     .bdss-table th, .bdss-table td {
         vertical-align: middle !important;
         border: none !important;
     }
+
     .bdss-table thead th {
         background: #f8fafc;
         font-weight: 600;
         color: #22223b;
         border-bottom: 1.5px solid #e5e7eb !important;
     }
+
     .bdss-table tbody tr:not(:last-child) {
         border-bottom: 1px solid #f1f5f9;
     }
+
     .bdss-link-blue {
         color: #2563eb;
         font-weight: 500;
         text-decoration: none;
         transition: color 0.2s;
     }
-    .bdss-link-blue:hover {
-        color: #1d4ed8;
-        text-decoration: underline;
-    }
+
+        .bdss-link-blue:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
     .bdss-name {
         font-weight: 700;
         font-size: 1.08em;
@@ -100,6 +113,7 @@
                     <th>Ngày yêu cầu</th>
                     <th>Số lượng (CC)</th>
                     <th>Mức độ</th>
+                    <th>Tương hợp</th>
                     <th>Trạng thái</th>
                     <th></th>
                 </tr>
@@ -127,18 +141,33 @@
                                 }
                             </td>
                             <td class="text-center">
+                                @if (req.IsCompatible)
+                                {
+                                    <span class="bdss-badge-soft bdss-badge-soft-success">Tương hợp</span>
+                                }
+                                else
+                                {
+                                    <span class="bdss-badge-soft bdss-badge-soft-danger">Không tương hợp</span>
+                                }
+                            </td>
+                            <td class="text-center">
                                 @switch (req.Status)
                                 {
                                     case "Pending":
-                                        <span class="bdss-badge-soft bdss-badge-soft-warning"><span style="font-size:1.1em;">&#x23F3;</span> Chờ duyệt</span>; break;
+                                        <span class="bdss-badge-soft bdss-badge-soft-warning"><span style="font-size:1.1em;">&#x23F3;</span> Chờ duyệt</span>
+                                        ; break;
                                     case "Approved":
-                                        <span class="bdss-badge-soft bdss-badge-soft-primary"><span style="font-size:1.1em;">&#x2714;</span> Đã duyệt</span>; break;
+                                        <span class="bdss-badge-soft bdss-badge-soft-primary"><span style="font-size:1.1em;">&#x2714;</span> Đã duyệt</span>
+                                        ; break;
                                     case "Completed":
-                                        <span class="bdss-badge-soft bdss-badge-soft-success"><span style="font-size:1.1em;">&#x2714;</span> Hoàn thành</span>; break;
+                                        <span class="bdss-badge-soft bdss-badge-soft-success"><span style="font-size:1.1em;">&#x2714;</span> Hoàn thành</span>
+                                        ; break;
                                     case "Rejected":
-                                        <span class="bdss-badge-soft bdss-badge-soft-danger"><span style="font-size:1.1em;">&#x2716;</span> Từ chối</span>; break;
+                                        <span class="bdss-badge-soft bdss-badge-soft-danger"><span style="font-size:1.1em;">&#x2716;</span> Từ chối</span>
+                                        ; break;
                                     default:
-                                        <span class="bdss-badge-soft bdss-badge-soft-secondary">@req.Status</span>; break;
+                                        <span class="bdss-badge-soft bdss-badge-soft-secondary">@req.Status</span>
+                                        ; break;
                                 }
                             </td>
                             <td class="text-end">

@@ -253,23 +253,74 @@ namespace BloodDonation.Controllers
             return View(approvedRequests);
         }
 
+        // Hàm lọc nhóm máu tương hợp
+        public static List<string> GetCompatibleBloodTypes(string recipientBloodType)
+        {
+            var allTypes = new List<string> { "O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+" };
+            var compatible = new List<string>();
+            switch (recipientBloodType)
+            {
+                case "A+":
+                    compatible.AddRange(new[] { "A+", "A-", "O+", "O-" });
+                    break;
+                case "A-":
+                    compatible.AddRange(new[] { "A-", "O-" });
+                    break;
+                case "B+":
+                    compatible.AddRange(new[] { "B+", "B-", "O+", "O-" });
+                    break;
+                case "B-":
+                    compatible.AddRange(new[] { "B-", "O-" });
+                    break;
+                case "AB+":
+                    compatible.AddRange(allTypes); // Nhận được tất cả
+                    break;
+                case "AB-":
+                    compatible.AddRange(new[] { "AB-", "A-", "B-", "O-" });
+                    break;
+                case "O+":
+                    compatible.AddRange(new[] { "O+", "O-" });
+                    break;
+                case "O-":
+                    compatible.Add("O-");
+                    break;
+            }
+            return compatible;
+        }
+
         public IActionResult ProcessBloodRequest(int id)
         {
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
             var request = _context.BloodRequests
-        .Include(r => r.MedicalCenter)
-        .Include(r => r.BloodType)
-        .FirstOrDefault(r => r.BloodRequestID == id);
+                .Include(r => r.MedicalCenter)
+                .Include(r => r.BloodType)
+                .FirstOrDefault(r => r.BloodRequestID == id);
 
             if (request == null || request.Status == "Completed" || request.Status == "Rejected")
-                return NotFound(); // không cho xử lý yêu cầu đã bị từ chối hoặc đã hoàn thành
+                return NotFound();
+
+            // Lấy danh sách nhóm máu tương hợp
+            var compatibleTypes = GetCompatibleBloodTypes(request.BloodType?.Type);
+            // Nếu chỉ có đúng 1 nhóm máu tương hợp và đó là nhóm máu được yêu cầu, chỉ cho chọn đúng nhóm máu đó
+            if (compatibleTypes.Count == 1 && compatibleTypes[0] == request.BloodType?.Type)
+            {
+                var onlyType = _context.BloodTypes.Where(bt => bt.Type == request.BloodType.Type).ToList();
+                ViewBag.CompatibleBloodTypes = onlyType;
+            }
+            else
+            {
+                var compatibleBloodTypes = _context.BloodTypes
+                    .Where(bt => compatibleTypes.Contains(bt.Type))
+                    .ToList();
+                ViewBag.CompatibleBloodTypes = compatibleBloodTypes;
+            }
 
             return View(request);
         }
 
         [HttpPost]
-        public IActionResult CompleteBloodRequest(int id, string note)
+        public IActionResult CompleteBloodRequest(int id, string note, int SelectedBloodTypeID)
         {
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
@@ -290,9 +341,18 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("BloodRequestList");
             }
 
+            // Kiểm tra nhóm máu được chọn có tương hợp không
+            var compatibleTypes = GetCompatibleBloodTypes(request.BloodType?.Type);
+            var selectedBloodType = _context.BloodTypes.FirstOrDefault(bt => bt.BloodTypeID == SelectedBloodTypeID);
+            if (selectedBloodType == null || !compatibleTypes.Contains(selectedBloodType.Type))
+            {
+                TempData["Error"] = "❌ Nhóm máu được chọn không tương hợp với yêu cầu.";
+                return RedirectToAction("ProcessBloodRequest", new { id });
+            }
+
             int bloodBankId = 1; // Mặc định
             var inventory = _context.BloodInventories
-                .FirstOrDefault(b => b.BloodTypeID == request.BloodTypeID && b.BloodBankID == bloodBankId);
+                .FirstOrDefault(b => b.BloodTypeID == SelectedBloodTypeID && b.BloodBankID == bloodBankId);
 
             if (inventory != null && inventory.Quantity >= request.Quantity)
             {
@@ -380,6 +440,23 @@ namespace BloodDonation.Controllers
             ViewBag.AllBloodTypes = allBloodTypes;
             ViewBag.AllBloodInventories = allBloodInventories;
 
+            // KHÔNG tính lại IsCompatible, chỉ lấy từ DB
+            bool isCompatible = bloodRequest.IsCompatible;
+            ViewBag.IsCompatible = isCompatible;
+            if (!isCompatible)
+            {
+                var onlyType = _context.BloodTypes.Where(bt => bt.Type == bloodRequest.BloodType.Type).ToList();
+                ViewBag.CompatibleBloodTypes = onlyType;
+            }
+            else
+            {
+                var compatibleTypes = GetCompatibleBloodTypes(bloodRequest.BloodType?.Type);
+                var compatibleBloodTypes = _context.BloodTypes
+                    .Where(bt => compatibleTypes.Contains(bt.Type))
+                    .ToList();
+                ViewBag.CompatibleBloodTypes = compatibleBloodTypes;
+            }
+
             return View(bloodRequest);
         }
 
@@ -401,6 +478,11 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
             }
 
+            // Lấy danh sách nhóm máu tương thích
+            var compatibleTypes = GetCompatibleBloodTypes(bloodRequest.BloodType?.Type);
+            bool isCompatible = !(compatibleTypes.Count == 1 && compatibleTypes[0] == bloodRequest.BloodType?.Type);
+            ViewBag.IsCompatible = isCompatible;
+
             switch (action.ToLower())
             {
                 case "approve":
@@ -412,18 +494,50 @@ namespace BloodDonation.Controllers
                     TempData["Message"] = "Yêu cầu đã bị từ chối.";
                     break;
                 case "complete":
-                    bloodRequest.Status = "Completed";
-                    TempData["Message"] = "Yêu cầu đã được hoàn thành.";
-                    // Cập nhật kho máu nếu có chọn nhóm máu và số lượng
-                    if (selectedBloodTypeId.HasValue && quantity.HasValue)
+                    // Kiểm tra nhóm máu được chọn có hợp lệ không
+                    if (!selectedBloodTypeId.HasValue)
                     {
-                        var inventory = _context.BloodInventories
-                            .FirstOrDefault(b => b.BloodTypeID == selectedBloodTypeId.Value);
-                        if (inventory != null)
+                        TempData["Error"] = "Vui lòng chọn nhóm máu để cấp phát.";
+                        return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
+                    }
+                    var selectedBloodType = _context.BloodTypes.FirstOrDefault(bt => bt.BloodTypeID == selectedBloodTypeId.Value);
+                    if (selectedBloodType == null)
+                    {
+                        TempData["Error"] = "Nhóm máu không hợp lệ.";
+                        return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
+                    }
+                    if (!isCompatible)
+                    {
+                        // Chỉ cho phép chọn đúng nhóm máu yêu cầu
+                        if (selectedBloodType.Type != bloodRequest.BloodType.Type)
                         {
-                            inventory.Quantity -= quantity.Value;
-                            inventory.LastUpdated = DateTime.Now;
+                            TempData["Error"] = "Chỉ được chọn đúng nhóm máu yêu cầu.";
+                            return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
                         }
+                    }
+                    else
+                    {
+                        // Phải nằm trong danh sách tương hợp
+                        if (!compatibleTypes.Contains(selectedBloodType.Type))
+                        {
+                            TempData["Error"] = "Nhóm máu không tương thích.";
+                            return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
+                        }
+                    }
+                    // Trừ kho máu
+                    if (quantity == null || quantity <= 0) quantity = bloodRequest.Quantity;
+                    var inventory = _context.BloodInventories.FirstOrDefault(b => b.BloodTypeID == selectedBloodType.BloodTypeID);
+                    if (inventory != null && inventory.Quantity >= quantity)
+                    {
+                        inventory.Quantity -= quantity.Value;
+                        inventory.LastUpdated = DateTime.Now;
+                        bloodRequest.Status = "Completed";
+                        TempData["Message"] = "Yêu cầu đã được hoàn thành và kho máu đã được cập nhật.";
+                    }
+                    else
+                    {
+                        bloodRequest.Status = "Pending";
+                        TempData["Error"] = "Kho máu không đủ. Đơn chuyển sang trạng thái chờ.";
                     }
                     break;
             }

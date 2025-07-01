@@ -127,10 +127,11 @@
                     </div>
                     <div class="form-row">
                         <div class="form-group">
+                            <label for="Compatibility">Yêu cầu tương hợp nhóm máu</label>
                             <select asp-for="Compatibility" class="form-control">
-                                <option value="">Thành phần</option>
-                                <option>Tương hợp</option>
-                                <option>Không tương hợp</option>
+                                <option value="">Chọn yêu cầu</option>
+                                <option value="Tương hợp">Tương hợp (có thể nhận các nhóm máu phù hợp)</option>
+                                <option value="Không tương hợp">Không tương hợp (chỉ nhận đúng nhóm máu này)</option>
                             </select>
                             <span asp-validation-for="Compatibility" class="text-danger"></span>
                         </div>
