@@ -1,0 +1,56 @@
+@model BloodDonation.Models.Notification
+@{
+    ViewData["Title"] = "Chi tiết thông báo";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    var appointment = ViewBag.Appointment as BloodDonation.Models.DonationAppointment;
+    var donor = Model.Donor;
+}
+<div class="container mt-4">
+    <h3 class="fw-bold mb-3">Chi tiết thông báo</h3>
+    <div class="card mb-3">
+        <div class="card-header">Nội dung thông báo</div>
+        <div class="card-body">
+            <p>@Model.Message</p>
+            <p><b>Thời gian:</b> @Model.SentAt.ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+    </div>
+    @if (donor != null)
+    {
+        <div class="card mb-3">
+            <div class="card-header">Thông tin người hiến máu</div>
+            <div class="card-body">
+                <p><b>Họ tên:</b> @donor.Name</p>
+                <p><b>Số điện thoại:</b> @donor.ContactNumber</p>
+                <p><b>Email:</b> @donor.Account?.Email</p>
+                <p><b>Ngày sinh:</b> @donor.DateOfBirth?.ToString("yyyy-MM-dd")</p>
+                <p><b>Nhóm máu:</b> @donor.BloodType?.Type</p>
+                <p><b>Địa chỉ:</b> @donor.Address</p>
+            </div>
+        </div>
+    }
+    @if (appointment != null)
+    {
+        <div class="card mb-3">
+            <div class="card-header">Thông tin đơn hiến máu</div>
+            <div class="card-body">
+                <p><b>Ngày hẹn:</b> @appointment.AppointmentDate.ToString("yyyy-MM-dd")</p>
+                <p><b>Khung giờ:</b> @appointment.TimeSlot</p>
+                <p><b>Nhóm máu hiến:</b> @appointment.BloodType?.Type</p>
+                <p><b>Số lượng hiến:</b> @(Model.BloodRequest?.Quantity ?? appointment.QuantityDonated) CC</p>
+                <p><b>Trạng thái:</b> @appointment.Status</p>
+                @if (appointment.Status != "Completed")
+                {
+                    <form asp-action="ConfirmAppointmentCompletion" asp-controller="MedicalCenter" method="post">
+                        <input type="hidden" name="appointmentId" value="@appointment.AppointmentID" />
+                        <button type="submit" class="btn btn-success">Xác nhận hoàn thành &amp; cấp chứng chỉ</button>
+                    </form>
+                }
+                else
+                {
+                    <span class="badge bg-success">Đã hoàn thành &amp; đã cấp chứng chỉ</span>
+                }
+            </div>
+        </div>
+    }
+    <a href="@Url.Action("MedicalCenterNotifications", "MedicalCenter")" class="btn btn-secondary">Quay lại danh sách thông báo</a>
+</div> 

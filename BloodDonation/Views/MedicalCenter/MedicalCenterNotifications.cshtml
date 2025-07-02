@@ -17,6 +17,7 @@
                         <th>#</th>
                         <th>Nội dung</th>
                         <th>Thời gian</th>
+                        <th>Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -27,6 +28,11 @@
                         <td>@(i+1)</td>
                         <td>@n.Message</td>
                         <td>@n.SentAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            <a class="btn btn-sm btn-primary" href="@Url.Action("NotificationDetail", "MedicalCenter", new { notificationId = n.NotificationID })">
+                                Chi tiết
+                            </a>
+                        </td>
                     </tr>
                 }
                 </tbody>

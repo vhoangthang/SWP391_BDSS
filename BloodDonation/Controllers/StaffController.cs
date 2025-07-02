@@ -822,7 +822,7 @@ namespace BloodDonation.Controllers
 
             // Filter only donors within 20km
             var donorWithDistance = validDonors.Select((x, idx) => new { Donor = x.donor, Distance = distanceArr[idx + 1].GetDouble() })
-                .Where(x => x.Distance <= 20)
+                .Where(x => x.Distance <= 25)
                 .OrderBy(x => x.Distance)
                 .ToList();
             ViewBag.DonorDistances = donorWithDistance;
