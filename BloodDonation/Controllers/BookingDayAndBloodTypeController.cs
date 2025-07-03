@@ -1,8 +1,8 @@
-﻿
-using BloodDonation.Models;
+﻿using BloodDonation.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using BloodDonation.Data;
+using System.Linq;
 
 namespace BloodDonation.Controllers
 {
@@ -19,6 +19,22 @@ namespace BloodDonation.Controllers
         public IActionResult Index()
         {
             ViewBag.BloodTypes = new SelectList(_context.BloodTypes.ToList(), "BloodTypeID", "Type");
+            // Lấy username từ session
+            var username = HttpContext.Session.GetString("Username");
+            int? userBloodTypeId = null;
+            if (!string.IsNullOrEmpty(username))
+            {
+                var account = _context.Accounts.FirstOrDefault(a => a.Username == username);
+                if (account != null)
+                {
+                    var donor = _context.Donors.FirstOrDefault(d => d.AccountID == account.AccountID);
+                    if (donor != null)
+                    {
+                        userBloodTypeId = donor.BloodTypeID;
+                    }
+                }
+            }
+            ViewBag.UserBloodTypeID = userBloodTypeId;
             return View();
         }
 

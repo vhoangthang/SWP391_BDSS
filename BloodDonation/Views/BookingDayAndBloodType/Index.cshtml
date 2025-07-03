@@ -27,7 +27,25 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Nhóm máu</label>
-                        <select asp-for="BloodTypeID" class="form-control" asp-items="ViewBag.BloodTypes"></select>
+                        @if (ViewBag.UserBloodTypeID != null)
+                        {
+                            <select class="form-control" disabled>
+                                @{
+                                    var bloodTypes = (SelectList)ViewBag.BloodTypes;
+                                    var selectedId = ViewBag.UserBloodTypeID.ToString();
+                                    foreach (var item in bloodTypes)
+                                    {
+                                        var selected = item.Value == selectedId ? " selected" : "";
+                                        @: <option value="@item.Value"@selected>@item.Text</option>
+                                    }
+                                }
+                            </select>
+                            <input type="hidden" asp-for="BloodTypeID" value="@ViewBag.UserBloodTypeID" />
+                        }
+                        else
+                        {
+                            <select asp-for="BloodTypeID" class="form-control" asp-items="ViewBag.BloodTypes"></select>
+                        }
                         <span asp-validation-for="BloodTypeID" class="text-danger"></span>
                     </div>
                     <div class="d-grid">
