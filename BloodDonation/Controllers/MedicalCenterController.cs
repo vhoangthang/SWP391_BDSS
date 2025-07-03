@@ -285,6 +285,13 @@ namespace BloodDonation.Controllers
                 appointment.Status = "Completed";
             }
 
+            // Nếu donor đang sẵn sàng thì chuyển về không sẵn sàng
+            if (appointment.Donor != null && appointment.Donor.IsAvailable == true)
+            {
+                appointment.Donor.IsAvailable = false;
+                _context.SaveChanges();
+            }
+
             // Tạo chứng chỉ nếu chưa có
             var existingCertificate = _context.DonationCertificates.FirstOrDefault(c => c.AppointmentID == appointment.AppointmentID);
             if (existingCertificate == null)

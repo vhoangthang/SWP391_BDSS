@@ -1,10 +1,7 @@
-﻿
-using BloodDonation.Models;
+﻿using BloodDonation.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using BloodDonation.Data;
-
-
 
 namespace BloodDonation.Controllers
 {
@@ -40,6 +37,13 @@ namespace BloodDonation.Controllers
 
             if (donor == null)
                 return Json(new { success = false, message = "Không tìm thấy thông tin người hiến máu" });
+
+            // Nếu câu hỏi số 10 là 'true' và trạng thái hiện tại là false hoặc null thì cập nhật thành true
+            if (model.Answers.TryGetValue("10_AnhChiSanSangHienMauNeuDuDieuKien", out var q10))
+            {
+                donor.IsAvailable = (q10 == "true");
+                _context.SaveChanges();
+            }
 
             var now = DateTime.Now;
 

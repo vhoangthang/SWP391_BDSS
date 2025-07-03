@@ -145,6 +145,14 @@ namespace BloodDonation.Controllers
                         appointment.Status = "Completed";
                         appointment.QuantityDonated = QuantityDonated;
 
+                        // Nếu donor đang sẵn sàng thì chuyển về không sẵn sàng
+                        var donorEntity = _context.Donors.FirstOrDefault(d => d.DonorID == appointment.DonorID);
+                        if (donorEntity != null && donorEntity.IsAvailable == true)
+                        {
+                            donorEntity.IsAvailable = false;
+                            _context.SaveChanges();
+                        }
+
                         // ✅ Cập nhật hoặc tạo mới kho máu
                         var inventory = _context.BloodInventories.FirstOrDefault(b => b.BloodTypeID == appointment.BloodTypeID);
                         if (inventory != null)

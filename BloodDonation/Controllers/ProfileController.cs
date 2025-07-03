@@ -38,6 +38,10 @@ namespace BloodDonation.Controllers
             if (donor == null)
                 return NotFound();
 
+            // Kiểm tra có đơn nào KHÔNG phải Completed hoặc Rejected không
+            var canEdit = _context.DonationAppointments.Any(a => a.DonorID == donor.DonorID && a.Status != "Completed" && a.Status != "Rejected");
+            ViewBag.CanEditIsAvailable = canEdit;
+
             // Truyền email từ account vào ViewBag
             ViewBag.Email = account.Email;
             return View(donor);
@@ -56,6 +60,11 @@ namespace BloodDonation.Controllers
             var donor = _context.Donors.FirstOrDefault(d => d.AccountID == account.AccountID);
             if (donor == null)
                 return NotFound();
+
+            // Bổ sung: Kiểm tra có đơn nào KHÔNG phải Completed hoặc Rejected không
+            var canEdit = _context.DonationAppointments.Any(a => a.DonorID == donor.DonorID && a.Status != "Completed" && a.Status != "Rejected");
+            ViewBag.CanEditIsAvailable = canEdit;
+
             ViewBag.BloodTypes = new SelectList(_context.BloodTypes.ToList(), "BloodTypeID", "Type", donor.BloodTypeID);
             return View(donor);
         }
@@ -87,9 +96,9 @@ namespace BloodDonation.Controllers
             existingDonor.Gender = donor.Gender;
             existingDonor.ContactNumber = donor.ContactNumber;
             existingDonor.Address = donor.Address;
-            existingDonor.IsAvailable = donor.IsAvailable;
             existingDonor.CCCD = donor.CCCD;
             existingDonor.BloodTypeID = donor.BloodTypeID;
+            existingDonor.IsAvailable = donor.IsAvailable;
 
             _context.SaveChanges();
             return RedirectToAction("Index");
