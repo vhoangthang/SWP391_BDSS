@@ -23,7 +23,7 @@ namespace BloodDonation.Data
         public DbSet<DonationAppointment> DonationAppointments { get; set; }
         public DbSet<DonationCertificate> DonationCertificates { get; set; }
         public DbSet<BloodInventory> BloodInventories { get; set; }
-
+        public DbSet<Notification> Notifications { get; set; }
         public DbSet<HealthSurvey> HealthSurveys { get; set; }
 
 
