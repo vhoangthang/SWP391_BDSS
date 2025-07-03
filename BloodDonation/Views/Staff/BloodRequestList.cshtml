@@ -5,27 +5,116 @@
     ViewData["Title"] = "Yêu cầu nhận máu";
 }
 
+<style>
+    .bdss-badge-soft {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4em;
+        padding: 0.35em 1.1em;
+        font-size: 1em;
+        font-weight: 500;
+        border-radius: 2em;
+        background: #e0e7ff;
+        color: #373a47;
+        letter-spacing: 0.02em;
+        box-shadow: none;
+        border: none;
+    }
+
+    .bdss-badge-soft-danger {
+        background: #fde8e8;
+        color: #b91c1c;
+    }
+
+    .bdss-badge-soft-warning {
+        background: #fef9c3;
+        color: #b45309;
+    }
+
+    .bdss-badge-soft-success {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .bdss-badge-soft-secondary {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+    .bdss-badge-soft-primary {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .bdss-badge-soft-info {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .bdss-table-card {
+        background: #fff;
+        border-radius: 1.2rem;
+        box-shadow: 0 2px 16px 0 rgba(0,0,0,0.07);
+        border: none;
+        padding: 0.5rem 0.5rem 1.5rem 0.5rem;
+    }
+
+    .bdss-table th, .bdss-table td {
+        vertical-align: middle !important;
+        border: none !important;
+    }
+
+    .bdss-table thead th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: #22223b;
+        border-bottom: 1.5px solid #e5e7eb !important;
+    }
+
+    .bdss-table tbody tr:not(:last-child) {
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .bdss-link-blue {
+        color: #2563eb;
+        font-weight: 500;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+        .bdss-link-blue:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+    .bdss-name {
+        font-weight: 700;
+        font-size: 1.08em;
+        color: #22223b;
+    }
+</style>
+
 <div class="container mt-4">
     <h2 class="mb-2 fw-bold">📨 Yêu cầu nhận máu</h2>
-    <p class="text-muted">Quản lý các yêu cầu nhận máu từ cơ sở y tế</p>
+    <p class="text-muted">Quản lý và xử lý các yêu cầu nhận máu từ cơ sở y tế</p>
 
     <div class="row mb-3">
         <div class="col-md-4">
-            <input type="text" class="form-control" placeholder="🔍 Tìm kiếm..." />
+            <input type="text" class="form-control" placeholder="Tìm kiếm..." />
         </div>
     </div>
 
-    <div class="table-responsive shadow-sm rounded bg-white">
-        <table class="table table-hover table-borderless align-middle mb-0">
-            <thead class="table-light text-center">
+    <div class="bdss-table-card">
+        <table class="table bdss-table align-middle mb-0">
+            <thead>
                 <tr>
                     <th>Thông tin cơ sở</th>
                     <th>Nhóm máu</th>
                     <th>Ngày yêu cầu</th>
                     <th>Số lượng (CC)</th>
                     <th>Mức độ</th>
+                    <th>Tương hợp</th>
                     <th>Trạng thái</th>
-                    <th>Hành động</th>
                     <th></th>
                 </tr>
             </thead>
@@ -36,7 +125,7 @@
                     {
                         <tr>
                             <td>
-                                <strong>@req.MedicalCenter?.Name</strong><br />
+                                <div class="bdss-name">@req.MedicalCenter?.Name</div>
                             </td>
                             <td class="text-center">@req.BloodType?.Type</td>
                             <td class="text-center">@req.RequestDate.ToString("yyyy-MM-dd")</td>
@@ -44,49 +133,51 @@
                             <td class="text-center">
                                 @if (req.IsEmergency)
                                 {
-                                    <span class="badge bg-danger">🚨 Khẩn cấp</span>
+                                    <span class="bdss-badge-soft bdss-badge-soft-danger"><span style="font-size:1.1em;">&#9888;</span> Khẩn cấp</span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-secondary">Thông thường</span>
+                                    <span class="bdss-badge-soft bdss-badge-soft-warning"><span style="font-size:1.1em;">&#9200;</span> Thông thường</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (req.IsCompatible)
+                                {
+                                    <span class="bdss-badge-soft bdss-badge-soft-success">Tương hợp</span>
+                                }
+                                else
+                                {
+                                    <span class="bdss-badge-soft bdss-badge-soft-danger">Không tương hợp</span>
                                 }
                             </td>
                             <td class="text-center">
                                 @switch (req.Status)
                                 {
                                     case "Pending":
-                                        <span class="badge bg-warning text-dark">⏳ Chờ duyệt</span>
+                                        <span class="bdss-badge-soft bdss-badge-soft-warning"><span style="font-size:1.1em;">&#x23F3;</span> Chờ duyệt</span>
                                         ; break;
                                     case "Approved":
-                                        <span class="badge bf-comfirm"><span class="check-circle">✔</span> Đã duyệt</span>
+                                        <span class="bdss-badge-soft bdss-badge-soft-primary"><span style="font-size:1.1em;">&#x2714;</span> Đã duyệt</span>
                                         ; break;
                                     case "Completed":
-                                        <span class="badge bg-success">✅ Hoàn tất</span>
+                                        <span class="bdss-badge-soft bdss-badge-soft-success"><span style="font-size:1.1em;">&#x2714;</span> Hoàn thành</span>
                                         ; break;
                                     case "Rejected":
-                                        <span class="badge bg-danger">❌ Từ chối</span>
+                                        <span class="bdss-badge-soft bdss-badge-soft-danger"><span style="font-size:1.1em;">&#x2716;</span> Từ chối</span>
                                         ; break;
                                     default:
-                                        <span class="badge bg-secondary">@req.Status</span>
+                                        <span class="bdss-badge-soft bdss-badge-soft-secondary">@req.Status</span>
                                         ; break;
                                 }
                             </td>
-                            <td class="text-center">
-                                @if (req.Status == "Completed")
-                                {
-                                    <button class="btn btn-outline-secondary btn-sm" disabled>Đã xử lý</button>
-                                }
-                                else
-                                {
-                                    <a href="@Url.Action("ProcessBloodRequest", "Staff", new { id = req.BloodRequestID })" class="btn btn-outline-danger btn-sm">
-                                        Xử lý
-                                    </a>
-                                }
+                            <td class="text-end">
+                                <a href="@Url.Action("BloodRequestDetails", "Staff", new { id = req.BloodRequestID })" class="bdss-link-blue">
+                                    Chi tiết
+                                </a>
                             </td>
                         </tr>
                     }
                 }
-
             </tbody>
         </table>
     </div>

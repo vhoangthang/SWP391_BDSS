@@ -37,7 +37,7 @@ namespace BloodDonation.Models
 
         public bool IsEmergency { get; set; }
 
-        public bool? IsCompatible { get; set; }
+        public bool IsCompatible { get; set; }
 
         public string? Status { get; set; } = "Pending";
 

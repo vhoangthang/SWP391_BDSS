@@ -1,0 +1,318 @@
+@model BloodDonation.Models.BloodRequest
+
+@{
+    Layout = "~/Views/Shared/_LayoutStaff.cshtml";
+    ViewData["Title"] = "Chi tiết yêu cầu nhận máu";
+    var inventories = ViewBag.AllBloodInventories as List<BloodDonation.Models.BloodInventory>;
+}
+
+<style>
+    .bdss-card {
+        border-radius: 1.2rem;
+        box-shadow: 0 2px 16px 0 rgba(0,0,0,0.07);
+        border: none;
+        background: #fff;
+        padding: 2rem 2.5rem 2rem 2.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .bdss-title {
+        font-size: 1.5em;
+        font-weight: 700;
+        color: #22223b;
+        margin-bottom: 1.2em;
+    }
+
+    .bdss-label {
+        color: #64748b;
+        font-weight: 500;
+        font-size: 1em;
+        margin-bottom: 0.2em;
+        min-width: 120px;
+        display: block;
+    }
+
+    .bdss-value {
+        font-weight: 600;
+        color: #22223b;
+        font-size: 1.08em;
+        display: block;
+        margin-bottom: 0.7em;
+    }
+
+    .bdss-badge-soft {
+        display: inline-block;
+        padding: 0.35em 1.1em;
+        font-size: 1.1em;
+        font-weight: 500;
+        border-radius: 2em;
+        background: #fef9c3;
+        color: #b45309;
+        letter-spacing: 0.02em;
+        border: none;
+    }
+
+    .bdss-badge-soft-danger {
+        background: #fde8e8;
+        color: #b91c1c;
+    }
+
+    .bdss-badge-soft-warning {
+        background: #fef9c3;
+        color: #b45309;
+    }
+
+    .bdss-badge-soft-success {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .bdss-btn-red {
+        background: #ef4444;
+        color: #fff;
+        border-radius: 0.7em;
+        font-weight: 600;
+        border: none;
+        padding: 0.7em 1.5em;
+        margin-bottom: 0.5em;
+        transition: background 0.2s;
+        width: 100%;
+    }
+
+        .bdss-btn-red:hover {
+            background: #b91c1c;
+            color: #fff;
+        }
+
+    .bdss-btn-blue {
+        background: #2563eb;
+        color: #fff;
+        border-radius: 0.7em;
+        font-weight: 600;
+        border: none;
+        padding: 0.7em 1.5em;
+        margin-bottom: 0.5em;
+        transition: background 0.2s;
+        width: 100%;
+    }
+
+        .bdss-btn-blue:hover {
+            background: #1d4ed8;
+            color: #fff;
+        }
+
+    .bdss-blood-inv-card {
+        border-radius: 1em;
+        background: #f8fafc;
+        box-shadow: 0 1px 6px 0 rgba(0,0,0,0.04);
+        padding: 1em 1.2em 0.7em 1.2em;
+        margin-bottom: 0.7em;
+        text-align: left;
+    }
+
+    .bdss-bloodtype-badge {
+        display: inline-block;
+        min-width: 2.2em;
+        min-height: 2.2em;
+        border-radius: 50%;
+        background: #fee2e2;
+        color: #ef4444;
+        font-weight: 700;
+        font-size: 1.1em;
+        text-align: center;
+        line-height: 2.2em;
+        margin-right: 0.7em;
+    }
+
+    .bdss-qty-badge {
+        background: #fef9c3;
+        color: #78350f;
+        border-radius: 1.2em;
+        font-size: 1em;
+        font-weight: 500;
+        padding: 0.25em 1em;
+        margin-left: 0.2em;
+        margin-bottom: 0.2em;
+        display: inline-block;
+    }
+</style>
+
+<!-- Thông báo trung tâm -->
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success bdss-alert-center text-center" id="centerAlert" style="padding:2.2rem 1.5rem 1.2rem 1.5rem;">
+        <div style="font-size:3rem;line-height:1;">
+            <i class="fas fa-check-circle" style="color:#22c55e;"></i>
+        </div>
+        <div style="font-size:1.2rem;font-weight:600;">@TempData["Message"]</div>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger bdss-alert-center text-center" id="centerAlert" style="padding:2.2rem 1.5rem 1.2rem 1.5rem;">
+        <div style="font-size:3rem;line-height:1;">
+            <i class="fas fa-times-circle" style="color:#ef4444;"></i>
+        </div>
+        <div style="font-size:1.2rem;font-weight:600;">@TempData["Error"]</div>
+    </div>
+}
+<script>
+    setTimeout(function() {
+        var alert = document.getElementById('centerAlert');
+        if(alert) alert.style.display = 'none';
+    }, 3500);
+</script>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1 fw-bold">📋 Chi tiết yêu cầu nhận máu</h2>
+                    <p class="text-muted mb-0">Thông tin chi tiết về yêu cầu nhận máu</p>
+                </div>
+                <a href="@Url.Action("BloodRequestList", "Staff")" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Quay lại
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="bdss-card">
+                <div class="bdss-title" style="font-size:1.2em; margin-bottom:1em;">Chi tiết yêu cầu máu</div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <span class="bdss-label">Nhóm máu yêu cầu</span>
+                        <span class="bdss-value">@Model.BloodType?.Type</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="bdss-label">Lý do</span>
+                        <span class="bdss-value">@Model.Reason</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="bdss-label">Lượng máu cần</span>
+                        <span class="bdss-value">@Model.Quantity CC</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="bdss-label">Thời gian cần</span>
+                        <span class="bdss-value">@Model.RequestDate.ToString("yyyy-MM-dd HH:mm")</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="bdss-label">Tương hợp</span>
+                        <span class="bdss-value">
+                            @(Model.IsCompatible ? "Có" : "Không")
+                        </span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="bdss-label">Mức độ</span>
+                        <span class="bdss-value">
+                            @(Model.IsEmergency ? "Khẩn cấp" : "Thông thường")
+                        </span>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="bdss-title" style="font-size:1.1em; margin-bottom:0.7em;">Kho máu hiện tại</div>
+                    <div class="row g-2">
+                        @if (inventories != null)
+                        {
+                            foreach (var inv in inventories)
+                            {
+                                <div class="col-6 col-md-4 col-lg-3">
+                                    <div class="bdss-blood-inv-card">
+                                        <span class="bdss-bloodtype-badge">@inv.BloodType?.Type</span>
+                                        <span class="bdss-qty-badge">@inv.Quantity đơn vị</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="bdss-card">
+                <div class="bdss-title" style="font-size:1.2em; margin-bottom:1em;">Tìm người hiến máu gần nhất</div>
+                <a href="@Url.Action("NearestDonorsWithin20km", "Staff", new { bloodRequestId = Model.BloodRequestID })" class="btn btn-danger mb-3">
+                    <i class="fas fa-search-location me-2"></i> Tìm người hiến máu trong bán kính 20km
+                </a>
+            </div>
+        </div>
+        <!-- Card thông tin bệnh viện bên phải -->
+        <div class="col-lg-4">
+            <div class="bdss-card">
+                <div class="bdss-title" style="font-size:1.2em; margin-bottom:1.2em;">Thông tin cơ sở y tế</div>
+                <span class="bdss-label">Cơ sở y tế</span>
+                <span class="bdss-value">@Model.MedicalCenter?.Name</span>
+                <span class="bdss-label">Địa chỉ</span>
+                <span class="bdss-value">@Model.MedicalCenter?.Location</span>
+                <span class="bdss-label">Số điện thoại liên hệ</span>
+                <span class="bdss-value">@Model.MedicalCenter?.ContactNumber</span>
+            </div>
+            <div class="bdss-card">
+                <div class="bdss-title" style="font-size:1.2em; margin-bottom:1.2em;">Trạng thái</div>
+                <span class="bdss-label">Trạng thái</span>
+                @switch (Model.Status)
+                {
+                    case "Pending":
+                        <span class="bdss-badge-soft bdss-badge-soft-warning">Chờ xử lý</span>
+                        ; break;
+                    case "Approved":
+                        <span class="bdss-badge-soft bdss-badge-soft-success">Đã duyệt</span>
+                        ; break;
+                    case "Completed":
+                        <span class="bdss-badge-soft bdss-badge-soft-success">Hoàn thành</span>
+                        ; break;
+                    case "Rejected":
+                        <span class="bdss-badge-soft bdss-badge-soft-danger">Từ chối</span>
+                        ; break;
+                    default:
+                        <span class="bdss-badge-soft">@Model.Status</span>
+                        ; break;
+                }
+                <div class="mt-3">
+                    <span class="bdss-label">Chọn loại máu để xử lý</span>
+                    <form method="post" action="@Url.Action("ProcessBloodRequestFromDetails", "Staff")">
+                        <input type="hidden" name="bloodRequestId" value="@Model.BloodRequestID" />
+                        <select name="selectedBloodTypeId" class="form-select mb-3">
+                            @if (ViewBag.CompatibleBloodTypes != null)
+                            {
+                                foreach (var bt in ViewBag.CompatibleBloodTypes as List<BloodDonation.Models.BloodType>)
+                                {
+                                    <option value="@bt.BloodTypeID">@bt.Type</option>
+                                }
+                            }
+                            else
+                            {
+                                <option disabled>Không có nhóm máu tương thích</option>
+                            }
+                        </select>
+                        <span class="bdss-label">Ghi chú xử lý</span>
+                        <textarea class="form-control" name="note" rows="2" placeholder="Nhập ghi chú xử lý..."></textarea>
+                        @if (Model.Status == "Completed")
+                        {
+                            <div class="text-center mt-4 mb-2">
+                                <span style="color:#22c55e; font-size:1.25em; font-weight:700;">Đã hoàn thành</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <button type="submit" name="action" value="complete" class="bdss-btn-blue">Hoàn thành đơn</button>
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link href="/css/select2.min.css" rel="stylesheet" />
+<script src="/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('select[name="selectedBloodTypeId"]').select2({
+            width: '100%',
+            placeholder: 'Chọn nhóm máu...',
+            allowClear: true
+        });
+    });
+</script> 

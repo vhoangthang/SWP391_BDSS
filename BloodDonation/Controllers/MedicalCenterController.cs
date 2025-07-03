@@ -171,5 +171,144 @@ namespace BloodDonation.Controllers
             }
             return RedirectToAction("BloodRequestList");
         }
+
+        public IActionResult MedicalCenterNotifications()
+        {
+            var username = HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+                return RedirectToAction("Index", "Login");
+
+            var medicalCenterAccount = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "medicalcenter");
+            if (medicalCenterAccount == null)
+                return RedirectToAction("Index", "Login");
+
+            var notifications = _context.Notifications
+                .Include(n => n.Donor)
+                .Where(n => n.AccountID == medicalCenterAccount.AccountID)
+                .OrderByDescending(n => n.SentAt)
+                .ToList();
+
+            return View("MedicalCenterNotifications", notifications);
+        }
+
+        public IActionResult NotificationDetail(int notificationId)
+        {
+            var notification = _context.Notifications
+                .Include(n => n.Donor)
+                .Include(n => n.BloodRequest)
+                .FirstOrDefault(n => n.NotificationID == notificationId);
+            if (notification == null)
+                return NotFound();
+
+            DonationAppointment appointment = null;
+            if (notification.BloodRequestID.HasValue && notification.BloodRequest != null)
+            {
+                // Tìm appointment phù hợp nhất với donor, bloodtype, medicalcenter, chưa completed, ngày gần nhất
+                appointment = _context.DonationAppointments
+                    .Include(a => a.Donor)
+                    .Include(a => a.MedicalCenter)
+                    .Include(a => a.BloodType)
+                    .Where(a => a.DonorID == notification.DonorID
+                        && a.BloodTypeID == notification.BloodRequest.BloodTypeID
+                        && a.MedicalCenterID == notification.BloodRequest.MedicalCenterID
+                        && a.Status != "Completed")
+                    .OrderByDescending(a => a.AppointmentDate)
+                    .FirstOrDefault();
+                // Nếu không có, lấy appointment gần nhất của donor tại medical center
+                if (appointment == null)
+                {
+                    appointment = _context.DonationAppointments
+                        .Include(a => a.Donor)
+                        .Include(a => a.MedicalCenter)
+                        .Include(a => a.BloodType)
+                        .Where(a => a.DonorID == notification.DonorID && a.MedicalCenterID == notification.BloodRequest.MedicalCenterID)
+                        .OrderByDescending(a => a.AppointmentDate)
+                        .FirstOrDefault();
+                }
+            }
+            else
+            {
+                // Nếu không có BloodRequestID, lấy appointment gần nhất của donor
+                appointment = _context.DonationAppointments
+                    .Include(a => a.Donor)
+                    .Include(a => a.MedicalCenter)
+                    .Include(a => a.BloodType)
+                    .Where(a => a.DonorID == notification.DonorID)
+                    .OrderByDescending(a => a.AppointmentDate)
+                    .FirstOrDefault();
+            }
+            ViewBag.Appointment = appointment;
+            return View("NotificationDetail", notification);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ConfirmAppointmentCompletion(int appointmentId)
+        {
+            var appointment = _context.DonationAppointments
+                .Include(a => a.Donor)
+                .Include(a => a.BloodType)
+                .Include(a => a.MedicalCenter)
+                .FirstOrDefault(a => a.AppointmentID == appointmentId);
+            if (appointment == null)
+            {
+                TempData["Error"] = "Không tìm thấy đơn hiến máu.";
+                return RedirectToAction("MedicalCenterNotifications");
+            }
+
+            // Tìm notification liên quan nếu có
+            var notification = _context.Notifications.FirstOrDefault(n => n.DonorID == appointment.DonorID && n.BloodRequestID != null);
+
+            // Tìm BloodRequest liên quan
+            BloodRequest bloodRequest = null;
+            if (notification != null && notification.BloodRequestID.HasValue)
+            {
+                bloodRequest = _context.BloodRequests.FirstOrDefault(br => br.BloodRequestID == notification.BloodRequestID.Value);
+            }
+            if (bloodRequest == null)
+            {
+                bloodRequest = _context.BloodRequests.FirstOrDefault(br => br.BloodTypeID == appointment.BloodTypeID && br.MedicalCenterID == appointment.MedicalCenterID);
+            }
+
+            // Cập nhật trạng thái và thông tin cho cả hai bảng
+            if (bloodRequest != null)
+            {
+                bloodRequest.Status = "Completed";
+                bloodRequest.BloodGiven = appointment.BloodType?.Type;
+                // Cập nhật QuantityDonated cho appointment
+                appointment.Status = "Completed";
+                appointment.QuantityDonated = bloodRequest.Quantity;
+            }
+            else
+            {
+                // Nếu không tìm thấy bloodRequest vẫn cho phép hoàn thành appointment
+                appointment.Status = "Completed";
+            }
+
+            // Nếu donor đang sẵn sàng thì chuyển về không sẵn sàng
+            if (appointment.Donor != null && appointment.Donor.IsAvailable == true)
+            {
+                appointment.Donor.IsAvailable = false;
+                _context.SaveChanges();
+            }
+
+            // Tạo chứng chỉ nếu chưa có
+            var existingCertificate = _context.DonationCertificates.FirstOrDefault(c => c.AppointmentID == appointment.AppointmentID);
+            if (existingCertificate == null)
+            {
+                decimal quantity = bloodRequest?.Quantity ?? appointment.QuantityDonated;
+                var issueDate = DateTime.Now;
+                var certificate = new DonationCertificate
+                {
+                    AppointmentID = appointment.AppointmentID,
+                    IssueDate = issueDate,
+                    CertificateDetails = $"Chứng chỉ hiến máu cho {(appointment.Donor?.Name ?? "Người hiến máu")}, nhóm máu {appointment.BloodType?.Type ?? "?"}, hiến {quantity}CC tại {appointment.MedicalCenter?.Name ?? "cơ sở y tế"} ngày {issueDate:dd/MM/yyyy}."
+                };
+                _context.DonationCertificates.Add(certificate);
+            }
+            _context.SaveChanges();
+            TempData["Message"] = "Đã xác nhận hoàn thành và cấp chứng chỉ cho người hiến máu.";
+            return RedirectToAction("NotificationDetail", new { notificationId = appointmentId });
+        }
     }
 }

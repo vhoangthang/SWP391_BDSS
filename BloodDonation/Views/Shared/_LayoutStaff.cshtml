@@ -60,6 +60,11 @@
                        class="nav-link @(currentAction == "NearestDonors" ? "active" : "")">
                         🔍 Tìm người hiến máu gần nhất
                     </a>
+
+                    <a href="@Url.Action("StaffNotifications", "Notification")"
+                       class="nav-link @(currentAction == "StaffNotifications" && currentController == "Notification" ? "active" : "")">
+                        🛎️ Thông báo
+                    </a>
                 </div>
 
                 <div>

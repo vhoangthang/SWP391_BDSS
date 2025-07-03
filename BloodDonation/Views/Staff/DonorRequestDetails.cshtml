@@ -6,135 +6,270 @@
     var donor = Model.Donor;
 }
 
+<style>
+    .bdss-card {
+        border-radius: 1.2rem;
+        box-shadow: 0 2px 16px 0 rgba(0,0,0,0.07);
+        border: none;
+        background: #fff;
+        padding: 2rem 2.5rem 2rem 2.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .bdss-title {
+        font-size: 1.5em;
+        font-weight: 700;
+        color: #22223b;
+        margin-bottom: 1.2em;
+    }
+    .bdss-label {
+        color: #64748b;
+        font-weight: 500;
+        font-size: 1em;
+        margin-bottom: 0.2em;
+        min-width: 120px;
+        display: block;
+    }
+    .bdss-value {
+        font-weight: 600;
+        color: #22223b;
+        font-size: 1.08em;
+        display: block;
+        margin-bottom: 0.7em;
+    }
+    .bdss-badge-soft {
+        display: inline-block;
+        padding: 0.35em 1.1em;
+        font-size: 1.1em;
+        font-weight: 500;
+        border-radius: 2em;
+        background: #fef9c3;
+        color: #b45309;
+        letter-spacing: 0.02em;
+        border: none;
+    }
+    .bdss-badge-soft-success {
+        background: #d1fae5;
+        color: #047857;
+    }
+    .bdss-badge-soft-danger {
+        background: #fde8e8;
+        color: #b91c1c;
+    }
+    .bdss-badge-soft-primary {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+    .bdss-btn-red {
+        background: #ef4444;
+        color: #fff;
+        border-radius: 0.7em;
+        font-weight: 600;
+        border: none;
+        padding: 0.7em 1.5em;
+        margin-bottom: 0.5em;
+        transition: background 0.2s;
+        width: 100%;
+    }
+    .bdss-btn-red:hover {
+        background: #b91c1c;
+        color: #fff;
+    }
+    .bdss-btn-green {
+        background: #22c55e;
+        color: #fff;
+        border-radius: 0.7em;
+        font-weight: 600;
+        border: none;
+        padding: 0.7em 1.5em;
+        margin-bottom: 0.5em;
+        transition: background 0.2s;
+        width: 100%;
+    }
+    .bdss-btn-green:hover {
+        background: #15803d;
+        color: #fff;
+    }
+    .bdss-status-card {
+        border-radius: 1.2rem;
+        background: #fff;
+        box-shadow: 0 2px 16px 0 rgba(0,0,0,0.07);
+        padding: 1.2em 1.5em;
+        margin-bottom: 1.5em;
+        text-align: center;
+    }
+    .bdss-alert-info {
+        background: #e0f2fe;
+        color: #0369a1;
+        border-radius: 0.7em;
+        padding: 1em 1.2em;
+        font-size: 1.05em;
+        margin-bottom: 1em;
+        text-align: left;
+    }
+    .bdss-form-label {
+        color: #64748b;
+        font-weight: 500;
+        margin-bottom: 0.3em;
+    }
+    .bdss-form-control, .bdss-form-select {
+        border-radius: 0.7em;
+        font-size: 1em;
+        margin-bottom: 1em;
+    }
+</style>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
 <div class="container mt-4">
-    <h4 class="mb-4 fw-bold">🩸 Chi tiết đăng ký hiến máu</h4>
-
-    <div class="row">
-        <!-- Thông tin người hiến máu -->
-        <div class="col-md-7">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header fw-bold">Thông tin người hiến máu</div>
-                <div class="card-body">
-                    <dl class="row">
-                        <dt class="col-sm-4">👤 Họ và tên</dt>
-                        <dd class="col-sm-8">@donor.Name</dd>
-
-                        <dt class="col-sm-4">📧 Email</dt>
-                        <dd class="col-sm-8">@donor.Account?.Email</dd>
-
-                        <dt class="col-sm-4">🗓 Ngày sinh</dt>
-                        <dd class="col-sm-8">@donor.DateOfBirth?.ToString("yyyy-MM-dd")</dd>
-
-                        <dt class="col-sm-4">📞 Số điện thoại</dt>
-                        <dd class="col-sm-8">@donor.ContactNumber</dd>
-
-                        <dt class="col-sm-4">📍 Địa chỉ</dt>
-                        <dd class="col-sm-8">@donor.Address</dd>
-
-                        <dt class="col-sm-4">🧬 Nhóm máu</dt>
-                        <dd class="col-sm-8">@donor.BloodType?.Type</dd>
-
-                        <dt class="col-sm-4">🆔 CCCD</dt>
-                        <dd class="col-sm-8">@donor.CCCD</dd>
-                    </dl>
+    <h2 class="fw-bold mb-3" style="color:#ef4444"><i class="fa-solid fa-droplet"></i> Chi tiết đăng ký hiến máu</h2>
+    <div class="row g-4">
+        <!-- Card thông tin bên trái -->
+        <div class="col-lg-8">
+            <div class="bdss-card">
+                <div class="bdss-title">Thông tin người hiến máu</div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <span class="bdss-label">Họ và tên</span>
+                        <span class="bdss-value">@donor.Name</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="bdss-label">Số điện thoại</span>
+                        <span class="bdss-value">@donor.ContactNumber</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="bdss-label">Email</span>
+                        <span class="bdss-value">@donor.Account?.Email</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="bdss-label">Ngày sinh</span>
+                        <span class="bdss-value">@donor.DateOfBirth?.ToString("yyyy-MM-dd")</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="bdss-label">Giới tính</span>
+                        <span class="bdss-value">@donor.Gender</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="bdss-label">Số CMND/CCCD</span>
+                        <span class="bdss-value">@donor.CCCD</span>
+                    </div>
+                    <div class="col-12">
+                        <span class="bdss-label">Địa chỉ</span>
+                        <span class="bdss-value">@donor.Address</span>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <span class="bdss-label">Nhóm máu</span>
+                        <span class="bdss-value">@donor.BloodType?.Type</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="bdss-label">Tiền sử bệnh</span>
+                        <span class="bdss-value"><button class="bdss-btn-red" style="padding:0.3em 1.2em; font-size:1em; width:auto;">Xem tiểu sử bệnh án</button></span>
+                    </div>
                 </div>
             </div>
-
-            <!-- Thông tin sức khỏe -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header fw-bold">Thông tin sức khỏe</div>
-                <div class="card-body">
-                    <dl class="row">
-                        <dt class="col-sm-4">📄 Tiền sử bệnh</dt>
-                        <dd class="col-sm-8">
-                            <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#healthHistoryModal">
-                                Xem tiểu sử bệnh án
-                            </button>
-                        </dd>
-                    </dl>
+            <div class="bdss-card">
+                <div class="bdss-title" style="font-size:1.2em; margin-bottom:1em;">Thông tin đăng ký</div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <span class="bdss-label">Ngày đăng ký</span>
+                        <span class="bdss-value">@Model.AppointmentDate.ToString("yyyy-MM-dd")</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="bdss-label">Ngày hẹn hiến máu</span>
+                        <span class="bdss-value">@Model.AppointmentDate.ToString("yyyy-MM-dd")</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="bdss-label">Khung giờ</span>
+                        <span class="bdss-value">@Model.TimeSlot</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="bdss-label">Nhóm máu hiến</span>
+                        <span class="bdss-value">@Model.BloodType?.Type</span>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <span class="bdss-label">Trạng thái</span>
+                        @switch (Model.Status)
+                        {
+                            case "Completed":
+                                <span class="bdss-badge-soft bdss-badge-soft-success">Hoàn tất</span>; break;
+                            case "Pending":
+                                <span class="bdss-badge-soft bdss-badge-soft-warning">Chờ xác nhận</span>; break;
+                            case "Rejected":
+                                <span class="bdss-badge-soft bdss-badge-soft-danger">Từ chối</span>; break;
+                            case "Confirmed":
+                                <span class="bdss-badge-soft bdss-badge-soft-primary">Đã xác nhận</span>; break;
+                            default:
+                                <span class="bdss-badge-soft">@Model.Status</span>; break;
+                        }
+                    </div>
                 </div>
             </div>
-
-            <div class="card shadow-sm mb-4">
-                <div class="card-header fw-bold">Thông tin yêu cầu</div>
-                <div class="card-body">
-                    <dl class="row">
-                        <dt class="col-sm-4">📅 Ngày yêu cầu</dt>
-                        <dd class="col-sm-8">@Model.AppointmentDate.ToString("yyyy-MM-dd") ?? "Không có"</dd>
-
-                        <dt class="col-sm-4">🩸 Nhóm máu</dt>
-                        <dd class="col-sm-8">@Model.BloodType?.Type</dd>
-
-                        <dt class="col-sm-4">📌 Trạng thái</dt>
-                        <dd class="col-sm-8">
-                            @switch (Model.Status)
-                            {
-                                case "Pending":
-                                    <span class="badge bg-warning text-dark">⏳ Chờ xác nhận</span>
-                                    ; break;
-                                case "Confirmed":
-                                    <span class="badge bg-primary">✔️ Đã xác nhận</span>
-                                    ; break;
-                                case "Rejected":
-                                    <span class="badge bg-danger">❌ Từ chối</span>
-                                    ; break;
-                                case "Completed":
-                                    <span class="badge bg-success">✅ Hoàn tất</span>
-                                    ; break;
-                            }
-                        </dd>
-                    </dl>
-                </div>
+            <div class="text-center mb-4">
+                <a href="#" class="bdss-btn-red" style="max-width:320px;">Chi tiết phiếu hiến máu</a>
             </div>
         </div>
-
-        <!-- Xử lý xác nhận -->
-        <div class="col-md-5">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header fw-bold">Xác nhận hiến máu</div>
-                <div class="card-body">
-                    @if (Model.Status == "Pending" || Model.Status == "Confirmed")
-                    {
-                        <form method="post" asp-action="ConfirmDonation" asp-controller="Staff">
-                            <input type="hidden" name="AppointmentID" value="@Model.AppointmentID" />
-
-                            <div class="mb-2">Đủ điều kiện hiến máu?</div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="IsEligible" id="eligible" value="true" checked />
-                                <label class="form-check-label text-success fw-bold" for="eligible">✔️ Đủ điều kiện</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="IsEligible" id="notEligible" value="false" />
-                                <label class="form-check-label text-danger fw-bold" for="notEligible">❌ Không đủ</label>
-                            </div>
-
-                            <div class="mt-3">
-                                <label>Lượng máu dự kiến hiến (cc)</label>
-                                <select name="QuantityDonated" class="form-control">
-                                    <option value="0.75">250ml (0.75CC)</option>
-                                    <option value="1">350ml (1CC)</option>
-                                    <option value="1.25">450ml (1.25CC)</option>
-                                </select>
-                            </div>
-
-                            <div class="mt-4 d-flex justify-content-between">
-                                <div>
-                                    <button type="submit" name="action" value="reject" class="btn btn-danger">Từ chối</button>
-                                    <button type="submit" name="action" value="confirm" class="btn btn-primary">Xác nhận</button>
+        <!-- Card xác nhận bên phải -->
+        <div class="col-lg-4">
+            <div class="bdss-card">
+                <div class="bdss-title" style="font-size:1.2em; margin-bottom:1.2em;">Xác nhận hiến máu</div>
+                @if (Model.Status == "Completed" || Model.Status == "Rejected")
+                {
+                    <div class="bdss-alert-info"><b>Thông báo:</b> Đơn hiến máu đã được xử lý với trạng thái <b>@Model.Status</b>. Không thể thay đổi nữa.</div>
+                }
+                else
+                {
+                    <form method="post" asp-action="ConfirmDonation" asp-controller="Staff">
+                        <input type="hidden" name="AppointmentID" value="@Model.AppointmentID" />
+                        <div class="mb-3">
+                            <label class="bdss-form-label">Đủ điều kiện hiến máu</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="IsEligible" id="eligible" value="true" checked />
+                                    <label class="form-check-label text-success fw-bold" for="eligible">✔ Đủ điều kiện</label>
                                 </div>
-                                <div class="text-end">
-                                    <button type="submit" name="action" value="completed" class="btn btn-success" onclick="return confirm('Xác nhận đã hoàn tất hiến máu?')">✅ Hoàn tất</button>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="IsEligible" id="notEligible" value="false" />
+                                    <label class="form-check-label text-danger fw-bold" for="notEligible">✗ Không đủ điều kiện</label>
                                 </div>
                             </div>
-                        </form>
-                    }
-                    else
-                    {
-                        <div class="alert alert-info">
-                            <strong>🔒 Thông báo:</strong> Đơn hiến máu đã được xử lý với trạng thái <span class="fw-bold">@Model.Status</span>. Không thể thay đổi nữa.
                         </div>
-                    }
-                </div>
+                        <div class="mb-3">
+                            <label class="bdss-form-label">Xác nhận nhóm máu</label>
+                            <select name="BloodTypeID" class="form-select bdss-form-select">
+                                <option value="@Model.BloodTypeID">@Model.BloodType?.Type</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="bdss-form-label">Lượng máu hiến</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="QuantityDonated" id="q250" value="0.75" />
+                                    <label class="form-check-label" for="q250">250ml (0.75CC)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="QuantityDonated" id="q350" value="1" checked />
+                                    <label class="form-check-label" for="q350">350ml (1CC)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="QuantityDonated" id="q450" value="1.25" />
+                                    <label class="form-check-label" for="q450">450ml (1.25CC)</label>
+                                </div>
+                            </div>
+                            <div class="form-text">Chọn lượng máu hiến phù hợp</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="bdss-form-label">Ghi chú</label>
+                            <textarea name="Note" class="form-control bdss-form-control" rows="2" placeholder="Nhập ghi chú nếu cần..."></textarea>
+                        </div>
+                        <button type="submit" name="action" value="reject" class="bdss-btn-red">Từ chối hiến máu</button>
+                        <button type="submit" name="action" value="confirm" class="bdss-btn-red">Xác nhận hiến máu</button>
+                        <button type="submit" name="action" value="completed" class="bdss-btn-green">Hoàn Thành đơn hiến máu</button>
+                    </form>
+                }
             </div>
         </div>
     </div>

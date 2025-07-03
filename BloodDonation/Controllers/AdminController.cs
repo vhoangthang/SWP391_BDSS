@@ -6,6 +6,7 @@ using BloodDonation.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace BloodDonation.Controllers
 {
@@ -31,7 +32,6 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
-            // Lấy thống kê tổng quan
             var totalUsers = await _context.Accounts.CountAsync();
             var totalBloodRequests = await _context.BloodRequests.CountAsync();
             var totalBloodInventory = await _context.BloodInventories.SumAsync(bi => bi.Quantity);
@@ -43,7 +43,6 @@ namespace BloodDonation.Controllers
             return View();
         }
 
-        // Quản lý người dùng
         public async Task<IActionResult> UserManagement()
         {
             var username = HttpContext.Session.GetString("Username");
@@ -62,7 +61,6 @@ namespace BloodDonation.Controllers
             return View(users);
         }
 
-        // Quản lý yêu cầu nhận máu
         public async Task<IActionResult> BloodRequestManagement()
         {
             var username = HttpContext.Session.GetString("Username");
@@ -79,10 +77,16 @@ namespace BloodDonation.Controllers
                 .OrderByDescending(br => br.RequestDate)
                 .ToListAsync();
 
+            // Lấy danh sách nhóm máu còn trong kho
+            var availableBloodTypes = await _context.BloodInventories
+                .Include(b => b.BloodType)
+                .Where(b => b.Quantity > 0)
+                .Select(b => b.BloodType.Type)
+                .ToListAsync();
+
             return View(bloodRequests);
         }
 
-        // Quản lý kho máu
         public async Task<IActionResult> BloodInventoryManagement()
         {
             var username = HttpContext.Session.GetString("Username");
@@ -102,7 +106,6 @@ namespace BloodDonation.Controllers
             return View(bloodInventory);
         }
 
-        // Cập nhật trạng thái yêu cầu nhận máu
         [HttpPost]
         public async Task<IActionResult> UpdateBloodRequestStatus(int requestId, string status)
         {
@@ -132,7 +135,6 @@ namespace BloodDonation.Controllers
             }
         }
 
-        // Cập nhật số lượng kho máu
         [HttpPost]
         public async Task<IActionResult> UpdateBloodInventory(int bloodTypeId, decimal quantity)
         {
@@ -146,11 +148,11 @@ namespace BloodDonation.Controllers
 
             try
             {
-                // Giả sử chỉ có 1 ngân hàng máu (BloodBankID = 1)
                 const int bloodBankId = 1;
 
-                var bloodInventory = await _context.BloodInventories.FirstOrDefaultAsync(i => i.BloodTypeID == bloodTypeId && i.BloodBankID == bloodBankId);
-                
+                var bloodInventory = await _context.BloodInventories
+                    .FirstOrDefaultAsync(i => i.BloodTypeID == bloodTypeId && i.BloodBankID == bloodBankId);
+
                 if (bloodInventory != null)
                 {
                     bloodInventory.Quantity = quantity;
@@ -159,6 +161,7 @@ namespace BloodDonation.Controllers
                     TempData["Message"] = "Cập nhật kho máu thành công!";
                     return RedirectToAction("BloodInventoryManagement");
                 }
+
                 TempData["Error"] = "Không tìm thấy nhóm máu trong kho.";
                 return RedirectToAction("BloodInventoryManagement");
             }
@@ -169,5 +172,21 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("BloodInventoryManagement");
             }
         }
+
+        // ✅ Hàm kiểm tra tương hợp nhóm máu
+        private bool CheckCompatibility(string donor, string recipient)
+        {
+            if (donor == "O-") return true;
+            if (donor == recipient) return true;
+            if (donor == "O+" && (recipient == "A+" || recipient == "B+" || recipient == "AB+" || recipient == "O+")) return true;
+            if (donor == "A-" && (recipient == "A+" || recipient == "A-" || recipient == "AB+" || recipient == "AB-")) return true;
+            if (donor == "B-" && (recipient == "B+" || recipient == "B-" || recipient == "AB+" || recipient == "AB-")) return true;
+            if (donor == "AB-" && (recipient == "AB+" || recipient == "AB-")) return true;
+            if (donor == "A+" && (recipient == "A+" || recipient == "AB+")) return true;
+            if (donor == "B+" && (recipient == "B+" || recipient == "AB+")) return true;
+            if (donor == "AB+" && recipient == "AB+") return true;
+
+            return false;
+        }
     }
-} 
+}

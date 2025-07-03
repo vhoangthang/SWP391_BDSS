@@ -33,6 +33,17 @@
                 <input type="hidden" name="id" value="@Model.BloodRequestID" />
 
                 <div class="mb-3">
+                    <label class="form-label fw-bold">Chọn nhóm máu để cấp phát</label>
+                    <select name="SelectedBloodTypeID" class="form-select" required>
+                        <option value="">-- Chọn nhóm máu --</option>
+                        @foreach (var bt in ViewBag.CompatibleBloodTypes)
+                        {
+                            <option value="@bt.BloodTypeID">@bt.Type</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
                     <label class="form-label fw-bold">Ghi chú xử lý</label>
                     <textarea name="Note" class="form-control" rows="3" required></textarea>
                 </div>

@@ -1,0 +1,46 @@
+@model List<BloodDonation.Models.Notification>
+@{
+    ViewData["Title"] = "Thông Báo Cơ Sở Y Tế";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    ViewBag.HideLogo = true;
+}
+
+<div class="container mt-4">
+    <h3 class="fw-bold mb-3">🔔 Thông báo dành cho Cơ sở y tế</h3>
+    <hr />
+    <div class="notification-list">
+        @if (Model != null && Model.Count > 0)
+        {
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Nội dung</th>
+                        <th>Thời gian</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    var n = Model[i];
+                    <tr class="@(n.IsRead ? "" : "table-warning")">
+                        <td>@(i+1)</td>
+                        <td>@n.Message</td>
+                        <td>@n.SentAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            <a class="btn btn-sm btn-primary" href="@Url.Action("NotificationDetail", "MedicalCenter", new { notificationId = n.NotificationID })">
+                                Chi tiết
+                            </a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="alert alert-info">Chưa có thông báo nào.</div>
+        }
+    </div>
+</div> 

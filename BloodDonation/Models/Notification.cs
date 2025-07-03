@@ -31,11 +31,16 @@ namespace BloodDonation.Models
 
         public int? AccountID { get; set; }
 
+        public int? BloodRequestID { get; set; }
+
         // Navigation properties
         [ForeignKey("DonorID")]
         public Donor Donor { get; set; }
 
         [ForeignKey("AccountID")]
         public Account? Account { get; set; }
+
+        [ForeignKey("BloodRequestID")]
+        public BloodRequest? BloodRequest { get; set; }
     }
 } 

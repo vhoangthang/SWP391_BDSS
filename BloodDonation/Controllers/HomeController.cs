@@ -2,6 +2,7 @@ using System.Diagnostics;
 using BloodDonation.Models;
 using Microsoft.AspNetCore.Mvc;
 using BloodDonation.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace BloodDonation.Controllers
 {
@@ -21,6 +22,20 @@ namespace BloodDonation.Controllers
             var username = HttpContext.Session.GetString("Username");
             ViewBag.IsLoggedIn = !string.IsNullOrEmpty(username);
             ViewBag.Username = username;
+
+            int unreadCount = 0;
+            if (!string.IsNullOrEmpty(username))
+            {
+                var donor = _context.Donors
+                    .Include(d => d.Notifications)
+                    .FirstOrDefault(d => d.Account.Username == username);
+                if (donor != null)
+                {
+                    unreadCount = donor.Notifications.Count(n => !n.IsRead);
+                }
+            }
+            ViewBag.UnreadNotificationCount = unreadCount;
+
             return View();
         }
 
