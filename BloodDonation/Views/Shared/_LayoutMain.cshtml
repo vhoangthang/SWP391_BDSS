@@ -75,9 +75,10 @@
                         <a asp-controller="Notification" asp-action="Index" class="position-relative">
                             <small class="me-3 text-dark">
                                 <i class="fa fa-bell text-danger me-2"></i>Thông báo
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationBadge">
-                                    3
-                                </span>
+                                @if (ViewBag.UnreadNotificationCount > 0)
+                                    {
+                                        <span class="badge bg-danger ms-2">@ViewBag.UnreadNotificationCount</span>
+                                    }
                             </small>
                         </a>
                         <div class="dropdown">
@@ -87,7 +88,10 @@
                             <div class="dropdown-menu rounded">
                                 <a asp-controller="Notification" asp-action="Index" class="dropdown-item">
                                     <i class="fas fa-bell me-2"></i>Thông báo
-                                    <span class="badge bg-danger ms-2">3</span>
+                                    @if (ViewBag.UnreadNotificationCount > 0)
+                                    {
+                                        <span class="badge bg-danger ms-2">@ViewBag.UnreadNotificationCount</span>
+                                    }
                                 </a>
                                 <a asp-controller="Profile" asp-action="Index" class="dropdown-item">
                                     <i class="fas fa-user me-2"></i>Hồ sơ cá nhân
@@ -116,9 +120,12 @@
     <!-- Navbar Start -->
     <div class="container-fluid position-relative p-0">
         <nav class="navbar navbar-expand-lg navbar-light px-4 px-lg-5 py-3 py-lg-0">
-            <a asp-controller="Home" asp-action="Index" class="navbar-brand p-0">
-                <h1 class="text-danger"><i class="fas fa-tint me-3"></i>Hiến Máu</h1>
-            </a>
+            @if (!(ViewBag.HideLogo ?? false))
+            {
+                <a asp-controller="Home" asp-action="Index" class="navbar-brand p-0">
+                    <h1 class="text-danger"><i class="fas fa-tint me-3"></i>Hiến Máu</h1>
+                </a>
+            }
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                 <span class="fa fa-bars"></span>
             </button>

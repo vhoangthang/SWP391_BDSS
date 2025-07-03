@@ -75,6 +75,7 @@
                             <th>Số điện thoại</th>
                             <th>Nhóm máu</th>
                             <th>Khoảng cách (km)</th>
+                            <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -90,6 +91,13 @@
                                     <td>@donor.ContactNumber</td>
                                     <td>@donor.BloodType?.Type</td>
                                     <td>@(item.Distance.ToString("0.00"))</td>
+                                    <td>
+                                        <form asp-action="SendInviteNotification" asp-controller="Notification" method="post">
+                                            <input type="hidden" name="donorId" value="@donor.DonorID" />
+                                            <input type="hidden" name="bloodRequestId" value="@ViewBag.BloodRequestId" />
+                                            <button type="submit" class="btn btn-warning btn-sm">Gửi thông báo mời hiến máu</button>
+                                        </form>
+                                    </td>
                                 </tr>
                                 idx++;
                             }

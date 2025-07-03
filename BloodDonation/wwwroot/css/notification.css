@@ -81,3 +81,16 @@ body {
 .notification-actions .btn {
     margin-right: 10px;
 } 
+.notification-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: red;
+    border-radius: 50%;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+.notification-item.unread {
+    background-color: #fff8f0;
+    font-weight: bold;
+}

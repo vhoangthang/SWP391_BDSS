@@ -8,57 +8,310 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@title</title>
 
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Icon Font Stylesheet -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Libraries Stylesheet -->
+    <link rel="stylesheet" href="~/lib/animate/animate.min.css" />
+    <link href="~/lib/lightbox/css/lightbox.min.css" rel="stylesheet">
+    <link href="~/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
-
+    
     <!-- Custom CSS -->
-    <link href="~/css/site.css" rel="stylesheet" />
+    @* <link href="~/css/site.css" rel="stylesheet" /> *@
+    <link href="~/css/style.css" rel="stylesheet">
 </head>
 
-<body class="d-flex flex-column min-vh-100">
-    <!-- Header / Navbar -->
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-danger shadow">
-            <div class="container">
-                <a class="navbar-brand fw-bold" href="@Url.Action("Index", "Home")">LifeBlood</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="BookingDayAndBloodType" asp-action="Index">Đặt Lịch Hẹn</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Profile" asp-action="Index">Hồ Sơ</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Certificate" asp-action="Index">Chứng Nhận</a>
-                        </li>
-                    </ul>
+<body>
+    <!-- Spinner Start -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <!-- Spinner End -->
+
+    <!-- Notification Banner Start -->
+    <div class="container-fluid notification-banner bg-danger text-white py-2" id="notificationBanner">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-bullhorn me-2"></i>
+                        <span id="notificationText">🚨 KHẨN CẤP: Cần máu nhóm O và A tại Bệnh viện Bạch Mai. Vui lòng liên hệ ngay!</span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-sm btn-outline-light me-2" onclick="markAsRead()">
+                        <i class="fas fa-check me-1"></i>Đã đọc
+                    </button>
+                    <button class="btn btn-sm btn-outline-light" onclick="closeNotification()">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </div>
+        </div>
+    </div>
+    <!-- Notification Banner End -->
+
+    <!-- Topbar Start -->
+    <div class="container-fluid topbar bg-light px-5 d-none d-lg-block">
+        <div class="row gx-0 align-items-center">
+            <div class="col-lg-8 text-center text-lg-start mb-2 mb-lg-0">
+                <div class="d-flex flex-wrap">
+                    <a href="#" class="text-muted small me-4"><i class="fas fa-map-marker-alt text-danger me-2"></i>Tìm địa điểm hiến máu</a>
+                    <a href="tel:19001234" class="text-muted small me-4"><i class="fas fa-phone-alt text-danger me-2"></i>1900 1234</a>
+                    <a href="mailto:info@hienmau.vn" class="text-muted small me-0"><i class="fas fa-envelope text-danger me-2"></i>info@hienmau.vn</a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center text-lg-end">
+                <div class="d-inline-flex align-items-center" style="height: 45px;">
+                    @{
+                        var username = Context.Session.GetString("Username");
+                        var isLoggedIn = !string.IsNullOrEmpty(username);
+                    }
+                    @if (isLoggedIn)
+                    {
+                        <a asp-controller="Profile" asp-action="Index"><small class="me-3 text-dark"><i class="fa fa-user text-danger me-2"></i>Hồ sơ</small></a>
+                        <a asp-controller="Notification" asp-action="Index" class="position-relative">
+                            <small class="me-3 text-dark">
+                                <i class="fa fa-bell text-danger me-2"></i>Thông báo
+                                @if (ViewBag.UnreadNotificationCount > 0)
+                                {
+                                    <span class="badge bg-danger ms-2">@ViewBag.UnreadNotificationCount</span>
+                                }
+                            </small>
+                        </a>
+                        <div class="dropdown">
+                            <a href="#" class="dropdown-toggle text-dark" data-bs-toggle="dropdown">
+                                <small><i class="fa fa-home text-danger me-2"></i> Xin chào, @username!</small>
+                            </a>
+                            <div class="dropdown-menu rounded">
+                                <a asp-controller="Notification" asp-action="Index" class="dropdown-item">
+                                    <i class="fas fa-bell me-2"></i>Thông báo
+                                    @if (ViewBag.UnreadNotificationCount > 0)
+                                    {
+                                        <span class="badge bg-danger ms-2">@ViewBag.UnreadNotificationCount</span>
+                                    }
+                                </a>
+                                <a asp-controller="Profile" asp-action="Index" class="dropdown-item">
+                                    <i class="fas fa-user me-2"></i>Hồ sơ cá nhân
+                                </a>
+                                <a href="#" class="dropdown-item">
+                                    <i class="fas fa-cog me-2"></i>Cài đặt
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a asp-controller="Login" asp-action="Logout" class="dropdown-item">
+                                    <i class="fas fa-power-off me-2"></i>Đăng xuất
+                                </a>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-controller="Login" asp-action="Index"><small class="me-3 text-dark"><i class="fa fa-sign-in-alt text-danger me-2"></i>Đăng nhập</small></a>
+                        <a asp-controller="Account" asp-action="Register"><small class="me-3 text-dark"><i class="fa fa-user-plus text-danger me-2"></i>Đăng ký</small></a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Topbar End -->
+
+    <!-- Navbar & Hero Start -->
+    <div class="container-fluid position-relative p-0">
+        <nav class="navbar navbar-expand-lg navbar-light px-4 px-lg-5 py-3 py-lg-0">
+            <a asp-controller="Home" asp-action="Index" class="navbar-brand p-0">
+                <h1 class="text-danger"><i class="fas fa-tint me-3"></i>Hiến Máu</h1>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="fa fa-bars"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="navbar-nav ms-auto py-0">
+                    <a asp-controller="Home" asp-action="Index" class="nav-item nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Home" && ViewContext.RouteData.Values["action"].ToString() == "Index" ? "active" : "")">Trang chủ</a>
+                    @if (ViewBag.IsLoggedIn == true)
+                    {
+                        <a asp-controller="DonationSummary" asp-action="Index" class="nav-link nav-history-link">Lịch Sử Hiến Máu</a>
+                    }
+                    <a asp-controller="Certificate" asp-action="Index" class="nav-item nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Service" ? "active" : "")">Chứng nhận</a>
+                    <a asp-controller="Blog" asp-action="Index" class="nav-item nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Blog" ? "active" : "")">Tin tức</a>
+                    <a href="/FAQ.html" class="nav-item nav-link">Hỏi đáp</a>
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                            Trang khác
+                        </a>
+                        <div class="dropdown-menu m-0">
+                            <a asp-controller="Feature" asp-action="Index" class="dropdown-item">Tính năng</a>
+                            <a asp-controller="Certificate" asp-action="Index" class="dropdown-item">Chứng nhận</a>
+                            <a asp-controller="Testimonial" asp-action="Index" class="dropdown-item">Cảm nhận</a>
+                            <a asp-controller="Offer" asp-action="Index" class="dropdown-item">Lợi ích</a>
+                            <a asp-controller="Faq" asp-action="Index" class="dropdown-item">FAQs</a>
+                        </div>
+                    </div>
+                    <a asp-controller="Contact" asp-action="Index" class="nav-item nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Contact" ? "active" : "")">Liên hệ</a>
+                </div>
+                @{
+                    var isLoggedInNav = !string.IsNullOrEmpty(Context.Session.GetString("Username"));
+                }
+            </div>
         </nav>
-    </header>
+
+        <!-- Carousel Start -->
+        <div class="header-carousel owl-carousel">
+            <div class="header-carousel-item" style="overflow: hidden; height: 300px; position: relative;">
+                <img src="https://content.presspage.com/uploads/1873/1920_donatingblood.jpg?10000"
+                     class="img-fluid w-100"
+                     style="height: 100%; object-fit: cover; object-position: center;"
+                     alt="Hiến máu cứu người">
+
+                <!-- Overlay đen mờ -->
+                <div style="
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);">
+                </div>
+            </div>
+        </div>
+        <!-- Carousel End -->
+    </div>
+    <!-- Navbar & Hero End -->
 
     <!-- Main Content -->
-    <main role="main" class="flex-grow-1 py-4">
+    <main role="main" class="py-4" style="min-height: 400px;">
         @RenderBody()
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-white text-center py-4 mt-auto">
-        <div class="container">
-            <p class="mb-0">© @DateTime.Now.Year LifeBlood. All rights reserved.</p>
-            <p>Hotline: <a href="tel:18001166" class="text-white text-decoration-underline">1900 1234</a></p>
+    <!-- Footer Start -->
+    <div class="container-fluid footer py-5 wow fadeIn" data-wow-delay="0.2s">
+        <div class="container py-5 border-start-0 border-end-0" style="border: 1px solid; border-color: rgb(255, 255, 255, 0.08);">
+            <div class="row g-5">
+                <div class="col-md-6 col-lg-6 col-xl-4">
+                    <div class="footer-item">
+                        <a href="#" class="p-0">
+                            <h4 class="text-white"><i class="fas fa-tint me-3"></i>LifeBlood</h4>
+                        </a>
+                        <p class="mb-4">Lan tỏa yêu thương, kết nối sự sống.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-6 col-xl-2">
+                    <div class="footer-item">
+                        <h4 class="text-white mb-4">Liên kết nhanh</h4>
+                        <a href="#about"><i class="fas fa-angle-right me-2"></i> Giới thiệu</a>
+                        <a href="#feature"><i class="fas fa-angle-right me-2"></i> Tính năng</a>
+                        <a href="#service"><i class="fas fa-angle-right me-2"></i> Dịch vụ</a>
+                        <a href="#contact"><i class="fas fa-angle-right me-2"></i> Liên hệ</a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-6 col-xl-3">
+                    <div class="footer-item">
+                        <h4 class="text-white mb-4">Hỗ trợ</h4>
+                        <a href="#"><i class="fas fa-angle-right me-2"></i> Chính sách bảo mật</a>
+                        <a href="#"><i class="fas fa-angle-right me-2"></i> Điều khoản</a>
+                        <a href="#"><i class="fas fa-angle-right me-2"></i> Hỗ trợ</a>
+                        <a href="#faq"><i class="fas fa-angle-right me-2"></i> FAQ</a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-6 col-xl-3">
+                    <div class="footer-item">
+                        <h4 class="text-white mb-4">Liên hệ</h4>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-map-marker-alt text-danger me-3"></i>
+                            <p class="text-white mb-0">123 Đường Hiến Máu, Hà Nội</p>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-envelope text-danger me-3"></i>
+                            <p class="text-white mb-0">info@hienmau.vn</p>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fa fa-phone-alt text-danger me-3"></i>
+                            <p class="text-white mb-0">1900 1234</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </footer>
+    </div>
+    <!-- Footer End -->
 
-    <!-- Bootstrap JS -->
+    <!-- Copyright Start -->
+    <div class="container-fluid copyright py-4">
+        <div class="container">
+            <div class="row g-4 align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-md-0">
+                    <span class="text-body"><a href="#" class="border-bottom text-white"><i class="fas fa-copyright text-light me-2"></i>LifeBlood</a>, All rights reserved.</span>
+                </div>
+                <div class="col-md-6 text-center text-md-end text-body">
+                    Thiết kế bởi <a class="border-bottom text-white" href="#">Nhóm LifeBlood</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Copyright End -->
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-danger btn-lg-square rounded-circle back-to-top"><i class="fa fa-arrow-up"></i></a>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/wow/wow.min.js"></script>
+    <script src="~/lib/easing/easing.min.js"></script>
+    <script src="~/lib/waypoints/waypoints.min.js"></script>
+    <script src="~/lib/counterup/counterup.min.js"></script>
+    <script src="~/lib/lightbox/js/lightbox.min.js"></script>
+    <script src="~/lib/owlcarousel/owl.carousel.min.js"></script>
+    <!-- Template Javascript -->
+    <script src="~/js/main.js"></script>
+
+    <!-- Notification Scripts -->
+    <script>
+        // Notification functions
+        function closeNotification() {
+            document.getElementById('notificationBanner').style.display = 'none';
+            localStorage.setItem('notificationClosed', 'true');
+        }
+
+        function markAsRead() {
+            document.getElementById('notificationBanner').style.display = 'none';
+            localStorage.setItem('notificationRead', 'true');
+            // Update notification badge
+            const badge = document.getElementById('notificationBadge');
+            if (badge) {
+                const currentCount = parseInt(badge.textContent);
+                if (currentCount > 0) {
+                    badge.textContent = currentCount - 1;
+                }
+            }
+        }
+
+        // Check if notification was closed or read
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationClosed = localStorage.getItem('notificationClosed');
+            const notificationRead = localStorage.getItem('notificationRead');
+
+            if (notificationClosed === 'true' || notificationRead === 'true') {
+                document.getElementById('notificationBanner').style.display = 'none';
+            }
+        });
+
+        // Auto-hide notification after 10 seconds
+        setTimeout(function() {
+            const banner = document.getElementById('notificationBanner');
+            if (banner && banner.style.display !== 'none') {
+                banner.style.opacity = '0.8';
+            }
+        }, 10000);
+    </script>
 
     @RenderSection("Scripts", required: false)
 </body>
