@@ -1,0 +1,15 @@
+﻿@{
+    ViewData["Title"] = "Xác minh mã";
+}
+<h2>Nhập mã xác minh đã gửi qua email</h2>
+
+<form method="post">
+    <label>Mã xác minh:</label>
+    <input type="text" name="code" required />
+    <button type="submit">Xác minh</button>
+</form>
+
+@if (ViewBag.Error != null)
+{
+    <p style="color:red">@ViewBag.Error</p>
+}
