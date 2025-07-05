@@ -19,15 +19,15 @@
             <div class="profile-info-col">
                 <div class="profile-info-item">
                     <span class="profile-info-label"><i class="fa fa-user"></i> Họ và Tên</span>
-                    <span class="profile-info-value">@Model.Name</span>
+                    <span class="profile-info-value">@(!string.IsNullOrWhiteSpace(Model.Name) ? Model.Name : "Chưa có thông tin")</span>
                 </div>
                 <div class="profile-info-item">
                     <span class="profile-info-label"><i class="fa fa-calendar"></i> Ngày Sinh</span>
-                    <span class="profile-info-value">@(Model.DateOfBirth?.ToShortDateString() ?? "Chưa cung cấp")</span>
+                    <span class="profile-info-value">@(Model.DateOfBirth?.ToShortDateString() ?? "Chưa có thông tin")</span>
                 </div>
                 <div class="profile-info-item">
                     <span class="profile-info-label"><i class="fa fa-phone"></i> Số Điện Thoại</span>
-                    <span class="profile-info-value">@(Model.ContactNumber ?? "Chưa cung cấp")</span>
+                    <span class="profile-info-value">@(string.IsNullOrWhiteSpace(Model.ContactNumber) ? "Chưa có thông tin" : Model.ContactNumber)</span>
                 </div>
             </div>
             <div class="profile-info-col">
@@ -37,11 +37,11 @@
                 </div>
                 <div class="profile-info-item">
                     <span class="profile-info-label"><i class="fa fa-map-marker"></i> Địa Chỉ</span>
-                    <span class="profile-info-value">@(Model.Address ?? "Chưa cung cấp")</span>
+                    <span class="profile-info-value">@(string.IsNullOrWhiteSpace(Model.Address) ? "Chưa có thông tin" : Model.Address)</span>
                 </div>
                 <div class="profile-info-item">
                     <span class="profile-info-label">Nhóm Máu</span>
-                    <span class="profile-info-value">@Model.BloodType?.Type</span>
+                    <span class="profile-info-value">@(Model.BloodType?.Type ?? "Chưa có thông tin")</span>
                 </div>
             </div>
             <div class="profile-info-col profile-info-col-right">

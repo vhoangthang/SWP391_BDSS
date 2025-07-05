@@ -8,12 +8,25 @@
 
 <div class="container" id="container">
     <div class="form-container sign-up-container">
-        <form action="/Account/Register" method="get">
+        <form action="/Account/Register" method="post">
             <h1>Tạo tài khoản</h1>
-            <input type="text" placeholder="Tên đăng nhập" name="Username" />
-            <input type="email" placeholder="Email" name="Email" />
-            <input type="password" placeholder="Mật khẩu" name="Password" />
+            <input type="text" placeholder="Tên đăng nhập" name="Username" required />
+            <input type="email" placeholder="Email" name="Email" required />
+            <input type="password" placeholder="Mật khẩu" name="Password" required />
+            <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+                <input type="text" placeholder="Mã xác minh" name="VerificationCode" style="flex:1;" required />
+                <button type="button" onclick="sendCodeRegister(this.form.Email.value)" style="white-space:nowrap;">Gửi mã</button>
+            </div>
             <button type="submit">Đăng ký</button>
+            <div id="registerMessage" style="color:red; margin-top:10px;"></div>
+            @if (TempData["RegisterSuccess"] != null)
+            {
+                <div style="color:green; margin-top:10px;">@TempData["RegisterSuccess"]</div>
+            }
+            @if (TempData["RegisterError"] != null)
+            {
+                <div style="color:red; margin-top:10px;">@TempData["RegisterError"]</div>
+            }
         </form>
     </div>
     <div class="form-container sign-in-container">
@@ -57,4 +70,32 @@
     signInButton.addEventListener('click', () => {
         container.classList.remove('right-panel-active');
     });
+
+    function sendCodeRegister(email) {
+        const messageEl = document.getElementById("registerMessage");
+        messageEl.innerText = "";
+        if (!email) {
+            messageEl.innerText = "Vui lòng nhập email trước khi gửi mã.";
+            return;
+        }
+        fetch('/Account/SendVerificationCode', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                messageEl.style.color = 'green';
+                messageEl.innerText = "Mã xác minh đã được gửi đến email.";
+            } else {
+                messageEl.style.color = 'red';
+                messageEl.innerText = "Gửi mã thất bại: " + (data.message || "Vui lòng thử lại.");
+            }
+        })
+        .catch(() => {
+            messageEl.style.color = 'red';
+            messageEl.innerText = "Lỗi khi gửi yêu cầu đến máy chủ.";
+        });
+    }
 </script>

@@ -21,28 +21,24 @@ namespace BloodDonation.Controllers
 
         public IActionResult Index()
         {
-            // Lấy username từ session
             var username = HttpContext.Session.GetString("Username");
             if (string.IsNullOrEmpty(username))
                 return RedirectToAction("Index", "Login");
 
-            // Tìm account theo username
             var account = _context.Accounts.FirstOrDefault(a => a.Username == username);
             if (account == null)
                 return NotFound();
 
-            // Tìm donor theo AccountID
             var donor = _context.Donors
-                .Include(d  => d.BloodType)
+                .Include(d => d.BloodType)
                 .FirstOrDefault(d => d.AccountID == account.AccountID);
             if (donor == null)
-                return NotFound();
+            {
+                ViewBag.Email = account.Email;
+                ViewBag.ProfileMessage = "Chưa có hồ sơ, vui lòng cập nhật!";
+                return View(new BloodDonation.Models.Donor { AccountID = account.AccountID });
+            }
 
-            // Kiểm tra có đơn nào KHÔNG phải Completed hoặc Rejected không
-            var canEdit = _context.DonationAppointments.Any(a => a.DonorID == donor.DonorID && a.Status != "Completed" && a.Status != "Rejected");
-            ViewBag.CanEditIsAvailable = canEdit;
-
-            // Truyền email từ account vào ViewBag
             ViewBag.Email = account.Email;
             return View(donor);
         }
@@ -59,12 +55,9 @@ namespace BloodDonation.Controllers
 
             var donor = _context.Donors.FirstOrDefault(d => d.AccountID == account.AccountID);
             if (donor == null)
-                return NotFound();
-
-            // Bổ sung: Kiểm tra có đơn nào KHÔNG phải Completed hoặc Rejected không
-            var canEdit = _context.DonationAppointments.Any(a => a.DonorID == donor.DonorID && a.Status != "Completed" && a.Status != "Rejected");
-            ViewBag.CanEditIsAvailable = canEdit;
-
+            {
+                donor = new BloodDonation.Models.Donor { AccountID = account.AccountID };
+            }
             ViewBag.BloodTypes = new SelectList(_context.BloodTypes.ToList(), "BloodTypeID", "Type", donor.BloodTypeID);
             return View(donor);
         }
@@ -73,7 +66,6 @@ namespace BloodDonation.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Donor donor)
         {
-            // Xóa lỗi validation cho các trường navigation
             ModelState.Remove("Account");
             ModelState.Remove("BloodType");
             ModelState.Remove("DonorBloodRequests");
@@ -84,24 +76,27 @@ namespace BloodDonation.Controllers
                 ViewBag.BloodTypes = new SelectList(_context.BloodTypes.ToList(), "BloodTypeID", "Type", donor.BloodTypeID);
                 return View(donor);
             }
-                
 
-            var existingDonor = _context.Donors.FirstOrDefault(d => d.DonorID == donor.DonorID);
+            var existingDonor = _context.Donors.FirstOrDefault(d => d.AccountID == donor.AccountID);
             if (existingDonor == null)
-                return NotFound();
-
-            // Cập nhật thông tin
-            existingDonor.Name = donor.Name;
-            existingDonor.DateOfBirth = donor.DateOfBirth;
-            existingDonor.Gender = donor.Gender;
-            existingDonor.ContactNumber = donor.ContactNumber;
-            existingDonor.Address = donor.Address;
-            existingDonor.CCCD = donor.CCCD;
-            existingDonor.BloodTypeID = donor.BloodTypeID;
-            existingDonor.IsAvailable = donor.IsAvailable;
-
+            {
+                // Tạo mới Donor
+                _context.Donors.Add(donor);
+            }
+            else
+            {
+                // Cập nhật thông tin
+                existingDonor.Name = donor.Name;
+                existingDonor.DateOfBirth = donor.DateOfBirth;
+                existingDonor.Gender = donor.Gender;
+                existingDonor.ContactNumber = donor.ContactNumber;
+                existingDonor.Address = donor.Address;
+                existingDonor.IsAvailable = donor.IsAvailable;
+                existingDonor.CCCD = donor.CCCD;
+                existingDonor.BloodTypeID = donor.BloodTypeID;
+            }
             _context.SaveChanges();
             return RedirectToAction("Index");
         }
     }
-} 
+}
