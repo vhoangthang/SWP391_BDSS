@@ -58,6 +58,9 @@ namespace BloodDonation.Controllers
                 .OrderBy(a => a.Username)
                 .ToListAsync();
 
+            var medicalCenters = await _context.MedicalCenters.ToListAsync();
+            ViewBag.MedicalCenters = medicalCenters;
+
             return View(users);
         }
 
@@ -187,6 +190,141 @@ namespace BloodDonation.Controllers
             if (donor == "AB+" && recipient == "AB+") return true;
 
             return false;
+        }
+
+        public class DeleteUserRequest
+        {
+            public int id { get; set; }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser([FromBody] DeleteUserRequest req)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            var role = HttpContext.Session.GetString("Role");
+
+            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
+            {
+                return Json(new { success = false, message = "Bạn không có quyền thực hiện thao tác này." });
+            }
+
+            // Xóa các appointment có Status hoặc HealthSurvey bị NULL trước khi truy vấn Donor
+            var nullAppointments = _context.DonationAppointments
+                .Where(a => a.Status == null || a.HealthSurvey == null)
+                .ToList();
+            if (nullAppointments.Any())
+            {
+                _context.DonationAppointments.RemoveRange(nullAppointments);
+                await _context.SaveChangesAsync();
+            }
+
+            var user = await _context.Accounts.FindAsync(req.id);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy tài khoản." });
+            }
+
+            if (user.Username == username || user.Role.ToLower() == "admin")
+            {
+                return Json(new { success = false, message = "Không thể xóa tài khoản admin hoặc chính bạn." });
+            }
+
+            // Xóa donor và các bản ghi liên quan nếu có
+            var donor = await _context.Donors
+                .Include(d => d.DonorBloodRequests)
+                .Include(d => d.DonationAppointments)
+                .Include(d => d.Notifications)
+                .FirstOrDefaultAsync(d => d.AccountID == user.AccountID);
+
+            if (donor != null)
+            {
+                if (donor.DonationAppointments != null)
+                {
+                    // Xóa các bản ghi liên quan đến các appointment còn lại
+                    var validAppointments = donor.DonationAppointments
+                        .Where(a => a.Status != null && a.HealthSurvey != null)
+                        .ToList();
+                    var appointmentIds = validAppointments.Select(a => a.AppointmentID).ToList();
+
+                    // Xóa HealthSurvey liên quan
+                    var surveys = _context.HealthSurveys.Where(s => appointmentIds.Contains(s.AppointmentID));
+                    _context.HealthSurveys.RemoveRange(surveys);
+
+                    // Xóa DonationCertificate liên quan
+                    var certificates = _context.DonationCertificates.Where(c => appointmentIds.Contains(c.AppointmentID));
+                    _context.DonationCertificates.RemoveRange(certificates);
+
+                    // Xóa các appointment còn lại
+                    _context.DonationAppointments.RemoveRange(validAppointments);
+                }
+                if (donor.DonorBloodRequests != null)
+                    _context.DonorBloodRequests.RemoveRange(donor.DonorBloodRequests);
+                if (donor.Notifications != null)
+                    _context.Notifications.RemoveRange(donor.Notifications);
+
+                _context.Donors.Remove(donor);
+            }
+
+            _context.Accounts.Remove(user);
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, message = "Xóa tài khoản thành công." });
+        }
+
+        public class ChangeRoleRequest
+        {
+            public int id { get; set; }
+            public string newRole { get; set; }
+            public int? medicalCenterId { get; set; }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangeUserRole([FromBody] ChangeRoleRequest req)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            var role = HttpContext.Session.GetString("Role");
+
+            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
+            {
+                return Json(new { success = false, message = "Bạn không có quyền thực hiện thao tác này." });
+            }
+
+            var user = await _context.Accounts.FindAsync(req.id);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy tài khoản." });
+            }
+
+            // Không cho phép đổi role của chính mình
+            if (user.Username == username)
+            {
+                return Json(new { success = false, message = "Không thể đổi vai trò của chính bạn." });
+            }
+
+            user.Role = req.newRole;
+            if (req.newRole.ToLower() == "medicalcenter")
+                user.MedicalCenterID = req.medicalCenterId;
+            else
+                user.MedicalCenterID = null;
+
+            // Cập nhật PermissionLevel đúng với Role
+            switch (req.newRole.ToLower())
+            {
+                case "donor":
+                    user.PermissionLevel = 1;
+                    break;
+                case "medicalcenter":
+                    user.PermissionLevel = 1;
+                    break;
+                case "staff":
+                    user.PermissionLevel = 2;
+                    break;
+                case "admin":
+                    user.PermissionLevel = 3;
+                    break;
+            }
+
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, message = "Cập nhật vai trò thành công." });
         }
     }
 }
