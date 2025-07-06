@@ -15,7 +15,19 @@
         <p class="lead text-muted">Cảm ơn bạn đã đóng góp cho cộng đồng. Dưới đây là danh sách các chứng nhận của bạn.</p>
     </div>
 
-    @if (Model == null || !Model.Any())
+    @if (ViewBag.NoCertificate != null && (bool)ViewBag.NoCertificate)
+    {
+        <div class="text-center">
+            <div class="alert alert-warning" style="font-size:1.2em;">
+                Bạn chưa có hồ sơ cá nhân nên chưa có chứng nhận nào.<br/>
+                Hãy đăng ký hiến máu để nhận chứng nhận đầu tiên!
+            </div>
+            <a asp-controller="BookingDayAndBloodType" asp-action="Index" class="btn btn-danger mt-3">
+                <i class="fas fa-tint"></i> Hiến máu ngay
+            </a>
+        </div>
+    }
+    else if (Model == null || !Model.Any())
     {
         <div class="text-center">
             <p>Bạn chưa có chứng nhận nào.</p>
