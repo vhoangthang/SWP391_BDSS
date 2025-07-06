@@ -3,6 +3,18 @@
     Layout = "~/Views/Shared/_LayoutHome.cshtml";
 }
 
+@if (TempData["NeedUpdateProfile"] != null && (bool)TempData["NeedUpdateProfile"])
+{
+    <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.3); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+        <div style="background: #fff; padding: 32px 40px; border-radius: 12px; box-shadow: 0 2px 16px rgba(0,0,0,0.15); text-align: center; max-width: 90vw;">
+            <h2 style="color: #d9534f; margin-bottom: 16px;">Bạn cần cập nhật hồ sơ để sử dụng chức năng này!</h2>
+            <div style="margin-bottom: 24px;">Vui lòng cập nhật hồ sơ cá nhân để xem lịch sử hiến máu.</div>
+            <a href="/Profile/Edit" class="btn btn-primary" style="margin-right: 16px;">Cập nhật hồ sơ</a>
+            <button class="btn btn-secondary" onclick="this.parentElement.parentElement.style.display='none'">Đóng</button>
+        </div>
+    </div>
+}
+
 <!-- About Start -->
 <div id="about" class="container-fluid about py-5">
     <div class="container py-5">
