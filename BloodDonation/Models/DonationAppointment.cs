@@ -32,7 +32,7 @@ namespace BloodDonation.Models
 
         public DateTime AppointmentDate { get; set; }
 
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
         public Decimal QuantityDonated { get; set; }
 
