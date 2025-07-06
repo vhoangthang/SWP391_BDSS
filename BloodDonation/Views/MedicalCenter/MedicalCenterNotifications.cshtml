@@ -1,11 +1,8 @@
 @model List<BloodDonation.Models.Notification>
 @{
-    ViewData["Title"] = "Thông Báo Cơ Sở Y Tế";
-    Layout = "~/Views/Shared/_LayoutMain.cshtml";
-    ViewBag.HideLogo = true;
+    Layout = "~/Views/Shared/_LayoutMedicalCenter.cshtml";
 }
-
-<div class="container mt-4">
+<div class="main-content blood-request-list-page">
     <h3 class="fw-bold mb-3">🔔 Thông báo dành cho Cơ sở y tế</h3>
     <hr />
     <div class="notification-list">

@@ -193,12 +193,20 @@ namespace BloodDonation.Controllers
 
         public IActionResult NotificationDetail(int notificationId)
         {
+            if (notificationId <= 0)
+            {
+                TempData["Error"] = "Không tìm thấy thông báo phù hợp.";
+                return RedirectToAction("MedicalCenterNotifications");
+            }
             var notification = _context.Notifications
                 .Include(n => n.Donor)
                 .Include(n => n.BloodRequest)
                 .FirstOrDefault(n => n.NotificationID == notificationId);
             if (notification == null)
-                return NotFound();
+            {
+                TempData["Error"] = "Không tìm thấy thông báo phù hợp.";
+                return RedirectToAction("MedicalCenterNotifications");
+            }
 
             DonationAppointment appointment = null;
             if (notification.BloodRequestID.HasValue && notification.BloodRequest != null)

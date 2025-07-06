@@ -1,189 +1,226 @@
 @model List<BloodDonation.Models.BloodRequest>
 @{
-    Layout = null;
+    Layout = "~/Views/Shared/_LayoutMedicalCenter.cshtml";
 }
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="utf-8" />
-    <title>Quản lý yêu cầu nhận máu - Trung tâm y tế</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="~/css/medicalCenter.css" />
-    <link rel="stylesheet" href="~/css/admin.css" />
-</head>
-<body>
-    <div class="container-fluid">
-        <div class="sidebar">
-            <h2>Hệ thống hiến máu</h2>
-            <ul class="sidebar-menu">
-                <li><a href="@Url.Action("Index", "MedicalCenter")"><span class="icon"></span>Tạo yêu cầu</a></li>
-                <li><a href="#" class="active"><i class="fas fa-check-circle icon"></i>Danh sách nhận máu</a></li>
-                <li><a href="#"><i class="fas fa-search icon"></i>Chi tiết đơn nhận máu</a></li>
-                <li><a href="#"><i class="fas fa-bell icon"></i>Thông báo <span class="notification-badge">2</span></a></li>
-                <li><a href="@Url.Action("Logout", "Login")"><i class="fas fa-sign-out-alt icon"></i>Đăng xuất</a></li>
-            </ul>
-        </div>
-        <div class="main-content">
-            <!-- Header -->
-            <div class="header">
-                <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <h1 class="mb-0"><i class="fas fa-clipboard-list text-danger"></i> Danh sách yêu cầu nhận máu</h1>
-                        <p class="text-muted mb-0">Quản lý các yêu cầu nhận máu của trung tâm bạn</p>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="user-profile">
-                            <a href="#"><i class="fas fa-user-circle"></i> @Context.Session.GetString("Username")</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Statistics -->
-            <div class="stats-row mb-4">
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="stat-card">
-                            <div class="stat-number text-warning">@Model.Count(r => r.Status == "Pending")</div>
-                            <div class="stat-label">Chờ duyệt</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-card">
-                            <div class="stat-number text-info">@Model.Count(r => r.Status == "Approved")</div>
-                            <div class="stat-label">Đã duyệt</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-card">
-                            <div class="stat-number text-success">@Model.Count(r => r.Status == "Completed")</div>
-                            <div class="stat-label">Hoàn tất</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-card">
-                            <div class="stat-number text-danger">@Model.Count(r => r.IsEmergency)</div>
-                            <div class="stat-label">Khẩn cấp</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Content Card -->
-            <div class="content-card">
-                <div class="table-responsive">
-                    <table class="table table-hover" id="requestTable">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nhóm máu</th>
-                                <th>Số lượng (CC)</th>
-                                <th>Ngày yêu cầu</th>
-                                <th>Lý do</th>
-                                <th>Mức độ</th>
-                                <th>Tương hợp</th>
-                                <th>Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var request in Model)
+<div class="main-content blood-request-list-page">
+    <div class="brl-header">
+        <h1 class="brl-title"><i class="fas fa-clipboard-list"></i> Danh sách yêu cầu nhận máu</h1>
+        <p class="brl-desc">Quản lý các yêu cầu nhận máu của trung tâm bạn</p>
+        <div class="brl-user">👤 @Context.Session.GetString("Username")</div>
+    </div>
+    <div class="brl-stats-row">
+        <div class="brl-stat"><span class="brl-stat-number">@Model.Count(r => r.Status == "Pending")</span><span class="brl-stat-label">Chờ duyệt</span></div>
+        <div class="brl-stat"><span class="brl-stat-number">@Model.Count(r => r.Status == "Approved")</span><span class="brl-stat-label">Đã duyệt</span></div>
+        <div class="brl-stat"><span class="brl-stat-number">@Model.Count(r => r.Status == "Completed")</span><span class="brl-stat-label">Hoàn tất</span></div>
+        <div class="brl-stat"><span class="brl-stat-number">@Model.Count(r => r.IsEmergency)</span><span class="brl-stat-label">Khẩn cấp</span></div>
+    </div>
+    <div class="brl-filter-row">
+        <input type="text" class="brl-input" id="searchInput" placeholder="🔍 Tìm kiếm theo ID...">
+        <select class="brl-select" id="statusFilter">
+            <option value="">Tất cả trạng thái</option>
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Completed">Completed</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Canceled">Canceled</option>
+        </select>
+        <select class="brl-select" id="bloodTypeFilter">
+            <option value="">Tất cả nhóm máu</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+        </select>
+        <select class="brl-select" id="emergencyFilter">
+            <option value="">Tất cả mức độ</option>
+            <option value="true">Khẩn cấp</option>
+            <option value="false">Thông thường</option>
+        </select>
+    </div>
+    <div class="brl-table-wrapper">
+        <table class="brl-table" id="requestTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nhóm máu</th>
+                    <th>Số lượng (CC)</th>
+                    <th>Ngày yêu cầu</th>
+                    <th>Lý do</th>
+                    <th>Mức độ</th>
+                    <th>Tương hợp</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var request in Model)
+                {
+                    <tr>
+                        <td>@request.BloodRequestID</td>
+                        <td><span class="badge bg-info">@request.BloodType?.Type</span></td>
+                        <td>@request.Quantity</td>
+                        <td>
+                            @if (request.RequestDate.TimeOfDay.TotalMinutes == 0)
                             {
-                                <tr>
-                                    <td>@request.BloodRequestID</td>
-                                    <td><span class="badge bg-info">@request.BloodType?.Type</span></td>
-                                    <td>@request.Quantity</td>
-                                    <td>
-                                        @if (request.RequestDate.TimeOfDay.TotalMinutes == 0)
-                                        {
-                                            @request.RequestDate.ToString("dd/MM/yyyy")
-                                        }
-                                        else
-                                        {
-                                            @request.RequestDate.ToString("dd/MM/yyyy HH:mm")
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (!string.IsNullOrEmpty(request.Reason))
-                                        {
-                                            <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#reasonModal" data-reason="@request.Reason">
-                                                <i class="fas fa-eye"></i> Xem lý do
-                                            </button>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">-</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (request.IsEmergency)
-                                        {
-                                            <span class="emergency-badge">🚨 Khẩn cấp</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary">Thông thường</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (request.IsCompatible)
-                                        {
-                                            <span class="badge bg-success"><i class="fas fa-check"></i> Tương hợp</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-danger"><i class="fas fa-times"></i> Không tương hợp</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @{
-                                            var statusClass = request.Status?.ToLower() switch
-                                            {
-                                                "pending" => "status-pending",
-                                                "approved" => "status-approved",
-                                                "completed" => "status-completed",
-                                                "rejected" => "status-rejected",
-                                                "canceled" => "status-rejected",
-                                                _ => "status-pending"
-                                            };
-                                        }
-                                        <span class="status-badge @statusClass">@request.Status</span>
-                                        @if (request.Status == "Pending")
-                                        {
-                                            <form asp-action="CancelBloodRequest" asp-controller="MedicalCenter" method="post" style="display:inline;">
-                                                <input type="hidden" name="id" value="@request.BloodRequestID" />
-                                                <button type="submit" class="btn btn-sm btn-danger ms-2" onclick="return confirm('Bạn có chắc muốn huỷ yêu cầu này?');">
-                                                    <i class="fas fa-times"></i> Huỷ
-                                                </button>
-                                            </form>
-                                        }
-                                    </td>
-                                </tr>
+                                @request.RequestDate.ToString("dd/MM/yyyy")
                             }
-                        </tbody>
-                    </table>
-                </div>
+                            else
+                            {
+                                @request.RequestDate.ToString("dd/MM/yyyy HH:mm")
+                            }
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(request.Reason))
+                            {
+                                <button type="button" class="btn btn-outline-info btn-sm px-3" data-bs-toggle="modal" data-bs-target="#reasonModal" data-reason="@request.Reason">
+                                    <i class="fas fa-eye"></i> Xem lý do
+                                </button>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>
+                            @if (request.IsEmergency)
+                            {
+                                <span class="emergency-badge">🚨 Khẩn cấp</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-normal">Thông thường</span>
+                            }
+                        </td>
+                        <td>
+                            @if (request.IsCompatible)
+                            {
+                                <span class="badge bg-success"><i class="fas fa-check"></i> Tương hợp</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger"><i class="fas fa-times"></i> Không tương hợp</span>
+                            }
+                        </td>
+                        <td>
+                            @{
+                                var statusClass = request.Status?.ToLower() switch
+                                {
+                                    "pending" => "status-pending",
+                                    "approved" => "status-approved",
+                                    "completed" => "status-completed",
+                                    "rejected" => "status-rejected",
+                                    "canceled" => "status-rejected",
+                                    _ => "status-pending"
+                                };
+                            }
+                            <span class="status-badge @statusClass">@request.Status</span>
+                        </td>
+                        <td>
+                            @if (request.Status == "Pending")
+                            {
+                                <form asp-action="CancelBloodRequest" asp-controller="MedicalCenter" method="post" style="display:inline;">
+                                    <input type="hidden" name="id" value="@request.BloodRequestID" />
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn huỷ yêu cầu này?');">
+                                        <i class="fas fa-times"></i> Huỷ
+                                    </button>
+                                </form>
+                            }
+                            else if (request.Status == "Approved")
+                            {
+                                <span class="status-approved-action"><i class="fas fa-check-circle"></i> Đã duyệt</span>
+                            }
+                            else if (request.Status == "Rejected")
+                            {
+                                <span class="status-rejected-action"><i class="fas fa-ban"></i> Bị từ chối</span>
+                            }
+                            else if (request.Status == "Completed")
+                            {
+                                <span class="text-success fw-bold"><i class="fas fa-check-circle"></i> Đã hoàn tất</span>
+                            }
+                            else if (request.Status == "Canceled")
+                            {
+                                <span class="text-danger fw-bold"><i class="fas fa-ban"></i> Đã huỷ</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Reason Modal -->
+<div class="modal fade" id="reasonModal" tabindex="-1" aria-labelledby="reasonModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reasonModalLabel">Chi tiết lý do</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="reasonText"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
             </div>
         </div>
     </div>
-    <!-- Reason Modal -->
-    <div class="modal fade" id="reasonModal" tabindex="-1" aria-labelledby="reasonModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="reasonModalLabel">Chi tiết lý do</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="reasonText"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+@section Scripts {
     <script>
+        // Filter functionality
+        function filterTable() {
+            var searchInput = document.getElementById('searchInput').value.toLowerCase();
+            var statusFilter = document.getElementById('statusFilter').value;
+            var bloodTypeFilter = document.getElementById('bloodTypeFilter').value;
+            var emergencyFilter = document.getElementById('emergencyFilter').value;
+            
+            var table = document.getElementById('requestTable');
+            var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                var id = row.cells[0].textContent.toLowerCase();
+                var bloodType = row.cells[1].textContent;
+                var status = row.cells[7].textContent.trim();
+                var emergency = row.cells[5].textContent.includes('Khẩn cấp') ? 'true' : 'false';
+                
+                var showRow = true;
+                
+                // Search filter
+                if (searchInput && !id.includes(searchInput)) {
+                    showRow = false;
+                }
+                // Status filter (case-sensitive)
+                if (statusFilter && status !== statusFilter) {
+                    showRow = false;
+                }
+                // Blood type filter
+                if (bloodTypeFilter && bloodType !== bloodTypeFilter) {
+                    showRow = false;
+                }
+                // Emergency filter (so sánh với tiếng Việt)
+                if (emergencyFilter && emergency !== emergencyFilter) {
+                    showRow = false;
+                }
+                row.style.display = showRow ? '' : 'none';
+            }
+        }
+        
+        // Add event listeners
+        document.getElementById('searchInput').addEventListener('input', filterTable);
+        document.getElementById('statusFilter').addEventListener('change', filterTable);
+        document.getElementById('bloodTypeFilter').addEventListener('change', filterTable);
+        document.getElementById('emergencyFilter').addEventListener('change', filterTable);
+        
+        // Modal functionality
         var reasonModal = document.getElementById('reasonModal');
         if (reasonModal) {
             reasonModal.addEventListener('show.bs.modal', function (event) {
@@ -194,5 +231,4 @@
             });
         }
     </script>
-</body>
-</html> 
+} 
