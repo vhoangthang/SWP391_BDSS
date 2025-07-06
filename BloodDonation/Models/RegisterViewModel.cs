@@ -12,5 +12,8 @@ namespace BloodDonation.Models
 
         [Required]
         public string VerificationCode { get; set; }
+
+        [Required]
+        public string Username { get; set; }
     }
 }
