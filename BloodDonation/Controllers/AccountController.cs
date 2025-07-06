@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Mail;
 using System.Net;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace BloodDonation.Controllers
 {
@@ -20,21 +21,57 @@ namespace BloodDonation.Controllers
         }
 
         [HttpGet]
-        public IActionResult Register() => View();
+        public IActionResult Register()
+        {
+            var model = new LoginRegisterViewModel();
+            return View("~/Views/Login/Index.cshtml", model);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+            {
+                ViewBag.ShowRegister = true;
+                var vm = new LoginRegisterViewModel { Register = model, Login = new LoginViewModel() };
+                return View("~/Views/Login/Index.cshtml", vm);
+            }
 
             if (model.VerificationCode != sentCode)
             {
+                ViewBag.ShowRegister = true;
                 ModelState.AddModelError("", "Mã xác minh không đúng.");
-                return View(model);
+                var vm = new LoginRegisterViewModel { Register = model, Login = new LoginViewModel() };
+                return View("~/Views/Login/Index.cshtml", vm);
             }
 
-            // TODO: Lưu thông tin tài khoản vào DB
-            TempData["Success"] = "Đăng ký thành công!";
+            if (_context.Accounts.Any(a => a.Username == model.Username))
+            {
+                ViewBag.ShowRegister = true;
+                ViewData["UsernameError"] = "Tên đăng nhập đã tồn tại.";
+                var vm = new LoginRegisterViewModel { Register = model, Login = new LoginViewModel() };
+                return View("~/Views/Login/Index.cshtml", vm);
+            }
+            if (_context.Accounts.Any(a => a.Email == model.Email))
+            {
+                ViewBag.ShowRegister = true;
+                ViewData["EmailError"] = "Email đã được sử dụng.";
+                var vm = new LoginRegisterViewModel { Register = model, Login = new LoginViewModel() };
+                return View("~/Views/Login/Index.cshtml", vm);
+            }
+
+            var account = new Account
+            {
+                Username = model.Username,
+                Password = model.Password, // NÊN mã hóa mật khẩu ở đây!
+                Email = model.Email,
+                Role = "Donor", // Giá trị mặc định cho tài khoản thường
+                PermissionLevel = 1 // Giá trị mặc định
+            };
+            _context.Accounts.Add(account);
+            await _context.SaveChangesAsync();
+
+            TempData["RegisterSuccess"] = "Đăng ký thành công!";
             return RedirectToAction("Index", "Login");
         }
 
@@ -153,6 +190,20 @@ namespace BloodDonation.Controllers
             _context.SaveChanges();
 
             return RedirectToAction("Login");
+        }
+
+        [HttpGet]
+        public IActionResult CheckUsername(string username)
+        {
+            bool exists = _context.Accounts.Any(a => a.Username == username);
+            return Json(new { exists });
+        }
+
+        [HttpGet]
+        public IActionResult CheckEmail(string email)
+        {
+            bool exists = _context.Accounts.Any(a => a.Email == email);
+            return Json(new { exists });
         }
     }
 }
