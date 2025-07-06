@@ -1,4 +1,4 @@
-﻿@model BloodDonation.Models.LoginViewModel
+﻿@model BloodDonation.Models.LoginRegisterViewModel
 @{
     Layout = null;
 }
@@ -10,8 +10,10 @@
     <div class="form-container sign-up-container">
         <form action="/Account/Register" method="post">
             <h1>Tạo tài khoản</h1>
-            <input type="text" placeholder="Tên đăng nhập" name="Username" required />
-            <input type="email" placeholder="Email" name="Email" required />
+            <input type="text" placeholder="Tên đăng nhập" name="Username" id="register-username" value="@Model?.Register?.Username" required />
+            <div id="username-error" style="color:red; font-size:13px; margin-bottom:4px;"></div>
+            <input type="email" placeholder="Email" name="Email" id="register-email" value="@Model?.Register?.Email" required />
+            <div id="email-error" style="color:red; font-size:13px; margin-bottom:4px;"></div>
             <input type="password" placeholder="Mật khẩu" name="Password" required />
             <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
                 <input type="text" placeholder="Mã xác minh" name="VerificationCode" style="flex:1;" required />
@@ -19,10 +21,6 @@
             </div>
             <button type="submit">Đăng ký</button>
             <div id="registerMessage" style="color:red; margin-top:10px;"></div>
-            @if (TempData["RegisterSuccess"] != null)
-            {
-                <div style="color:green; margin-top:10px;">@TempData["RegisterSuccess"]</div>
-            }
             @if (TempData["RegisterError"] != null)
             {
                 <div style="color:red; margin-top:10px;">@TempData["RegisterError"]</div>
@@ -30,9 +28,13 @@
         </form>
     </div>
     <div class="form-container sign-in-container">
+        @if (TempData["RegisterSuccess"] != null)
+        {
+            <div id="register-success-message" style="color:green; margin-top:10px; text-align:center;">@TempData["RegisterSuccess"]</div>
+        }
         <form method="post" action="/Login/Index">
             <h1>Đăng nhập</h1>
-            <input type="text" name="Username" placeholder="Tên đăng nhập" value="@Model?.Username" required />
+            <input type="text" name="Username" placeholder="Tên đăng nhập" value="@Model?.Login?.Username" required />
             <input type="password" name="Password" placeholder="Mật khẩu" required />
             <a href="/Account/ForgotPassword">Quên mật khẩu?</a>
             <button type="submit">Đăng nhập</button>
@@ -57,6 +59,14 @@
     </div>
 </div>
 
+@if (ViewBag.ShowRegister != null && (bool)ViewBag.ShowRegister)
+{
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('container').classList.add('right-panel-active');
+        });
+    </script>
+}
 
 <script>
     const signUpButton = document.getElementById('signUp');
@@ -73,11 +83,25 @@
 
     function sendCodeRegister(email) {
         const messageEl = document.getElementById("registerMessage");
+        const sendBtn = event.target;
         messageEl.innerText = "";
         if (!email) {
             messageEl.innerText = "Vui lòng nhập email trước khi gửi mã.";
             return;
         }
+        sendBtn.disabled = true;
+        let countdown = 10;
+        const originalText = sendBtn.innerText;
+        sendBtn.innerText = `Gửi lại mã (${countdown}s)`;
+        const timer = setInterval(() => {
+            countdown--;
+            sendBtn.innerText = `Gửi lại mã (${countdown}s)`;
+            if (countdown <= 0) {
+                clearInterval(timer);
+                sendBtn.disabled = false;
+                sendBtn.innerText = originalText;
+            }
+        }, 1000);
         fetch('/Account/SendVerificationCode', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -98,4 +122,50 @@
             messageEl.innerText = "Lỗi khi gửi yêu cầu đến máy chủ.";
         });
     }
+
+    document.getElementById('register-username').addEventListener('blur', function() {
+        const username = this.value.trim();
+        const errorDiv = document.getElementById('username-error');
+        if (!username) {
+            errorDiv.innerText = '';
+            return;
+        }
+        fetch(`/Account/CheckUsername?username=${encodeURIComponent(username)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.exists) {
+                    errorDiv.innerText = 'Tên đăng nhập đã tồn tại.';
+                } else {
+                    errorDiv.innerText = '';
+                }
+            });
+    });
+
+    document.getElementById('register-email').addEventListener('blur', function() {
+        const email = this.value.trim();
+        const errorDiv = document.getElementById('email-error');
+        if (!email) {
+            errorDiv.innerText = '';
+            return;
+        }
+        fetch(`/Account/CheckEmail?email=${encodeURIComponent(email)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.exists) {
+                    errorDiv.innerText = 'Email đã được sử dụng.';
+                } else {
+                    errorDiv.innerText = '';
+                }
+            });
+    });
+
+    // Ẩn thông báo đăng ký thành công sau 5 giây
+    window.addEventListener('DOMContentLoaded', function() {
+        var msg = document.getElementById('register-success-message');
+        if (msg) {
+            setTimeout(function() {
+                msg.style.display = 'none';
+            }, 5000);
+        }
+    });
 </script>
