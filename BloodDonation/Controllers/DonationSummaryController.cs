@@ -42,7 +42,6 @@ namespace BloodDonation.Controllers
             var account = _context.Accounts.FirstOrDefault(a => a.Username == username);
             if (account == null)
             {
-                // Hoặc xử lý lỗi theo cách khác
                 return RedirectToAction("Index", "Login");
             }
 
@@ -50,26 +49,30 @@ namespace BloodDonation.Controllers
                 .Include(d => d.Account)
                 .FirstOrDefault(d => d.AccountID == account.AccountID);
 
+            DonationSummaryViewModel viewModel;
+
             if (donor == null)
             {
-                // Hoặc xử lý lỗi
-                return RedirectToAction("Index", "Login");
+                TempData["NeedUpdateProfile"] = true;
+                return RedirectToAction("Index", "Home");
             }
-
-            var appointments = _context.DonationAppointments
-                .Include(a => a.BloodType)
-                .Include(a => a.MedicalCenter)
-                .Where(a => a.DonorID == donor.DonorID)
-                .OrderByDescending(a => a.AppointmentDate)
-                .ToList();
-
-            ViewBag.HealthSurveyQuestions = HealthSurveyQuestions;
-
-            var viewModel = new DonationSummaryViewModel
+            else
             {
-                Appointments = appointments,
-                Donor = donor
-            };
+                var appointments = _context.DonationAppointments
+                    .Include(a => a.BloodType)
+                    .Include(a => a.MedicalCenter)
+                    .Where(a => a.DonorID == donor.DonorID)
+                    .OrderByDescending(a => a.AppointmentDate)
+                    .ToList();
+
+                ViewBag.HealthSurveyQuestions = HealthSurveyQuestions;
+
+                viewModel = new DonationSummaryViewModel
+                {
+                    Appointments = appointments,
+                    Donor = donor
+                };
+            }
 
             return View(viewModel);
         }
