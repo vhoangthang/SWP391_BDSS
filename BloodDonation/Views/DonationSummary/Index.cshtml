@@ -49,7 +49,10 @@
         {
             <div class="appointment-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; background-color: #f9f9f9;">
                 <h3>Phiếu đăng ký #@appointment.AppointmentID</h3>
-                
+                <button class="btn btn-primary" type="button" onclick="toggleDetails('details-@appointment.AppointmentID')">
+                    Hiển thị/Ẩn chi tiết
+                </button>
+                <div id="details-@appointment.AppointmentID" style="margin-top: 15px; display: none;">
                 <div class="appointment-info">
                     <ul>
                         <li><strong>Ngày hẹn:</strong> @appointment.AppointmentDate.ToShortDateString()</li>
@@ -128,10 +131,22 @@
                     </div>
                 }
             </div>
+        </div>
         }
     }
     else
     {
         <p>Bạn chưa có phiếu đăng ký hiến máu nào.</p>
     }
-</div> 
+</div>
+
+<script>
+    function toggleDetails(id) {
+        const element = document.getElementById(id);
+        if (element.style.display === "none" || element.style.display === "") {
+            element.style.display = "block";
+        } else {
+            element.style.display = "none";
+        }
+    }
+</script>
