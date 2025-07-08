@@ -88,7 +88,7 @@
                 if (res.success) {
                     $item.removeClass("unread");
                     $item.find(".notification-dot").remove();
-                    // Giảm badge
+                    // Decrease badge
                     var $badge = $("#notificationBadge");
                     var count = parseInt($badge.text()) || 0;
                     if (count > 0) $badge.text(count - 1);

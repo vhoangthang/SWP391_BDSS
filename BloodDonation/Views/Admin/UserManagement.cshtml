@@ -176,7 +176,7 @@
         var newRole = selectEl.value;
         var mcPicker = document.getElementById('mc-picker-' + id);
         if (newRole === 'medicalcenter') {
-            // Hiển thị dropdown chọn MedicalCenter
+                // Display dropdown to select Medical Center
             let html = '<select id="mc-select-' + id + '" class="form-select form-select-sm" style="width:auto; display:inline-block;">';
             html += '<option value="">Chọn cơ sở y tế</option>';
             @foreach (var mc in medicalCenters)
