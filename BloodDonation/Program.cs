@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using BloodDonation.Data; // namespace chứa lớp MyDbContext
+using BloodDonation.Data; // namespace have AppDbContext
 using BloodDonation.Repositories.Interfaces;
 using BloodDonation.Repositories;
 
@@ -11,28 +11,28 @@ namespace BloodDonation
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // ✅ Kết nối DbContext
+            // Connect DbContext
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // ✅ Đăng ký Repository
+            // Register Repository
             builder.Services.AddScoped<IDonorRepository, DonorRepository>();
 
-            // ✅ Thêm Session và cache
-            builder.Services.AddDistributedMemoryCache(); // Bắt buộc cho Session
+            // Add Session & Cache
+            builder.Services.AddDistributedMemoryCache(); // Must have Session
             builder.Services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(30); // session timeout
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // Session timeout
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
 
-            // Thêm MVC
+            // Add MVC
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
 
-            // Middleware xử lý lỗi
+            // Middleware fix error
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -44,7 +44,7 @@ namespace BloodDonation
 
             app.UseRouting();
 
-            // ✅ Kích hoạt session middleware (rất quan trọng)
+            // Activate session middleware
             app.UseSession();
 
             app.UseAuthorization();
