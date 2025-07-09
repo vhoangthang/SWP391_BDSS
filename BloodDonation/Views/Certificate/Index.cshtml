@@ -48,6 +48,14 @@
                         </div>
                         <div class="card-body">
                             <p>@cert.CertificateDetails</p>
+                            @{
+                                decimal cc = cert.Appointment.QuantityDonated;
+                                string ml = cc == 0.75m ? "250ml" : cc == 1m ? "350ml" : cc == 1.25m ? "450ml" : null;
+                            }
+                            @if (ml != null)
+                            {
+                                <p><strong>Lượng máu hiến:</strong> @ml</p>
+                            }
                             <hr>
                             <p class="text-muted small">
                                 <strong>Lịch hẹn:</strong> @cert.Appointment.AppointmentDate.ToString("dd/MM/yyyy")
@@ -60,4 +68,7 @@
             }
         </div>
     }
+</div>
+<div class="mb-3 mt-4 text-center">
+    <button class="btn btn-secondary" onclick="window.history.back()"><i class="fa fa-arrow-left"></i> Quay lại</button>
 </div> 
