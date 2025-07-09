@@ -8,6 +8,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
+
+
 namespace BloodDonation.Controllers
 {
     public class AdminController : Controller
@@ -35,13 +37,77 @@ namespace BloodDonation.Controllers
             var totalUsers = await _context.Accounts.CountAsync();
             var totalBloodRequests = await _context.BloodRequests.CountAsync();
             var totalBloodInventory = await _context.BloodInventories.SumAsync(bi => bi.Quantity);
+            //var donorCount = await _context.Donors.CountAsync();
+
+            var donationTrends = await _context.DonationAppointments
+                .GroupBy(a => a.AppointmentDate.Month)
+                .Select(g => new
+                {
+                    month = new DateTime(2025, g.Key, 1).ToString("MMM"),
+                    donations = g.Count(a => a.Status == "Completed"),
+                    requests = g.Count(a => a.Status == "Requested")
+                }).ToListAsync();
+
+            // Danh sách nhóm máu chuẩn
+            // Danh sách 8 nhóm máu chuẩn
+            var bloodTypes = new[] { "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-" };
+
+            // Lấy số lượt hiến thành công theo nhóm máu
+            var completedDonations = await _context.DonationAppointments
+                .Where(a => a.Status == "Completed" && a.BloodType != null)
+                .GroupBy(a => a.BloodType.Type)
+                .Select(g => new
+                {
+                    bloodType = g.Key,
+                    count = g.Count()
+                }).ToListAsync();
+
+            // Ghép đủ 8 nhóm máu, nhóm nào không có thì count = 0
+            var bloodTypeDistribution = bloodTypes
+                .Select(bt => new
+                {
+                    bloodType = bt,
+                    count = completedDonations.FirstOrDefault(x => x.bloodType == bt)?.count ?? 0
+                }).ToList();
+
+
+
+
+
+
 
             ViewBag.TotalUsers = totalUsers;
             ViewBag.TotalBloodRequests = totalBloodRequests;
             ViewBag.TotalBloodInventory = totalBloodInventory;
+            //ViewBag.AvailableDonors = donorCount;
+            ViewBag.DonationTrends = donationTrends;
+            ViewBag.BloodTypeDistribution = bloodTypeDistribution;
 
             return View();
         }
+
+        public async Task<IActionResult> DonationHistory()
+        {
+            var username = HttpContext.Session.GetString("Username");
+            var role = HttpContext.Session.GetString("Role");
+
+            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            var donationHistory = await _context.DonationAppointments
+                .Include(a => a.Donor)
+                    .ThenInclude(d => d.Account)
+                .Include(a => a.BloodType)        // ✅ Cần để hiển thị nhóm máu
+                       
+                .Where(a => a.Status == "Completed")
+                .OrderByDescending(a => a.AppointmentDate)
+                .ToListAsync();
+
+            return View(donationHistory);
+        }
+
 
         public async Task<IActionResult> UserManagement()
         {
@@ -326,5 +392,7 @@ namespace BloodDonation.Controllers
             await _context.SaveChangesAsync();
             return Json(new { success = true, message = "Cập nhật vai trò thành công." });
         }
+
+
     }
 }
