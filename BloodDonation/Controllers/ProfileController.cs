@@ -58,6 +58,11 @@ namespace BloodDonation.Controllers
             {
                 donor = new BloodDonation.Models.Donor { AccountID = account.AccountID };
             }
+
+            // Kiểm tra quyền chỉnh sửa IsAvailable: chỉ cho phép nếu có đơn đăng ký hiến máu Pending hoặc Confirmed
+            var canEditIsAvailable = _context.DonationAppointments.Any(a => a.DonorID == donor.DonorID && (a.Status == "Pending" || a.Status == "Confirmed"));
+            ViewBag.CanEditIsAvailable = canEditIsAvailable;
+
             ViewBag.BloodTypes = new SelectList(_context.BloodTypes.ToList(), "BloodTypeID", "Type", donor.BloodTypeID);
             return View(donor);
         }
