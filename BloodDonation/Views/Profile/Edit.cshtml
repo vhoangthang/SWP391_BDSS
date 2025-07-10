@@ -59,11 +59,22 @@
 
             <div class="form-group">
                 <label asp-for="IsAvailable">Trạng Thái</label>
-                <select asp-for="IsAvailable" class="form-control">
-                    <option value="">Chọn trạng thái</option>
-                    <option value="true">Sẵn sàng</option>
-                    <option value="false">Không sẵn sàng</option>
-                </select>
+                @if (ViewBag.CanEditIsAvailable == false)
+                {
+                    <select asp-for="IsAvailable" class="form-control" disabled>
+                        <option value="">Chọn trạng thái</option>
+                        <option value="true">Sẵn sàng</option>
+                        <option value="false">Không sẵn sàng</option>
+                    </select>
+                }
+                else
+                {
+                    <select asp-for="IsAvailable" class="form-control">
+                        <option value="">Chọn trạng thái</option>
+                        <option value="true">Sẵn sàng</option>
+                        <option value="false">Không sẵn sàng</option>
+                    </select>
+                }
                 <span asp-validation-for="IsAvailable" class="text-danger"></span>
             </div>
 
