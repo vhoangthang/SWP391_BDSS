@@ -293,6 +293,19 @@ namespace BloodDonation.Controllers
                 appointment.Status = "Completed";
             }
 
+            // Lưu vào bảng DonorBloodRequest nếu có bloodRequest và donor
+            if (bloodRequest != null && appointment.Donor != null)
+            {
+                var donorBloodRequest = new DonorBloodRequest
+                {
+                    BloodRequestID = bloodRequest.BloodRequestID,
+                    DonorID = appointment.Donor.DonorID,
+                    DonationDate = DateTime.Now,
+                    QuantityDonated = bloodRequest.Quantity
+                };
+                _context.DonorBloodRequests.Add(donorBloodRequest);
+            }
+
             // Nếu donor đang sẵn sàng thì chuyển về không sẵn sàng
             if (appointment.Donor != null && appointment.Donor.IsAvailable == true)
             {
