@@ -45,10 +45,15 @@
     
     @if (appointments != null && appointments.Any())
     {
+        var latestAppointmentId = appointments.OrderByDescending(a => a.AppointmentDate).FirstOrDefault()?.AppointmentID;
         @foreach (var appointment in appointments)
         {
             <div class="appointment-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; background-color: #f9f9f9;">
-                <h3>Phiếu đăng ký số @appointment.AppointmentID</h3>                
+                <h3>Phiếu đăng ký số @appointment.AppointmentID</h3>
+                <button class="btn btn-primary" type="button" onclick="toggleDetails('details-@appointment.AppointmentID')">
+                    Hiển thị/Ẩn chi tiết khảo sát sức khỏe
+                </button>
+                <div id="details-@appointment.AppointmentID" style="margin-top: 15px; display: @(appointment.AppointmentID == latestAppointmentId ? "block" : "none");">
                 <div class="appointment-info">
                     <ul>
                         <li><strong>Ngày hẹn:</strong> @appointment.AppointmentDate.ToShortDateString() / <strong>Khung giờ:</strong> @appointment.TimeSlot</li>
@@ -56,10 +61,7 @@
                         <li><strong>Nhóm máu:</strong> @appointment.BloodType?.Type / <strong>Trạng thái:</strong> @appointment.Status</li>
                     </ul>
                 </div>
-                <button class="btn btn-primary" type="button" onclick="toggleDetails('details-@appointment.AppointmentID')">
-                    Hiển thị/Ẩn chi tiết khảo sát sức khỏe
-                </button>
-                <div id="details-@appointment.AppointmentID" style="margin-top: 15px; display: none;">
+                
                 @if (!string.IsNullOrEmpty(appointment.HealthSurvey))
                 {
                     <h4>Kết quả khảo sát sức khỏe</h4>
