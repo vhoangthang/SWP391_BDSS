@@ -51,7 +51,7 @@
             <div class="appointment-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; background-color: #f9f9f9;">
                 <h3>Phiếu đăng ký số @appointment.AppointmentID</h3>
                 <button class="btn btn-primary" type="button" onclick="toggleDetails('details-@appointment.AppointmentID')">
-                    Hiển thị/Ẩn chi tiết khảo sát sức khỏe
+                    Hiển thị/Ẩn chi tiết
                 </button>
                 <div id="details-@appointment.AppointmentID" style="margin-top: 15px; display: @(appointment.AppointmentID == latestAppointmentId ? "block" : "none");">
                 <div class="appointment-info">
