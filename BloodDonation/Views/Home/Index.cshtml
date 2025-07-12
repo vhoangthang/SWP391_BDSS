@@ -15,6 +15,9 @@
     </div>
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/Homepage.css" asp-append-version="true" />
+}
 <!-- About Start -->
 <div id="about" class="container-fluid about py-5">
     <div class="container py-5">
@@ -53,7 +56,7 @@
             </div>
             <div class="col-xl-5 wow fadeInRight" data-wow-delay="0.2s">
                 <div class="bg-danger rounded position-relative overflow-hidden">
-                    <img src="~/img/about-2.png" class="img-fluid rounded w-100" alt="">
+                    <img src="~/img/Ve Chung toi.png" class="img-fluid w-100" alt="Về chúng tôi">
                 </div>
             </div>
         </div>
@@ -306,7 +309,7 @@
             </div>
             <div class="col-lg-6 wow fadeInRight" data-wow-delay="0.2s">
                 <div class="bg-danger rounded">
-                    <img src="~/img/blood-faq.png" class="img-fluid w-100" alt="Hiến máu cứu người">
+                    <img src="~/img/hien-mau-nhan-dao (1).png" class="img-fluid w-100" alt="Hiến máu cứu người">
                 </div>
             </div>
         </div>
@@ -323,34 +326,47 @@
         </div>
         <div class="row g-4">
             <div class="col-md-6 col-lg-3">
-                <div class="team-item text-center p-4 border rounded h-100">
+                <div class="team-item text-center p-4 border rounded h-100" data-href="http://www.thiduakhenthuongvn.org.vn/dien-hinh-tien-tien/bac-si-hon-30-nam-gan-bo-voi-nganh-truyen-mau">
                     <img src="~/img/team-1.jpg" class="img-fluid rounded-circle mb-3" alt="">
-                    <h5>BS. Nguyễn Văn A</h5>
+                    <h5>BS. Phạm Tuấn Dương</h5>
                     <p>Bác sĩ huyết học</p>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="team-item text-center p-4 border rounded h-100">
+                <div class="team-item text-center p-4 border rounded h-100" data-href="https://suckhoedoisong.vn/bac-si-tre-hon-40-lan-hien-mau-169240724154313626.htm">
                     <img src="~/img/team-2.jpg" class="img-fluid rounded-circle mb-3" alt="">
-                    <h5>BS. Trần Thị B</h5>
-                    <p>Bác sĩ truyền máu</p>
+                    <h5>BS. Nguyễn Thanh Hưng</h5>
+                    <p>Bác sĩ huyết học</p>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="team-item text-center p-4 border rounded h-100">
+                <div class="team-item text-center p-4 border rounded h-100" data-href="https://hienmaunhandao.org.vn/blogs/guong-hien-mau-tieu-bieu/16-nam-53-lan-hien-mau">
                     <img src="~/img/team-3.jpg" class="img-fluid rounded-circle mb-3" alt="">
-                    <h5>Nguyễn Minh C</h5>
+                    <h5>Chú Ngô Quốc Tùng</h5>
                     <p>Tình nguyện viên</p>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="team-item text-center p-4 border rounded h-100">
+                <div class="team-item text-center p-4 border rounded h-100" data-href="https://hienmaunhandao.org.vn/blogs/guong-hien-mau-tieu-bieu/cu-ong-nguoi-anh-hien-hon-60-lit-mau-cuu-nguoi">
                     <img src="~/img/team-4.jpg" class="img-fluid rounded-circle mb-3" alt="">
-                    <h5>Lê Thị D</h5>
+                    <h5>Ông Rodger Webster</h5>
                     <p>Tình nguyện viên</p>
                 </div>
             </div>
         </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.team-item[data-href]').forEach(function(item) {
+                    item.style.cursor = 'pointer';
+                    item.addEventListener('click', function(e) {
+                        var link = item.getAttribute('data-href');
+                        if (link && link !== '#') {
+                            window.open(link, '_blank');
+                        }
+                    });
+                });
+            });
+        </script>
     </div>
 </div>
 <!-- Team End -->
@@ -400,6 +416,10 @@
                 </div>
             </div>
         </div>
+        <div class="text-center mt-4">
+            <a href="https://xaydungso.vn/blog/kinh-nghiem-hien-mau-gan-day-va-cach-giai-quyet-vi-cb.html" class="btn btn-success btn-lg px-4 me-3" target="_blank">Xem chi tiết chia sẻ</a>
+            <a href="https://hienmaunhandao.org.vn/blogs/guong-hien-mau-tieu-bieu" class="btn btn-outline-danger btn-lg px-4" target="_blank">Tấm gương hiến máu tiêu biểu</a>
+        </div>
     </div>
 </div>
 <!-- Testimonial End -->
@@ -407,26 +427,32 @@
 <div class="container py-5" id="blood-compatibility">
     <div class="text-center mb-4">
         <h4 class="text-danger">Tương thích nhóm máu</h4>
-        <p>Nhấn vào hình bịch máu để xem nhóm máu nào có thể truyền cho nhóm nào!</p>
+        <p>Nhấn vào hình giọt máu để xem nhóm máu nào có thể truyền cho nhóm nào!</p>
     </div>
-    <div class="row justify-content-center mb-3">
-        <div class="col-6 col-md-2 text-center">
-            <img id="blood-A" src="~/img/blood-bag-a.png" alt="Nhóm máu A" class="img-fluid mb-2" style="cursor:pointer;max-width:80px;">
-            <div id="blood-target-A" class="fw-bold">A</div>
+    <div class="position-relative" style="max-width:600px;margin:auto;">
+        <div class="row justify-content-center mb-3 gx-4 gy-3" id="blood-bags-row">
+            <div class="col-6 col-md-2 text-center blood-bag-col" data-type="A" style="margin-right:30px;">
+                <img id="blood-A" src="~/img/blood-bag-a.png" alt="Nhóm máu A" class="img-fluid mb-2 blood-bag-img" style="cursor:pointer;max-width:100px;">
+                <div id="blood-target-A" class="fw-bold">A</div>
+            </div>
+            <div class="col-6 col-md-2 text-center blood-bag-col" data-type="B" style="margin-right:30px;">
+                <img id="blood-B" src="~/img/blood-bag-b.png" alt="Nhóm máu B" class="img-fluid mb-2 blood-bag-img" style="cursor:pointer;max-width:100px;">
+                <div id="blood-target-B" class="fw-bold">B</div>
+            </div>
+            <div class="col-6 col-md-2 text-center blood-bag-col" data-type="AB" style="margin-right:30px;">
+                <img id="blood-AB" src="~/img/blood-bag-ab.png" alt="Nhóm máu AB" class="img-fluid mb-2 blood-bag-img" style="cursor:pointer;max-width:100px;">
+                <div id="blood-target-AB" class="fw-bold">AB</div>
+            </div>
+            <div class="col-6 col-md-2 text-center blood-bag-col" data-type="O">
+                <img id="blood-O" src="~/img/blood-bag-o.png" alt="Nhóm máu O" class="img-fluid mb-2 blood-bag-img" style="cursor:pointer;max-width:100px;">
+                <div id="blood-target-O" class="fw-bold">O</div>
+            </div>
         </div>
-        <div class="col-6 col-md-2 text-center">
-            <img id="blood-B" src="~/img/blood-bag-b.png" alt="Nhóm máu B" class="img-fluid mb-2" style="cursor:pointer;max-width:80px;">
-            <div id="blood-target-B" class="fw-bold">B</div>
-        </div>
-        <div class="col-6 col-md-2 text-center">
-            <img id="blood-AB" src="~/img/blood-bag-ab.png" alt="Nhóm máu AB" class="img-fluid mb-2" style="cursor:pointer;max-width:80px;">
-            <div id="blood-target-AB" class="fw-bold">AB</div>
-        </div>
-        <div class="col-6 col-md-2 text-center">
-            <img id="blood-O" src="~/img/blood-bag-o.png" alt="Nhóm máu O" class="img-fluid mb-2" style="cursor:pointer;max-width:80px;">
-            <div id="blood-target-O" class="fw-bold">O</div>
-        </div>
+        <svg id="blood-svg" width="100%" height="180" style="position:absolute;top:0;left:0;pointer-events:none;"></svg>
     </div>
     <div class="text-center text-muted" style="font-size:0.95em;">* Nhóm máu O là "người cho phổ quát" (có thể truyền cho mọi nhóm máu), nhóm AB là "người nhận phổ quát".</div>
 </div>
 <!-- End Blood Type Compatibility Section -->
+@section Scripts {
+    <script src="~/js/Homepage.js" asp-append-version="true"></script>
+}

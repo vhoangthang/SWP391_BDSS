@@ -15,8 +15,15 @@ wwwroot\css\site.css
 wwwroot\css\Staff.css
 wwwroot\css\style.css
 wwwroot\favicon.ico
+wwwroot\img\blood-bag-a.png
+wwwroot\img\blood-bag-ab.png
+wwwroot\img\blood-bag-b.png
+wwwroot\img\blood-bag-o.png
+wwwroot\img\hien-mau-nhan-dao (1).png
+wwwroot\img\Ve Chung toi.png
 wwwroot\js\admin.js
 wwwroot\js\DonationBookingForm.js
+wwwroot\js\Homepage.js
 wwwroot\js\main.js
 wwwroot\js\select2.min.js
 wwwroot\js\site.js

@@ -1,0 +1,50 @@
+@{
+    ViewData["Title"] = "Tin tức & Blog chia sẻ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .custom-link-list-news {
+        font-size: 1.1em;
+        list-style: none;
+        padding-left: 0;
+    }
+    .custom-link-list-news li {
+        margin-bottom: 16px;
+    }
+    .custom-link-list-news a {
+        display: block;
+        background: #f6fef9;
+        border: 1px solid #22c55e22;
+        border-radius: 10px;
+        padding: 18px 24px;
+        color: #166534;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 8px #22c55e11;
+        position: relative;
+    }
+    .custom-link-list-news a:hover {
+        background: #d1fae5;
+        color: #15803d;
+        box-shadow: 0 4px 16px #22c55e22;
+        text-decoration: none;
+    }
+</style>
+<div class="container mt-4 mb-5">
+    <a href="/" class="btn btn-outline-secondary mb-3" style="min-width:120px;"><i class="fas fa-arrow-left me-2"></i>Quay lại trang chủ</a>
+    <h2 class="fw-bold mb-4" style="color:#22c55e; margin-top: 48px;"><i class="fas fa-newspaper"></i> Tin tức</h2>
+    <div class="mb-4">
+        <iframe src="https://giotmauvang.org.vn/news" width="100%" height="800" style="border-radius:12px;border:1px solid #eee;"></iframe>
+    </div>
+    <h4 class="mb-3">Các nguồn tin tức & cộng đồng nổi bật:</h4>
+    <ul class="custom-link-list-news">
+        <li><a href="https://hienmaunhandao.org.vn/blogs/all" target="_blank">Tin tức & sự kiện</a></li>
+        <li><a href="https://hienmaunhandao.org.vn/blogs/nhom-mau-va-suc-khoe" target="_blank">Tin tức về nhóm máu</a></li>
+        <li><a href="https://www.facebook.com/groups/901038351145463/" target="_blank">Cộng đồng Facebook Hiến máu</a></li>
+        <li><a href="https://www.redcross.org.vn/" target="_blank">Hội Chữ thập đỏ Việt Nam</a></li>
+    </ul>
+    <div class="alert alert-info mt-4">
+        <b>Lưu ý:</b> Nội dung hiển thị bên dưới được lấy từ các trang web bên ngoài, có thể thay đổi theo nguồn gốc.
+    </div>
+</div> 
