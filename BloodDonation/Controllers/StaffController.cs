@@ -53,6 +53,7 @@ namespace BloodDonation.Controllers
             // Lấy appointment theo ID (AppointmentID)
             var appointment = _context.DonationAppointments
                 .Include(x => x.Donor)
+                    .ThenInclude(d => d.Account)
                 .Include(x => x.MedicalCenter)
                 .Include(x => x.BloodType)
                 .FirstOrDefault(x => x.AppointmentID == id);

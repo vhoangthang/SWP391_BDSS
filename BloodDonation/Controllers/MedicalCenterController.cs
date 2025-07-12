@@ -200,6 +200,7 @@ namespace BloodDonation.Controllers
             }
             var notification = _context.Notifications
                 .Include(n => n.Donor)
+                    .ThenInclude(d => d.Account)
                 .Include(n => n.BloodRequest)
                 .FirstOrDefault(n => n.NotificationID == notificationId);
             if (notification == null)
