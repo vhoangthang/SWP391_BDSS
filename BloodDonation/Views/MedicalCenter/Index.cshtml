@@ -7,6 +7,12 @@
         <h2 class="brl-title"><i class="fas fa-plus-circle"></i> Tạo yêu cầu nhận máu</h2>
         <p class="brl-desc">Điền thông tin để gửi yêu cầu nhận máu cho trung tâm</p>
     </div>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div style="background:#22c55e;color:white;font-weight:600;padding:14px 20px;border-radius:8px;margin:18px 0 10px 0;font-size:1.1em;box-shadow:0 2px 8px #0001;">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
     <div class="brl-table-wrapper" style="max-width: 700px; margin: 0 auto;">
         <form asp-action="Create" method="post" class="brl-form blood-request-form-card">
             @Html.AntiForgeryToken()
