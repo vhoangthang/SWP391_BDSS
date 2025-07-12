@@ -165,7 +165,7 @@
                     </div>
                     <div class="col-md-6">
                         <span class="bdss-label">Tiền sử bệnh</span>
-                        <span class="bdss-value"><button class="bdss-btn-red" style="padding:0.3em 1.2em; font-size:1em; width:auto;">Xem tiểu sử bệnh án</button></span>
+                        <span class="bdss-value"><button class="bdss-btn-red" style="padding:0.3em 1.2em; font-size:1em; width:auto;" data-bs-toggle="modal" data-bs-target="#healthHistoryModal">Xem tiểu sử bệnh án</button></span>
                     </div>
                 </div>
             </div>
@@ -278,24 +278,24 @@
 <!-- Modal -->
 @section Modal {
     @{
-        var survey = ViewData["HealthSurvey"] as Dictionary<string, bool>;
-        var questionMap = new Dictionary<string, string>
-                {
-                    ["1_AnhChiDaTungHienMauChua"] = "1. Anh/Chị đã từng hiến máu chưa?",
-                    ["2_HienTaiAnhChiCoMacBenhLyKhong"] = "2. Hiện tại Anh/Chị có mắc bệnh lý không?",
-                    ["3_TruocDayAnhChiCoMacCacBenhLietKeKhong"] = "3. Trước đây có mắc các bệnh liệt kê không?",
-                    ["4_KhoiBenhSauMacCacBenh12Thang"] = "4. Khỏi bệnh sau khi mắc bệnh trong 12 tháng?",
-                    ["4_DuocTruyenMauHoacGayGhepMo"] = "5. Được truyền máu hoặc ghép mô?",
-                    ["4_TiemVaccine"] = "6. Tiêm vaccine gần đây?",
-                    ["5_KhoiBenhSauMacCacBenh6Thang"] = "7. Khỏi bệnh sau mắc bệnh 6 tháng?",
-                    ["6_KhoiBenhSauMacCacBenh1Thang"] = "8. Khỏi bệnh sau mắc bệnh 1 tháng?",
-                    ["7_BiCumCamLanhHoNhucDauSotDauHong14Ngay"] = "9. Có triệu chứng cảm cúm trong 14 ngày?",
-                    ["8_DungThuocKhangSinhKhangVirus"] = "10. Đang dùng kháng sinh/virus?",
-                    ["8_DungThuocKhangSinhKhangViemAspirinCorticoide7Ngay"] = "11. Đang dùng Aspirin/Corticoid 7 ngày?",
-                    ["9_HienChiDangMangThaiHoacCoThai12ThangTruoc"] = "12. Mang thai hiện tại hoặc 12 tháng trước?",
-                    ["9_ChamDutThaiKy12ThangGanDay"] = "13. Chấm dứt thai kỳ 12 tháng gần đây?",
-                    ["10_AnhChiSanSangHienMauNeuDuDieuKien"] = "14. Sẵn sàng hiến máu nếu đủ điều kiện?"
-                };
+        var survey = ViewData["HealthSurvey"] as IDictionary<string, object>;
+        var questionMap = new List<(string Key, string Question, bool IsGroup4)>
+        {
+            ("1_AnhChiDaTungHienMauChua", "1. Anh/chị từng hiến máu chưa?", false),
+            ("2_HienTaiAnhChiCoMacBenhLyKhong", "2. Hiện tại, anh/chị có mắc bệnh lý nào không?", false),
+            ("3_TruocDayAnhChiCoMacCacBenhLietKeKhong", "3. Trước đây, anh/chị có từng mắc một trong các bệnh: viêm gan siêu vi B, C, HIV, gây nên, phi đại tiền liệt tuyến, sốt rét, giang mai, tai biến mạch máu não, nhồi máu cơ tim, lupus ban đỏ, động kinh, ung thư, hen, được cấy ghép mô tạng?", false),
+            ("4_KhoiBenhSauMacCacBenh12Thang", "4.1 Khỏi bệnh sau khi mắc bệnh trong 12 tháng?", true),
+            ("4_DuocTruyenMauHoacGayGhepMo", "4.2 Được truyền máu hoặc ghép mô?", true),
+            ("4_TiemVaccine", "4.3 Tiêm vaccine gần đây?", true),
+            ("5_KhoiBenhSauMacCacBenh6Thang", "5. Trong 06 tháng gần đây, anh/chị có khỏi bệnh sau các bệnh truyền nhiễm, viêm tuỷ không?", false),
+            ("6_KhoiBenhSauMacCacBenh1Thang", "6. Trong 01 tháng gần đây, anh/chị có khỏi bệnh viêm tiết niệu, viêm phổi, rubella không?", false),
+            ("7_BiCumCamLanhHoNhucDauSotDauHong14Ngay", "7. Trong 14 ngày gần đây, anh/chị có bị cảm, sốt, đau họng không?", false),
+            ("8_DungThuocKhangSinhKhangVirus", "8. Trong 07 ngày gần đây, anh/chị có dùng thuốc kháng sinh, aspirin, corticoid không?", false),
+            ("9_HienChiDangMangThaiHoacCoThai12ThangTruoc", "9. Câu hỏi dành cho phụ nữ:", false),
+            ("9_DangMangThaiHoacNuoiConDuoi12Thang", " - Đang mang thai hoặc nuôi con dưới 12 tháng tuổi?", false),
+            ("9_ChamDutThaiKy12ThangGanDay", " - Chấm dứt thai kỳ trong 12 tháng gần đây?", false),
+            ("10_AnhChiSanSangHienMauNeuDuDieuKien", "10. Anh/chị có sẵn sàng hiến máu mọi lúc khi cần không?", false)
+        };
     }
 
     <div class="modal fade" id="healthHistoryModal" tabindex="-1" aria-labelledby="healthHistoryModalLabel" aria-hidden="true">
@@ -306,22 +306,18 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body">
-                    @if (survey != null)
+                    @if (survey != null && survey.Count > 0)
                     {
                         <table class="table table-bordered table-hover table-sm">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Câu hỏi</th>
-                                    <th class="text-center">Trạng thái</th>
-                                </tr>
-                            </thead>
                             <tbody>
-                                @foreach (var item in questionMap)
-                                {
-                                    <tr>
-                                        <td>@item.Value</td>
-                                        <td class="text-center">
-                                            @if (survey.TryGetValue(item.Key, out var value) && value)
+                            @foreach (var (key, question, _) in questionMap)
+                            {
+                                <tr>
+                                    <td>@question</td>
+                                    <td class="text-center">
+                                        @if (survey != null && survey.TryGetValue(key, out var value))
+                                        {
+                                            if (value?.ToString().ToLower() == "true")
                                             {
                                                 <span class="text-success fw-bold">✅ Có</span>
                                             }
@@ -329,9 +325,14 @@
                                             {
                                                 <span class="text-danger fw-bold">❌ Không</span>
                                             }
-                                        </td>
-                                    </tr>
-                                }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic">Không trả lời</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
                             </tbody>
                         </table>
                     }
