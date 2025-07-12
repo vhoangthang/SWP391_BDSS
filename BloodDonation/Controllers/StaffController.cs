@@ -64,13 +64,13 @@ namespace BloodDonation.Controllers
             }
 
             // Parse JSON từ chuỗi HealthSurvey nếu có
-            Dictionary<string, bool> healthSurvey = new();
+            Dictionary<string, object> healthSurvey = new();
 
             if (!string.IsNullOrEmpty(appointment.HealthSurvey))
             {
                 try
                 {
-                    healthSurvey = JsonSerializer.Deserialize<Dictionary<string, bool>>(appointment.HealthSurvey);
+                    healthSurvey = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(appointment.HealthSurvey);
                 }
                 catch (Exception ex)
                 {
