@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using BloodDonation.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace BloodDonation.Controllers
 {
@@ -48,15 +49,16 @@ namespace BloodDonation.Controllers
             var now = DateTime.Now;
 
             // Kiểm tra lịch hiến máu trong vòng 14 ngày gần nhất
-            var recentAppointment = _context.DonationAppointments
-                .Where(a => a.DonorID == donor.DonorID)
-                .OrderByDescending(a => a.AppointmentDate)
+            var recentCertificate = _context.DonationCertificates
+                .Include(c => c.Appointment)
+                .Where(c => c.Appointment.DonorID == donor.DonorID)
+                .OrderByDescending(c => c.IssueDate)
                 .FirstOrDefault();
 
-    if (recentAppointment != null && (now - recentAppointment.AppointmentDate).TotalDays < 14)
-    {
-        return Json(new { success = false, message = "Bạn chỉ có thể đăng ký hiến máu lại sau 14 ngày kể từ lần đăng ký gần nhất!" });
-    }
+            if (recentCertificate != null && (now - recentCertificate.IssueDate).TotalDays < 14)
+            {
+                return Json(new { success = false, message = "Bạn chỉ có thể đăng ký hiến máu lại sau 14 ngày kể từ lần hiến máu gần nhất!" });
+            }
 
             // Lấy MedicalCenterID hợp lệ (ví dụ: lấy bản ghi đầu tiên)
             var medicalCenterId = _context.MedicalCenters.Select(m => m.MedicalCenterID).FirstOrDefault();
