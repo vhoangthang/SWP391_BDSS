@@ -20,11 +20,15 @@ namespace BloodDonation.Controllers
             if (string.IsNullOrEmpty(username))
                 return RedirectToAction("Index", "Login");
     
-            var donor = _context.Donors.Include(d => d.Notifications).Include(d => d.Account).FirstOrDefault(d => d.Account.Username == username);
+            var donor = _context.Donors.Include(d => d.Account).FirstOrDefault(d => d.Account.Username == username);
             if (donor == null)
                 return RedirectToAction("Index", "Login");
 
-            var notifications = donor.Notifications.OrderByDescending(n => n.SentAt).ToList();
+            // Chỉ lấy thông báo có AccountID đúng với tài khoản donor
+            var notifications = _context.Notifications
+                .Where(n => n.AccountID == donor.AccountID)
+                .OrderByDescending(n => n.SentAt)
+                .ToList();
             return View(notifications);
         }
 
