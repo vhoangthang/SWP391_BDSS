@@ -27,11 +27,11 @@ namespace BloodDonation.Controllers
             if (!string.IsNullOrEmpty(username))
             {
                 var donor = _context.Donors
-                    .Include(d => d.Notifications)
+                    .Include(d => d.Account)
                     .FirstOrDefault(d => d.Account.Username == username);
                 if (donor != null)
                 {
-                    unreadCount = donor.Notifications.Count(n => !n.IsRead);
+                    unreadCount = _context.Notifications.Count(n => n.AccountID == donor.AccountID && !n.IsRead);
                 }
             }
             ViewBag.UnreadNotificationCount = unreadCount;

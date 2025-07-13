@@ -56,7 +56,7 @@
                 <div id="details-@appointment.AppointmentID" style="margin-top: 15px; display: @(appointment.AppointmentID == latestAppointmentId ? "block" : "none");">
                 <div class="appointment-info">
                     <ul>
-                        <li><strong>Ngày hẹn:</strong> @appointment.AppointmentDate.ToShortDateString() / <strong>Khung giờ:</strong> @appointment.TimeSlot</li>
+                        <li><strong>Ngày hiến:</strong> @appointment.AppointmentDate.ToShortDateString() / <strong>Khung giờ:</strong> @appointment.TimeSlot</li>
                         <li><strong>Địa điểm:</strong> @appointment.MedicalCenter?.Name</li>
                         <li><strong>Nhóm máu:</strong> @appointment.BloodType?.Type / <strong>Trạng thái:</strong> @appointment.Status</li>
                     </ul>

@@ -223,6 +223,7 @@ namespace BloodDonation.Controllers
                 // Thêm notification nếu trạng thái là Confirmed hoặc Rejected
                 if (appointment.Status == "Confirmed" || appointment.Status == "Rejected")
                 {
+                    var donor = _context.Donors.Include(d => d.Account).FirstOrDefault(d => d.DonorID == appointment.DonorID);
                     var notification = new Notification
                     {
                         DonorID = appointment.DonorID,
@@ -231,7 +232,7 @@ namespace BloodDonation.Controllers
                         IsRead = false,
                         Type = "AppointmentStatus",
                         IsConfirmed = false,
-                        AccountID = null
+                        AccountID = donor?.AccountID // Sửa lại dòng này để luôn gán đúng AccountID
                     };
                     _context.Notifications.Add(notification);
                 }
