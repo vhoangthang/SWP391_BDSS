@@ -4766,23 +4766,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\asus\\.nuget\\packages\\": {},
+    "C:\\Users\\nguye\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\Git_Push\\SWP391_BDSS\\BloodDonation\\BloodDonation.csproj",
+      "projectUniqueName": "D:\\study\\Summer_2025\\Swp391\\ProjectGit\\SWP391_BDSS\\BloodDonation\\BloodDonation.csproj",
       "projectName": "BloodDonation",
-      "projectPath": "E:\\Git_Push\\SWP391_BDSS\\BloodDonation\\BloodDonation.csproj",
-      "packagesPath": "C:\\Users\\asus\\.nuget\\packages\\",
-      "outputPath": "E:\\Git_Push\\SWP391_BDSS\\BloodDonation\\obj\\",
+      "projectPath": "D:\\study\\Summer_2025\\Swp391\\ProjectGit\\SWP391_BDSS\\BloodDonation\\BloodDonation.csproj",
+      "packagesPath": "C:\\Users\\nguye\\.nuget\\packages\\",
+      "outputPath": "D:\\study\\Summer_2025\\Swp391\\ProjectGit\\SWP391_BDSS\\BloodDonation\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\asus\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\nguye\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],

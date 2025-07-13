@@ -64,6 +64,10 @@
                     <a href="@Url.Action("StaffNotifications", "Notification")"
                        class="nav-link @(currentAction == "StaffNotifications" && currentController == "Notification" ? "active" : "")">
                         🛎️ Thông báo
+                        @if (ViewBag.UnreadNotificationCount > 0)
+                        {
+                            <span class="badge bg-danger ms-2" id="notificationBadge">@ViewBag.UnreadNotificationCount</span>
+                        }
                     </a>
                 </div>
 

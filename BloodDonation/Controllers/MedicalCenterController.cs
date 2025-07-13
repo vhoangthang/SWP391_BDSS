@@ -34,6 +34,15 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
+            // Thêm logic badge
+            var medicalCenterAccount = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "medicalcenter");
+            int unreadCount = 0;
+            if (medicalCenterAccount != null)
+            {
+                unreadCount = _context.Notifications.Count(n => n.AccountID == medicalCenterAccount.AccountID && !n.IsRead);
+            }
+            ViewBag.UnreadNotificationCount = unreadCount;
+
             // Debug: Log all blood types
             var bloodTypes = _context.BloodTypes.ToList();
             foreach (var bt in bloodTypes)
@@ -181,6 +190,11 @@ namespace BloodDonation.Controllers
             var medicalCenterAccount = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "medicalcenter");
             if (medicalCenterAccount == null)
                 return RedirectToAction("Index", "Login");
+
+            // Thêm logic badge
+            int unreadCount = 0;
+            unreadCount = _context.Notifications.Count(n => n.AccountID == medicalCenterAccount.AccountID && !n.IsRead);
+            ViewBag.UnreadNotificationCount = unreadCount;
 
             var notifications = _context.Notifications
                 .Include(n => n.Donor)
@@ -331,6 +345,29 @@ namespace BloodDonation.Controllers
             _context.SaveChanges();
             TempData["Message"] = "Đã xác nhận hoàn thành và cấp chứng chỉ cho người hiến máu.";
             return RedirectToAction("NotificationDetail", new { notificationId = appointmentId });
+        }
+
+        [HttpPost]
+        public IActionResult MarkAsRead(int id)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+
+            var account = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "medicalcenter");
+            if (account == null)
+                return Json(new { success = false, message = "Không tìm thấy tài khoản" });
+
+            var notification = _context.Notifications.FirstOrDefault(n => n.NotificationID == id && n.AccountID == account.AccountID);
+            if (notification == null)
+                return Json(new { success = false, message = "Không tìm thấy thông báo" });
+
+            if (!notification.IsRead)
+            {
+                notification.IsRead = true;
+                _context.SaveChanges();
+            }
+            return Json(new { success = true });
         }
     }
 }

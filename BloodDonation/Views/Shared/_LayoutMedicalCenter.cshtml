@@ -21,7 +21,7 @@
                 <li><a href="@Url.Action("Index", "MedicalCenter")" class="@(currentController == "MedicalCenter" && currentAction == "Index" ? "active" : "")"><span class="icon"><i class="fas fa-plus-circle"></i></span>Tạo yêu cầu</a></li>
                 <li><a href="@Url.Action("BloodRequestList", "MedicalCenter")" class="@(currentController == "MedicalCenter" && currentAction == "BloodRequestList" ? "active" : "")"><span class="icon"><i class="fas fa-list"></i></span>Danh sách nhận máu</a></li>
                 <li><a href="@Url.Action("NotificationDetail", "MedicalCenter", new { notificationId = 0 })" class="@(currentController == "MedicalCenter" && currentAction == "NotificationDetail" ? "active" : "")"><span class="icon"><i class="fas fa-search"></i></span>Chi tiết đơn máu</a></li>
-                <li><a href='@Url.Action("MedicalCenterNotifications", "MedicalCenter")' class="@(currentController == "MedicalCenter" && currentAction == "MedicalCenterNotifications" ? "active" : "")"><span class="icon"><i class="fas fa-bell"></i></span>Thông báo</a></li>
+                <li><a href='@Url.Action("MedicalCenterNotifications", "MedicalCenter")' class="@(currentController == "MedicalCenter" && currentAction == "MedicalCenterNotifications" ? "active" : "")"><span class="icon"><i class="fas fa-bell"></i></span>Thông báo @if (ViewBag.UnreadNotificationCount > 0) { <span class="badge bg-danger ms-2" id="notificationBadge">@ViewBag.UnreadNotificationCount</span> }</a></li>
                 <li><a href="@Url.Action("Logout", "Login")"><span class="icon"><i class="fas fa-sign-out-alt"></i></span>Đăng xuất</a></li>
             </ul>
         </nav>

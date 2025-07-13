@@ -170,6 +170,11 @@ namespace BloodDonation.Controllers
             if (staffAccount == null)
                 return RedirectToAction("Index", "Login");
 
+            // Thêm logic badge
+            int unreadCount = 0;
+            unreadCount = _context.Notifications.Count(n => n.AccountID == staffAccount.AccountID && !n.IsRead);
+            ViewBag.UnreadNotificationCount = unreadCount;
+
             var notifications = _context.Notifications
                 .Include(n => n.Donor)
                 .Where(n => n.AccountID == staffAccount.AccountID)

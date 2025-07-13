@@ -21,9 +21,10 @@
                 @for (int i = 0; i < Model.Count; i++)
                 {
                     var n = Model[i];
-                    <tr class="@(n.IsRead ? "" : "table-warning")">
+                    var unreadClass = n.IsRead ? "" : "table-warning unread";
+                    <tr class="notification-row @unreadClass" data-id="@n.NotificationID" style="cursor:pointer;">
                         <td>@(i+1)</td>
-                        <td>@n.Message</td>
+                        <td>@n.Message @if (!n.IsRead) { <span class="notification-dot"></span> }</td>
                         <td>@n.SentAt.ToString("dd/MM/yyyy HH:mm")</td>
                         <td>
                             <a class="btn btn-sm btn-primary" href="@Url.Action("NotificationDetail", "MedicalCenter", new { notificationId = n.NotificationID })">
@@ -40,4 +41,27 @@
             <div class="alert alert-info">Chưa có thông báo nào.</div>
         }
     </div>
-</div> 
+</div>
+@section Scripts {
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(function() {
+        $(".notification-row.unread").on("click", function(e) {
+            // Nếu click vào nút Chi tiết thì không xử lý
+            if ($(e.target).closest("a").length > 0) return;
+            var $row = $(this);
+            var id = $row.data("id");
+            $.post("/MedicalCenter/MarkAsRead", { id: id }, function(res) {
+                if (res.success) {
+                    $row.removeClass("unread table-warning");
+                    $row.find(".notification-dot").remove();
+                    // Decrease badge
+                    var $badge = $("#notificationBadge");
+                    var count = parseInt($badge.text()) || 0;
+                    if (count > 0) $badge.text(count - 1);
+                }
+            });
+        });
+    });
+</script>
+} 
