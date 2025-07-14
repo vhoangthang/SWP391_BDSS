@@ -8,6 +8,13 @@
     var error = ViewBag.Error as string;
 }
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success text-center">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
 <div class="container mt-4">
     @if (ViewBag.BloodRequestId != null)
     {

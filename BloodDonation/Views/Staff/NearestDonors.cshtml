@@ -7,6 +7,13 @@
     var error = ViewBag.Error as string;
 }
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success text-center">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
 <div class="container mt-4">
     <h3 class="fw-bold mb-3">🔍 Tìm người hiến máu gần nhất</h3>
     
@@ -94,7 +101,7 @@
                                     <td>
                                         <form asp-action="SendInviteNotification" asp-controller="Notification" method="post">
                                             <input type="hidden" name="donorId" value="@donor.DonorID" />
-                                            <input type="hidden" name="bloodRequestId" value="@ViewBag.BloodRequestId" />
+                                            <input type="hidden" name="bloodRequestId" value="1" />
                                             <button type="submit" class="btn btn-warning btn-sm">Gửi thông báo mời hiến máu</button>
                                         </form>
                                     </td>

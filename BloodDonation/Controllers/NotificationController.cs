@@ -76,6 +76,8 @@ namespace BloodDonation.Controllers
             _context.Notifications.Add(notification);
             _context.SaveChanges();
 
+            TempData["SuccessMessage"] = "Đã gửi thông báo mời hiến máu thành công!";
+
             return RedirectToAction("NearestDonorsWithin20km", "Staff", new { bloodRequestId = bloodRequestId });
         }
 
