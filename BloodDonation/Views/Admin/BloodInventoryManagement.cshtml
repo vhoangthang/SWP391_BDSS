@@ -47,7 +47,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     @if (TempData["Message"] != null)
                     {
                         <div class="alert alert-success">@TempData["Message"]</div>
@@ -64,7 +64,7 @@
                                 <div class="blood-card">
                                     <h4 class="blood-type">Nhóm máu @item.BloodType.Type</h4>
                                     <p class="blood-quantity">
-                                        Số lượng: 
+                                        Số lượng:
                                         <span class="badge bg-danger quantity-badge">@item.Quantity.ToString("F2") đơn vị</span>
                                     </p>
                                     <p class="last-updated">
@@ -78,7 +78,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Modal -->
     <div class="modal fade" id="updateInventoryModal" tabindex="-1" aria-labelledby="updateInventoryModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -90,13 +90,16 @@
                 <form asp-action="UpdateBloodInventory" asp-controller="Admin" method="post">
                     <div class="modal-body">
                         <p>Chọn nhóm máu và nhập số lượng mới.</p>
-                        
+
                         <div class="mb-3">
                             <label for="bloodTypeId" class="form-label">Nhóm máu</label>
                             <select name="bloodTypeId" class="form-select" required>
-                                @foreach (var item in Model.OrderBy(i => i.BloodType.Type))
+                                @if (ViewBag.AllBloodTypes != null)
                                 {
-                                    <option value="@item.BloodTypeID">@item.BloodType.Type</option>
+                                    foreach (var bt in ViewBag.AllBloodTypes as List<BloodDonation.Models.BloodType>)
+                                    {
+                                        <option value="@bt.BloodTypeID">@bt.Type</option>
+                                    }
                                 }
                             </select>
                         </div>
@@ -105,7 +108,6 @@
                             <label for="quantity" class="form-label">Số lượng mới (đơn vị)</label>
                             <input type="number" name="quantity" class="form-control" step="0.01" required min="0">
                         </div>
-
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>

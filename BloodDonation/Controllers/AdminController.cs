@@ -172,8 +172,13 @@ namespace BloodDonation.Controllers
                 .OrderBy(bi => bi.BloodType.Type)
                 .ToListAsync();
 
+            // ✅ THÊM DÒNG NÀY
+            var allBloodTypes = await _context.BloodTypes.ToListAsync();
+            ViewBag.AllBloodTypes = allBloodTypes;
+
             return View(bloodInventory);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> UpdateBloodRequestStatus(int requestId, string status)
@@ -205,6 +210,7 @@ namespace BloodDonation.Controllers
         }
 
         [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> UpdateBloodInventory(int bloodTypeId, decimal quantity)
         {
             var username = HttpContext.Session.GetString("Username");
@@ -217,7 +223,7 @@ namespace BloodDonation.Controllers
 
             try
             {
-                const int bloodBankId = 1;
+                const int bloodBankId = 1; // Nếu có nhiều cơ sở y tế thì bạn có thể truyền từ view hoặc session
 
                 var bloodInventory = await _context.BloodInventories
                     .FirstOrDefaultAsync(i => i.BloodTypeID == bloodTypeId && i.BloodBankID == bloodBankId);
@@ -226,12 +232,23 @@ namespace BloodDonation.Controllers
                 {
                     bloodInventory.Quantity = quantity;
                     bloodInventory.LastUpdated = DateTime.Now;
-                    await _context.SaveChangesAsync();
-                    TempData["Message"] = "Cập nhật kho máu thành công!";
-                    return RedirectToAction("BloodInventoryManagement");
+                    _context.Update(bloodInventory);
+                }
+                else
+                {
+                    // THÊM MỚI nếu chưa có
+                    var newInventory = new BloodInventory
+                    {
+                        BloodTypeID = bloodTypeId,
+                        BloodBankID = bloodBankId,
+                        Quantity = quantity,
+                        LastUpdated = DateTime.Now
+                    };
+                    _context.Add(newInventory);
                 }
 
-                TempData["Error"] = "Không tìm thấy nhóm máu trong kho.";
+                await _context.SaveChangesAsync();
+                TempData["Message"] = "Cập nhật kho máu thành công!";
                 return RedirectToAction("BloodInventoryManagement");
             }
             catch (Exception ex)
@@ -241,6 +258,7 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("BloodInventoryManagement");
             }
         }
+
 
         // ✅ Hàm kiểm tra tương hợp nhóm máu
         private bool CheckCompatibility(string donor, string recipient)
