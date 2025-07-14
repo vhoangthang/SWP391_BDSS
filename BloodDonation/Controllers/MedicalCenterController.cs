@@ -371,5 +371,25 @@ namespace BloodDonation.Controllers
             }
             return Json(new { success = true });
         }
+
+        [HttpPost]
+        public IActionResult DeleteNotification(int notificationId)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+
+            var account = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "medicalcenter");
+            if (account == null)
+                return Json(new { success = false, message = "Không tìm thấy tài khoản" });
+
+            var notification = _context.Notifications.FirstOrDefault(n => n.NotificationID == notificationId && n.AccountID == account.AccountID);
+            if (notification == null)
+                return Json(new { success = false, message = "Không tìm thấy thông báo" });
+
+            _context.Notifications.Remove(notification);
+            _context.SaveChanges();
+            return Json(new { success = true });
+        }
     }
 }

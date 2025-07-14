@@ -30,6 +30,7 @@
                             <a class="btn btn-sm btn-primary" href="@Url.Action("NotificationDetail", "MedicalCenter", new { notificationId = n.NotificationID })">
                                 Chi tiết
                             </a>
+                            <button class="btn btn-danger btn-sm btn-delete-notification" data-id="@n.NotificationID" type="button">Xóa</button>
                         </td>
                     </tr>
                 }
@@ -47,8 +48,8 @@
 <script>
     $(function() {
         $(".notification-row.unread").on("click", function(e) {
-            // Nếu click vào nút Chi tiết thì không xử lý
-            if ($(e.target).closest("a").length > 0) return;
+            // Nếu click vào nút Chi tiết hoặc Xóa thì không xử lý
+            if ($(e.target).closest("a,button").length > 0) return;
             var $row = $(this);
             var id = $row.data("id");
             $.post("/MedicalCenter/MarkAsRead", { id: id }, function(res) {
@@ -61,6 +62,20 @@
                     if (count > 0) $badge.text(count - 1);
                 }
             });
+        });
+        $(".btn-delete-notification").on("click", function(e) {
+            e.stopPropagation();
+            var $btn = $(this);
+            var id = $btn.data("id");
+            if (confirm("Bạn có chắc muốn xóa thông báo này?")) {
+                $.post("/MedicalCenter/DeleteNotification", { notificationId: id }, function(res) {
+                    if (res.success) {
+                        $btn.closest("tr").fadeOut(300, function() { $(this).remove(); });
+                    } else {
+                        alert(res.message || "Xóa không thành công!");
+                    }
+                });
+            }
         });
     });
 </script>
