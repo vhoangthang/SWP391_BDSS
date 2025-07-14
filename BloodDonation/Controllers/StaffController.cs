@@ -209,6 +209,13 @@ namespace BloodDonation.Controllers
 
                     case "reject":
                         appointment.Status = "Rejected";
+                        // Nếu donor đang sẵn sàng thì chuyển về không sẵn sàng
+                        var donorReject = _context.Donors.FirstOrDefault(d => d.DonorID == appointment.DonorID);
+                        if (donorReject != null && donorReject.IsAvailable == true)
+                        {
+                            donorReject.IsAvailable = false;
+                            _context.SaveChanges();
+                        }
                         break;
 
                     case "approve":
@@ -587,7 +594,9 @@ namespace BloodDonation.Controllers
             // Lấy danh sách donor sẵn sàng có địa chỉ
             var donors = _context.Donors
                 .Include(d => d.BloodType)
-                .Where(d => d.IsAvailable == true && !string.IsNullOrEmpty(d.Address))
+                .Where(d => d.IsAvailable == true 
+                    && !string.IsNullOrEmpty(d.Address)
+                    && _context.DonationAppointments.Any(a => a.DonorID == d.DonorID && a.Status == "Confirmed"))
                 .ToList();
 
             // Lấy địa chỉ kho máu (ưu tiên customAddress nếu có)
@@ -721,7 +730,9 @@ namespace BloodDonation.Controllers
             ViewBag.SelectedBankId = selectedBankId;
 
             // Default: all available donors with address
-            var donorsQuery = _context.Donors.Include(d => d.BloodType).Where(d => d.IsAvailable == true && !string.IsNullOrEmpty(d.Address));
+            var donorsQuery = _context.Donors.Include(d => d.BloodType).Where(d => d.IsAvailable == true 
+                && !string.IsNullOrEmpty(d.Address)
+                && _context.DonationAppointments.Any(a => a.DonorID == d.DonorID && a.Status == "Confirmed"));
 
             // Nếu có bloodRequestId thì lọc theo tương hợp
             if (bloodRequestId.HasValue)
@@ -830,7 +841,7 @@ namespace BloodDonation.Controllers
             var distances = matrixDoc.RootElement.GetProperty("distances");
             var distanceArr = distances[0];
 
-            // Filter only donors within 20km
+            // Filter only donors within 25km
             var donorWithDistance = validDonors.Select((x, idx) => new { Donor = x.donor, Distance = distanceArr[idx + 1].GetDouble() })
                 .Where(x => x.Distance <= 25)
                 .OrderBy(x => x.Distance)
