@@ -301,11 +301,13 @@ namespace BloodDonation.Controllers
                 // Cập nhật QuantityDonated cho appointment
                 appointment.Status = "Completed";
                 appointment.QuantityDonated = bloodRequest.Quantity;
+                appointment.AppointmentDate = DateTime.Now; // Cập nhật ngày hoàn thành
             }
             else
             {
                 // Nếu không tìm thấy bloodRequest vẫn cho phép hoàn thành appointment
                 appointment.Status = "Completed";
+                appointment.AppointmentDate = DateTime.Now; // Cập nhật ngày hoàn thành
             }
 
             // Lưu vào bảng DonorBloodRequest nếu có bloodRequest và donor

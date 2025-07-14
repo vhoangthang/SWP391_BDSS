@@ -49,15 +49,18 @@ namespace BloodDonation.Controllers
             var now = DateTime.Now;
 
             // Kiểm tra lịch hiến máu trong vòng 14 ngày gần nhất
-            var recentCertificate = _context.DonationCertificates
-                .Include(c => c.Appointment)
-                .Where(c => c.Appointment.DonorID == donor.DonorID)
-                .OrderByDescending(c => c.IssueDate)
+            var lastAppointment = _context.DonationAppointments
+                .Where(a => a.DonorID == donor.DonorID)
+                .OrderByDescending(a => a.AppointmentDate)
                 .FirstOrDefault();
 
-            if (recentCertificate != null && (now - recentCertificate.IssueDate).TotalDays < 14)
+            if (lastAppointment != null)
             {
-                return Json(new { success = false, message = "Bạn chỉ có thể đăng ký hiến máu lại sau 14 ngày kể từ lần hiến máu gần nhất!" });
+                var nextEligibleDate = lastAppointment.AppointmentDate.AddDays(14);
+                if (now < nextEligibleDate)
+                {
+                    return Json(new { success = false, message = $"Bạn chỉ có thể đăng ký hiến máu lại sau 14 ngày kể từ lần đăng ký gần nhất! (sau ngày {nextEligibleDate:dd/MM/yyyy})" });
+                }
             }
 
             // Lấy MedicalCenterID hợp lệ (ví dụ: lấy bản ghi đầu tiên)

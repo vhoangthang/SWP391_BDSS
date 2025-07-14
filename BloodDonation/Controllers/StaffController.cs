@@ -145,6 +145,7 @@ namespace BloodDonation.Controllers
 
                         appointment.Status = "Completed";
                         appointment.QuantityDonated = QuantityDonated;
+                        appointment.AppointmentDate = DateTime.Now; // Cập nhật ngày hoàn thành
 
                         // Nếu donor đang sẵn sàng thì chuyển về không sẵn sàng
                         var donorEntity = _context.Donors.FirstOrDefault(d => d.DonorID == appointment.DonorID);
@@ -198,7 +199,6 @@ namespace BloodDonation.Controllers
                         if (isEligible)
                         {
                             appointment.Status = "Confirmed";
-                            appointment.AppointmentDate = DateTime.Now;
                         }
                         else
                         {
