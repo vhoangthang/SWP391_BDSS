@@ -55,6 +55,7 @@
                         {
                             <span class="text-success">Đã xác nhận</span>
                         }
+                        <button class="btn btn-danger btn-sm mt-2 btn-delete-notification" data-id="@n.NotificationID" type="button">Xóa</button>
                     </div>
                     <div class="timestamp">
                         @n.SentAt.ToString("dd/MM/yyyy HH:mm")
@@ -96,6 +97,20 @@
                     if (count > 0) $badge.text(count - 1);
                 }
             });
+        });
+        $(".btn-delete-notification").on("click", function(e) {
+            e.stopPropagation();
+            var $btn = $(this);
+            var id = $btn.data("id");
+            if (confirm("Bạn có chắc muốn xóa thông báo này?")) {
+                $.post("/Notification/DeleteNotification", { notificationId: id }, function(res) {
+                    if (res.success) {
+                        $btn.closest(".notification-item").fadeOut(300, function() { $(this).remove(); });
+                    } else {
+                        alert(res.message || "Xóa không thành công!");
+                    }
+                });
+            }
         });
     });
 </script>

@@ -162,6 +162,26 @@ namespace BloodDonation.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        public IActionResult DeleteNotification(int notificationId)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+
+            var donor = _context.Donors.Include(d => d.Account).FirstOrDefault(d => d.Account.Username == username);
+            if (donor == null)
+                return Json(new { success = false, message = "Không tìm thấy người dùng" });
+
+            var notification = _context.Notifications.FirstOrDefault(n => n.NotificationID == notificationId && n.AccountID == donor.AccountID);
+            if (notification == null)
+                return Json(new { success = false, message = "Không tìm thấy thông báo" });
+
+            _context.Notifications.Remove(notification);
+            _context.SaveChanges();
+            return Json(new { success = true });
+        }
+
         public IActionResult StaffNotifications()
         {
             var username = HttpContext.Session.GetString("Username");
