@@ -19,7 +19,7 @@ namespace BloodDonation.Controllers
             var username = HttpContext.Session.GetString("Username");
             if (string.IsNullOrEmpty(username))
                 return RedirectToAction("Index", "Login");
-    
+
             var donor = _context.Donors.Include(d => d.Account).FirstOrDefault(d => d.Account.Username == username);
             if (donor == null)
                 return RedirectToAction("Index", "Login");
@@ -101,6 +101,16 @@ namespace BloodDonation.Controllers
 
             if (bloodRequest != null)
             {
+                // Cập nhật MedicalCenterID của đơn hiến máu gần nhất (Confirmed) thành MedicalCenterID của BloodRequest
+                var appointment = _context.DonationAppointments
+                    .Where(a => a.DonorID == notification.DonorID && a.Status == "Confirmed")
+                    .OrderByDescending(a => a.AppointmentDate)
+                    .FirstOrDefault();
+                if (appointment != null)
+                {
+                    appointment.MedicalCenterID = bloodRequest.MedicalCenterID;
+                    _context.SaveChanges();
+                }
                 // Gửi thông báo cho tất cả staff (không lọc theo MedicalCenterID)
                 var staffAccounts = _context.Accounts.Where(a => a.Role.ToLower() == "staff").ToList();
                 foreach (var staffAccount in staffAccounts)

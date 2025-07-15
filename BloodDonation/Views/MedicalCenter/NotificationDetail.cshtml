@@ -37,17 +37,23 @@
                 <p><b>Nhóm máu hiến:</b> @appointment.BloodType?.Type</p>
                 <p><b>Số lượng hiến:</b> @(Model.BloodRequest?.Quantity ?? appointment.QuantityDonated) CC</p>
                 <p><b>Trạng thái:</b> @appointment.Status</p>
-                @if (appointment.Status != "Completed")
+                @if (appointment.Status == "Confirmed")
                 {
                     <form asp-action="ConfirmAppointmentCompletion" asp-controller="MedicalCenter" method="post">
                         <input type="hidden" name="appointmentId" value="@appointment.AppointmentID" />
                         <button type="submit" class="btn btn-success">Xác nhận hoàn thành &amp; Cấp chứng chỉ</button>
                     </form>
                 }
+                else if (appointment.Status == "Completed")
+                {
+                    <span class="badge bg-success">
+                        Đã hoàn thành&Cấp chứng chỉ
+                    </span>
+                }
                 else
                 {
                     <span class="badge bg-success">
-                        Đã hoàn thành &amp; Đã cấp chứng chỉ
+                        Đã hoàn thành
                     </span>
                 }
             </div>

@@ -226,28 +226,14 @@ namespace BloodDonation.Controllers
             DonationAppointment appointment = null;
             if (notification.BloodRequestID.HasValue && notification.BloodRequest != null)
             {
-                // Tìm appointment phù hợp nhất với donor, bloodtype, medicalcenter, chưa completed, ngày gần nhất
+                // Lấy appointment gần nhất của donor có trạng thái Confirmed hoặc Completed
                 appointment = _context.DonationAppointments
                     .Include(a => a.Donor)
                     .Include(a => a.MedicalCenter)
                     .Include(a => a.BloodType)
-                    .Where(a => a.DonorID == notification.DonorID
-                        && a.BloodTypeID == notification.BloodRequest.BloodTypeID
-                        && a.MedicalCenterID == notification.BloodRequest.MedicalCenterID
-                        && a.Status != "Completed")
+                    .Where(a => a.DonorID == notification.DonorID && (a.Status == "Confirmed" || a.Status == "Completed"))
                     .OrderByDescending(a => a.AppointmentDate)
                     .FirstOrDefault();
-                // Nếu không có, lấy appointment gần nhất của donor tại medical center
-                if (appointment == null)
-                {
-                    appointment = _context.DonationAppointments
-                        .Include(a => a.Donor)
-                        .Include(a => a.MedicalCenter)
-                        .Include(a => a.BloodType)
-                        .Where(a => a.DonorID == notification.DonorID && a.MedicalCenterID == notification.BloodRequest.MedicalCenterID)
-                        .OrderByDescending(a => a.AppointmentDate)
-                        .FirstOrDefault();
-                }
             }
             else
             {
@@ -346,7 +332,7 @@ namespace BloodDonation.Controllers
             }
             _context.SaveChanges();
             TempData["Message"] = "Đã xác nhận hoàn thành và cấp chứng chỉ cho người hiến máu.";
-            return RedirectToAction("NotificationDetail", new { notificationId = appointmentId });
+            return RedirectToAction("NotificationDetail", new { notificationId = appointmentId, appointmentId = appointment.AppointmentID });
         }
 
         [HttpPost]
