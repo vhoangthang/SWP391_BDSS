@@ -109,6 +109,7 @@
                 <option value="approved">Đã duyệt</option>
                 <option value="completed">Hoàn thành</option>
                 <option value="rejected">Từ chối</option>
+                <option value="canceled">Đã hủy</option>
             </select>
         </div>
     </div>
@@ -130,60 +131,58 @@
             <tbody id="bloodRequestTableBody">
                 @foreach (var req in Model)
                 {
-                    if (req.Status == "Approved" || req.Status == "Completed")
-                    {
-                        <tr>
-                            <td class="center name-col">@req.MedicalCenter?.Name</td>
-                            <td class="text-center blood-col">@req.BloodType?.Type</td>
-                            <td class="text-center date-col">@req.RequestDate.ToString("yyyy-MM-dd")</td>
-                            <td class="text-center quantity-col">@req.Quantity</td>
-                            <td class="text-center emergency-col">
-                                @if (req.IsEmergency)
-                                {
-                                    <span class="bdss-badge-soft bdss-badge-soft-danger"><span style="font-size:1.1em;">&#9888;</span> Khẩn cấp</span>
-                                }
-                                else
-                                {
-                                    <span class="bdss-badge-soft bdss-badge-soft-warning"><span style="font-size:1.1em;">&#9200;</span> Thông thường</span>
-                                }
-                            </td>
-                            <td class="text-center compatible-col">
-                                @if (req.IsCompatible)
-                                {
-                                    <span class="bdss-badge-soft bdss-badge-soft-success">Tương hợp</span>
-                                }
-                                else
-                                {
-                                    <span class="bdss-badge-soft bdss-badge-soft-danger">Không tương hợp</span>
-                                }
-                            </td>
-                            <td class="text-center status-col" data-status="@req.Status?.ToLower()">
-                                @switch (req.Status)
-                                {
-                                    case "Pending":
-                                        <span class="bdss-badge-soft bdss-badge-soft-warning"><span style="font-size:1.1em;">&#x23F3;</span> Chờ duyệt</span>
-                                        ; break;
-                                    case "Approved":
-                                        <span class="bdss-badge-soft bdss-badge-soft-primary"><span style="font-size:1.1em;">&#x2714;</span> Đã duyệt</span>
-                                        ; break;
-                                    case "Completed":
-                                        <span class="bdss-badge-soft bdss-badge-soft-success"><span style="font-size:1.1em;">&#x2714;</span> Hoàn thành</span>
-                                        ; break;
-                                    case "Rejected":
-                                        <span class="bdss-badge-soft bdss-badge-soft-danger"><span style="font-size:1.1em;">&#x2716;</span> Từ chối</span>
-                                        ; break;
-                                    default:
-                                        <span class="bdss-badge-soft bdss-badge-soft-secondary">@req.Status</span>
-                                        ; break;
-                                }
-                            </td>
-                            <td class="text-end">
-                                <a href="@Url.Action("BloodRequestDetails", "Staff", new { id = req.BloodRequestID })" class="bdss-link-blue">
-                                    Chi tiết
-                                </a>
-                            </td>
-                        </tr>
-                    }
+                    <tr>
+                        <td class="center name-col">@req.MedicalCenter?.Name</td>
+                        <td class="text-center blood-col">@req.BloodType?.Type</td>
+                        <td class="text-center date-col">@req.RequestDate.ToString("yyyy-MM-dd")</td>
+                        <td class="text-center quantity-col">@req.Quantity</td>
+                        <td class="text-center emergency-col">
+                            @if (req.IsEmergency)
+                            {
+                                <span class="bdss-badge-soft bdss-badge-soft-danger"><span style="font-size:1.1em;">&#9888;</span> Khẩn cấp</span>
+                            }
+                            else
+                            {
+                                <span class="bdss-badge-soft bdss-badge-soft-warning"><span style="font-size:1.1em;">&#9200;</span> Thông thường</span>
+                            }
+                        </td>
+                        <td class="text-center compatible-col">
+                            @if (req.IsCompatible)
+                            {
+                                <span class="bdss-badge-soft bdss-badge-soft-success">Tương hợp</span>
+                            }
+                            else
+                            {
+                                <span class="bdss-badge-soft bdss-badge-soft-danger">Không tương hợp</span>
+                            }
+                        </td>
+                        <td class="text-center status-col" data-status="@req.Status?.ToLower()">
+                            @switch (req.Status)
+                            {
+                                case "Pending":
+                                    <span class="bdss-badge-soft bdss-badge-soft-warning"><span style="font-size:1.1em;">&#x23F3;</span> Chờ duyệt</span>
+                                    ; break;
+                                case "Approved":
+                                    <span class="bdss-badge-soft bdss-badge-soft-primary"><span style="font-size:1.1em;">&#x2714;</span> Đã duyệt</span>
+                                    ; break;
+                                case "Completed":
+                                    <span class="bdss-badge-soft bdss-badge-soft-success"><span style="font-size:1.1em;">&#x2714;</span> Hoàn thành</span>
+                                    ; break;
+                                case "Rejected":
+                                case "Canceled":
+                                    <span class="bdss-badge-soft bdss-badge-soft-danger"><span style="font-size:1.1em;">&#x2716;</span> Từ chối</span>
+                                    ; break;
+                                default:
+                                    <span class="bdss-badge-soft bdss-badge-soft-secondary">@req.Status</span>
+                                    ; break;
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a href="@Url.Action("BloodRequestDetails", "Staff", new { id = req.BloodRequestID })" class="bdss-link-blue">
+                                Chi tiết
+                            </a>
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
