@@ -310,14 +310,61 @@
                     {
                         <table class="table table-bordered table-hover table-sm">
                             <tbody>
-                            @foreach (var (key, question, _) in questionMap)
-                            {
-                                <tr>
-                                    <td>@question</td>
-                                    <td class="text-center">
-                                        @if (survey != null && survey.TryGetValue(key, out var value))
+                            @{
+                                object q9a = null;
+                                object q9b = null;
+                                @foreach (var (key, question, _) in questionMap)
+                                {
+                                    if (key == "9_DangMangThaiHoacNuoiConDuoi12Thang")
+                                    {
+                                        q9a = null;
+                                        q9b = null;
+                                        var hasQ9a = survey != null && survey.TryGetValue("9_DangMangThaiHoacNuoiConDuoi12Thang", out q9a) && !string.IsNullOrEmpty(q9a?.ToString());
+                                        var hasQ9b = survey != null && survey.TryGetValue("9_ChamDutThaiKy12ThangGanDay", out q9b) && !string.IsNullOrEmpty(q9b?.ToString());
+                                        if (hasQ9a || hasQ9b)
                                         {
-                                            if (value?.ToString().ToLower() == "true")
+                                            @:<tr><td colspan="2"><b>9. Câu hỏi dành cho phụ nữ:</b></td></tr>
+                                            if (hasQ9a)
+                                            {
+                                                @:<tr><td> - Đang mang thai hoặc nuôi con dưới 12 tháng tuổi?</td><td class="text-center">
+                                                if (q9a.ToString().ToLower() == "true")
+                                                {
+                                                    @:<span class="text-success fw-bold">✅ Có</span>
+                                                }
+                                                else
+                                                {
+                                                    @:<span class="text-danger fw-bold">❌ Không</span>
+                                                }
+                                                @:</td></tr>
+                                            }
+                                            if (hasQ9b)
+                                            {
+                                                @:<tr><td> - Chấm dứt thai kỳ trong 12 tháng gần đây?</td><td class="text-center">
+                                                if (q9b.ToString().ToLower() == "true")
+                                                {
+                                                    @:<span class="text-success fw-bold">✅ Có</span>
+                                                }
+                                                else
+                                                {
+                                                    @:<span class="text-danger fw-bold">❌ Không</span>
+                                                }
+                                                @:</td></tr>
+                                            }
+                                        }
+                                        continue;
+                                    }
+                                    if (key == "9_ChamDutThaiKy12ThangGanDay" || key == "9_HienChiDangMangThaiHoacCoThai12ThangTruoc")
+                                    {
+                                        continue;
+                                    }
+                                    if (survey == null || !survey.TryGetValue(key, out var value) || string.IsNullOrEmpty(value?.ToString()))
+                                    {
+                                        continue;
+                                    }
+                                    <tr>
+                                        <td>@question</td>
+                                        <td class="text-center">
+                                            @if (value?.ToString().ToLower() == "true")
                                             {
                                                 <span class="text-success fw-bold">✅ Có</span>
                                             }
@@ -325,13 +372,9 @@
                                             {
                                                 <span class="text-danger fw-bold">❌ Không</span>
                                             }
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted fst-italic">Không trả lời</span>
-                                        }
-                                    </td>
-                                </tr>
+                                        </td>
+                                    </tr>
+                                }
                             }
                             </tbody>
                         </table>
