@@ -533,6 +533,10 @@ namespace BloodDonation.Controllers
                     bloodRequest.Status = "Rejected";
                     TempData["Message"] = "Yêu cầu đã bị từ chối.";
                     break;
+                case "cancel":
+                    bloodRequest.Status = "Canceled";
+                    TempData["Message"] = "Đơn đã được hủy.";
+                    break;
                 case "complete":
                     // Kiểm tra nhóm máu được chọn có hợp lệ không
                     if (!selectedBloodTypeId.HasValue)
