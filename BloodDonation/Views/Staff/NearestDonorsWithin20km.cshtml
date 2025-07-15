@@ -24,14 +24,29 @@
     }
     <h3 class="fw-bold mb-3">🔍 Tìm người hiến máu gần nhất (<= 25km)</h3>
     <hr />
-    @if (bloodBanks != null)
+    @if (ViewBag.MedicalCenter != null)
+    {
+        var center = ViewBag.MedicalCenter as BloodDonation.Models.MedicalCenter;
+        <form method="get" asp-action="NearestDonorsWithin20km" class="mb-4">
+            <input type="hidden" name="bloodRequestId" value="@ViewBag.BloodRequestId" />
+            <div class="row g-2 align-items-end">
+                <div class="col-md-8">
+                    <label class="form-label fw-bold">Cơ sở y tế:</label>
+                    <select class="form-select" disabled>
+                        <option>@center.Name (@center.Location)</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    }
+    else if (bloodBanks != null)
     {
         <form method="get" asp-action="NearestDonorsWithin20km" class="mb-4">
             <div class="row g-2 align-items-end">
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">Chọn kho máu:</label>
+                    <label class="form-label fw-bold">Nơi hiến máu:</label>
                     <select name="bloodBankId" class="form-select" required>
-                        <option value="">-- Chọn kho máu --</option>
+                        <option value="">-- Nơi hiến máu --</option>
                         @foreach (var bank in bloodBanks)
                         {
                             <option value="@bank.BloodBankID" selected="@(selectedBankId == bank.BloodBankID ? "selected" : null)">
