@@ -62,7 +62,7 @@ namespace BloodDonation.Controllers
                     .Include(a => a.BloodType)
                     .Include(a => a.MedicalCenter)
                     .Where(a => a.DonorID == donor.DonorID)
-                    .OrderByDescending(a => a.AppointmentDate)
+                    .OrderByDescending(a => a.AppointmentID)
                     .ToList();
 
                 ViewBag.HealthSurveyQuestions = HealthSurveyQuestions;
