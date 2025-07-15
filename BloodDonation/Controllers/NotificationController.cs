@@ -173,6 +173,68 @@ namespace BloodDonation.Controllers
         }
 
         [HttpPost]
+        public IActionResult RejectDonation(int notificationId)
+        {
+            var notification = _context.Notifications
+                .Include(n => n.Donor)
+                .ThenInclude(d => d.BloodType)
+                .FirstOrDefault(n => n.NotificationID == notificationId);
+            if (notification == null)
+                return NotFound();
+
+            notification.IsConfirmed = false; // Đánh dấu đã từ chối
+            _context.SaveChanges();
+
+            // Lấy thông tin BloodRequest liên quan
+            var bloodRequest = _context.BloodRequests
+                .Include(br => br.MedicalCenter)
+                .FirstOrDefault(br => br.BloodRequestID == notification.BloodRequestID);
+
+            if (bloodRequest != null)
+            {
+                // Gửi thông báo cho tất cả staff liên quan
+                var staffAccounts = _context.Accounts.Where(a => a.Role.ToLower() == "staff").ToList();
+                foreach (var staffAccount in staffAccounts)
+                {
+                    var staffNotification = new Notification
+                    {
+                        DonorID = notification.DonorID,
+                        Message = $"Donor {notification.Donor.Name} (ID: {notification.Donor.DonorID}, Nhóm máu: {notification.Donor.BloodType?.Type}) đã từ chối lời mời hiến máu.",
+                        SentAt = DateTime.Now,
+                        IsRead = false,
+                        Type = "DonorRejected",
+                        IsConfirmed = false,
+                        AccountID = staffAccount.AccountID,
+                        BloodRequestID = bloodRequest.BloodRequestID
+                    };
+                    _context.Notifications.Add(staffNotification);
+                }
+                _context.SaveChanges();
+            }
+            else
+            {
+                // Nếu không có BloodRequestID, gửi cho tất cả staff
+                var allStaff = _context.Accounts.Where(a => a.Role.ToLower() == "staff").ToList();
+                foreach (var staffAccount in allStaff)
+                {
+                    var staffNotification = new Notification
+                    {
+                        DonorID = notification.DonorID,
+                        Message = $"Donor {notification.Donor.Name} (ID: {notification.Donor.DonorID}, Nhóm máu: {notification.Donor.BloodType?.Type}) đã từ chối lời mời hiến máu.",
+                        SentAt = DateTime.Now,
+                        IsRead = false,
+                        Type = "DonorRejected",
+                        IsConfirmed = false,
+                        AccountID = staffAccount.AccountID
+                    };
+                    _context.Notifications.Add(staffNotification);
+                }
+                _context.SaveChanges();
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
         public IActionResult DeleteNotification(int notificationId)
         {
             var username = HttpContext.Session.GetString("Username");

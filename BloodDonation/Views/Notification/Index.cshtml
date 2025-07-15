@@ -50,6 +50,10 @@
                                 <input type="hidden" name="notificationId" value="@n.NotificationID" />
                                 <button type="submit" class="btn btn-success btn-sm mt-2">Xác nhận đi hiến máu</button>
                             </form>
+                            <form asp-action="RejectDonation" asp-controller="Notification" method="post" style="display:inline;">
+                                <input type="hidden" name="notificationId" value="@n.NotificationID" />
+                                <button type="submit" class="btn btn-secondary btn-sm mt-2 ms-2">Từ chối</button>
+                            </form>
                         }
                         else if (n.Type == "Invite" && n.IsConfirmed)
                         {
