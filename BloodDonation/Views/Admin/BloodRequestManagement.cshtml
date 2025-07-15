@@ -185,10 +185,20 @@
                                                         "approved" => "status-approved",
                                                         "completed" => "status-completed",
                                                         "rejected" => "status-rejected",
+                                                        "canceled" => "status-canceled",
                                                         _ => "status-pending"
                                                     };
+                                                    var statusText = request.Status switch
+                                                    {
+                                                        "Pending" => "Chờ duyệt",
+                                                        "Approved" => "Đã duyệt",
+                                                        "Completed" => "Hoàn tất",
+                                                        "Rejected" => "Từ chối",
+                                                        "Canceled" => "Đã huỷ",
+                                                        _ => request.Status
+                                                    };
                                                 }
-                                                <span class="status-badge @statusClass">@request.Status</span>
+                                                <span class="status-badge @statusClass">@statusText</span>
                                             </td>
                                             
                                             <td>
