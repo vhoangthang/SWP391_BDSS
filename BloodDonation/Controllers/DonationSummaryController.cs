@@ -22,7 +22,8 @@ namespace BloodDonation.Controllers
             { "6_KhoiBenhSauMacCacBenh1Thang", "6. Trong 01 tháng gần đây, anh/chị có khỏi bệnh viêm tiết niệu, viêm phổi, rubella không?" },
             { "7_BiCumCamLanhHoNhucDauSotDauHong14Ngay", "7. Trong 14 ngày gần đây, anh/chị có bị cảm, sốt, đau họng không?" },
             { "8_DungThuocKhangSinhKhangViêmAspirinCorticoide7Ngay", "8. Trong 07 ngày gần đây, anh/chị có dùng thuốc kháng sinh, aspirin, corticoid không?" },
-            { "9_CauHoiDanhChoPhuNu", "9. Câu hỏi dành cho phụ nữ:" },
+            { "9_DangMangThaiHoacNuoiConDuoi12Thang", "9.1 Đang mang thai hoặc nuôi con dưới 12 tháng tuổi?" },
+            { "9_ChamDutThaiKy12ThangGanDay", "9.2 Chấm dứt thai kỳ trong 12 tháng gần đây?" },
             { "10_AnhChiSanSangHienMauNeuDuDieuKien", "10. Anh/chị có sẵn sàng hiến máu mọi lúc khi cần không?" }
         };
 
@@ -62,7 +63,7 @@ namespace BloodDonation.Controllers
                     .Include(a => a.BloodType)
                     .Include(a => a.MedicalCenter)
                     .Where(a => a.DonorID == donor.DonorID)
-                    .OrderByDescending(a => a.AppointmentID)
+                    .OrderByDescending(a => a.AppointmentDate)
                     .ToList();
 
                 ViewBag.HealthSurveyQuestions = HealthSurveyQuestions;
