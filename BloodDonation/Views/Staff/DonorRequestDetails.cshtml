@@ -216,7 +216,7 @@
         <div class="col-lg-4">
             <div class="bdss-card">
                 <div class="bdss-title" style="font-size:1.2em; margin-bottom:1.2em;">Xác nhận hiến máu</div>
-                @if (Model.Status == "Completed" || Model.Status == "Rejected")
+                @if (Model.Status == "Completed" || Model.Status == "Rejected" || Model.Status == "Cancelled")
                 {
                     <div class="bdss-alert-info"><b>Thông báo:</b> Đơn hiến máu đã được xử lý với trạng thái <b>@Model.Status</b>. Không thể thay đổi nữa.</div>
                 }

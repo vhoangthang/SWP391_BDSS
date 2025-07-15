@@ -106,6 +106,13 @@ namespace BloodDonation.Controllers
                 {
                     // Chuyển trạng thái sang Cancelled
                     appointment.Status = "Cancelled";
+                    // Nếu donor đang sẵn sàng thì chuyển về không sẵn sàng
+                    var donor = _context.Donors.FirstOrDefault(d => d.DonorID == appointment.DonorID);
+                    if (donor != null && donor.IsAvailable == true)
+                    {
+                        donor.IsAvailable = false;
+                        _context.SaveChanges();
+                    }
                     _context.SaveChanges();
                 }
             }

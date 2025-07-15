@@ -119,6 +119,12 @@ namespace BloodDonation.Controllers
                     return RedirectToAction("DonationList");
                 }
 
+                if (appointment.Status == "Completed" || appointment.Status == "Cancelled")
+                {
+                    TempData["Error"] = "⚠️ Lịch hẹn đã hoàn thành hoặc đã bị hủy. Không thể chỉnh sửa.";
+                    return RedirectToAction("DonationList");
+                }
+
                 string normalizedAction = action?.ToLowerInvariant();
                 bool isEligible = IsEligible == "true";
 
@@ -221,6 +227,9 @@ namespace BloodDonation.Controllers
                     case "approve":
                         appointment.Status = "Approved";
                         break;
+                    case "cancel":
+                        appointment.Status = "Cancelled";
+                        break;
 
                     default:
                         TempData["Error"] = "❌ Hành động không hợp lệ.";
@@ -231,10 +240,23 @@ namespace BloodDonation.Controllers
                 if (appointment.Status == "Confirmed" || appointment.Status == "Rejected")
                 {
                     var donor = _context.Donors.Include(d => d.Account).FirstOrDefault(d => d.DonorID == appointment.DonorID);
+                    string notificationMessage;
+                    switch (appointment.Status)
+                    {
+                        case "Confirmed":
+                            notificationMessage = "Đơn của bạn đã được chấp nhận.";
+                            break;
+                        case "Rejected":
+                            notificationMessage = "Đơn của bạn đã bị từ chối.";
+                            break;
+                        default:
+                            notificationMessage = $"Đơn hiến máu của bạn đã chuyển sang trạng thái: {appointment.Status}";
+                            break;
+                    }
                     var notification = new Notification
                     {
                         DonorID = appointment.DonorID,
-                        Message = $"Đơn hiến máu của bạn đã chuyển sang trạng thái: {appointment.Status}",
+                        Message = notificationMessage,
                         SentAt = DateTime.Now,
                         IsRead = false,
                         Type = "AppointmentStatus",
