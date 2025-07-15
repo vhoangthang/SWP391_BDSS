@@ -175,6 +175,7 @@ namespace BloodDonation.Controllers
             return View();
         }
 
+        
         [HttpPost]
         public IActionResult ResetPassword(string newPassword)
         {
@@ -186,11 +187,13 @@ namespace BloodDonation.Controllers
                 return View();
             }
 
-            account.Password = newPassword; // Mã hóa nếu cần
+            account.Password = newPassword;
             _context.SaveChanges();
 
-            return RedirectToAction("Login");
+            // ✅ Sửa lại redirect cho đúng
+            return RedirectToAction("Index", "Login");
         }
+
 
         [HttpGet]
         public IActionResult CheckUsername(string username)
