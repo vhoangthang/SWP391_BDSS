@@ -90,7 +90,7 @@
                 </div>
                 <form asp-action="UpdateBloodInventory" asp-controller="Admin" method="post">
                     <div class="modal-body">
-                        <p>Chọn nhóm máu và nhập số lượng mới.</p>
+                        <p>Chọn nhóm máu và nhập số lượng:</p>
 
                         <div class="mb-3">
                             <label for="bloodTypeId" class="form-label">Nhóm máu</label>
@@ -106,20 +106,38 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="quantity" class="form-label">Số lượng mới (đơn vị)</label>
-                            <input type="number" name="quantity" class="form-control" step="0.01" required min="0">
+                            <label for="quantity" class="form-label">Số lượng (đơn vị)</label>
+                            <input type="number" name="quantity" class="form-control" step="0.01" min="0" required>
                         </div>
+
+                        <!-- ✅ Thêm input ẩn để truyền loại thao tác -->
+                        <input type="hidden" name="operation" id="operationInput" value="" />
                     </div>
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                        <button type="submit" class="btn btn-danger">Lưu thay đổi</button>
+
+                        <!-- ✅ Hai nút riêng để chọn thao tác -->
+                        <button type="submit" class="btn btn-success" onclick="setOperation('add')">
+                            ➕ Thêm
+                        </button>
+                        <button type="submit" class="btn btn-warning" onclick="setOperation('subtract')">
+                            ➖ Giảm
+                        </button>
                     </div>
                 </form>
+
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/admin.js"></script>
+    <script>
+        function setOperation(op) {
+            document.getElementById("operationInput").value = op;
+        }
+    </script>
+
 </body>
 </html>

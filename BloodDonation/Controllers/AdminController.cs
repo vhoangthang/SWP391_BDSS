@@ -209,9 +209,9 @@ namespace BloodDonation.Controllers
             }
         }
 
+
         [HttpPost]
-        [HttpPost]
-        public async Task<IActionResult> UpdateBloodInventory(int bloodTypeId, decimal quantity)
+        public async Task<IActionResult> UpdateBloodInventory(int bloodTypeId, decimal quantity, string operation)
         {
             var username = HttpContext.Session.GetString("Username");
             var role = HttpContext.Session.GetString("Role");
@@ -223,25 +223,30 @@ namespace BloodDonation.Controllers
 
             try
             {
-                const int bloodBankId = 1; // Nếu có nhiều cơ sở y tế thì bạn có thể truyền từ view hoặc session
+                const int bloodBankId = 1;
 
                 var bloodInventory = await _context.BloodInventories
                     .FirstOrDefaultAsync(i => i.BloodTypeID == bloodTypeId && i.BloodBankID == bloodBankId);
 
+                // Xác định số thay đổi dựa trên nút admin chọn
+                decimal change = operation == "subtract" ? -quantity : quantity;
+
                 if (bloodInventory != null)
                 {
-                    bloodInventory.Quantity = quantity;
+                    bloodInventory.Quantity += change;
+                    if (bloodInventory.Quantity < 0)
+                        bloodInventory.Quantity = 0;
+
                     bloodInventory.LastUpdated = DateTime.Now;
                     _context.Update(bloodInventory);
                 }
                 else
                 {
-                    // THÊM MỚI nếu chưa có
                     var newInventory = new BloodInventory
                     {
                         BloodTypeID = bloodTypeId,
                         BloodBankID = bloodBankId,
-                        Quantity = quantity,
+                        Quantity = change < 0 ? 0 : change,
                         LastUpdated = DateTime.Now
                     };
                     _context.Add(newInventory);
@@ -258,6 +263,7 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("BloodInventoryManagement");
             }
         }
+
 
 
         // ✅ Hàm kiểm tra tương hợp nhóm máu
