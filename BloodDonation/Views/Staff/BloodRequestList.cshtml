@@ -131,6 +131,8 @@
             <tbody id="bloodRequestTableBody">
                 @foreach (var req in Model)
                 {
+    if (req.Status == "Approved" || req.Status == "Completed")
+    {
                     <tr>
                         <td class="center name-col">@req.MedicalCenter?.Name</td>
                         <td class="text-center blood-col">@req.BloodType?.Type</td>
@@ -183,6 +185,7 @@
                             </a>
                         </td>
                     </tr>
+                }
                 }
             </tbody>
         </table>
