@@ -50,7 +50,7 @@ namespace BloodDonation.Controllers
 
             // Kiểm tra lịch hiến máu trong vòng 14 ngày gần nhất
             var lastAppointment = _context.DonationAppointments
-                .Where(a => a.DonorID == donor.DonorID)
+                .Where(a => a.DonorID == donor.DonorID && a.Status != "Cancelled" && a.Status != "Rejected")
                 .OrderByDescending(a => a.AppointmentDate)
                 .FirstOrDefault();
 
