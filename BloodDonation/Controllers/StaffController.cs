@@ -619,169 +619,196 @@ namespace BloodDonation.Controllers
         public async Task<IActionResult> NearestDonors(string locationId = null, string customAddress = null)
         {
             SetStaffNotificationBadge();
-            var bloodBanks = _context.BloodBanks.ToList();
-            var medicalCenters = _context.MedicalCenters.ToList();
-            ViewBag.BloodBanks = bloodBanks;
-            ViewBag.MedicalCenters = medicalCenters;
-            ViewBag.CustomAddress = customAddress;
-
-            int? selectedBankId = null;
-            int? selectedMedicalCenterId = null;
-            string locationType = null;
-            int locationIntId = 0;
-
-            if (!string.IsNullOrEmpty(locationId))
+            try
             {
-                if (locationId.StartsWith("bank_"))
+                var bloodBanks = _context.BloodBanks.ToList();
+                var medicalCenters = _context.MedicalCenters.ToList();
+                ViewBag.BloodBanks = bloodBanks;
+                ViewBag.MedicalCenters = medicalCenters;
+                ViewBag.CustomAddress = customAddress;
+
+                int? selectedBankId = null;
+                int? selectedMedicalCenterId = null;
+                string locationType = null;
+                int locationIntId = 0;
+
+                if (!string.IsNullOrEmpty(locationId))
                 {
-                    locationType = "bank";
-                    if (int.TryParse(locationId.Substring(5), out int id))
+                    if (locationId.StartsWith("bank_"))
                     {
-                        selectedBankId = id;
-                        locationIntId = id;
+                        locationType = "bank";
+                        if (int.TryParse(locationId.Substring(5), out int id))
+                        {
+                            selectedBankId = id;
+                            locationIntId = id;
+                        }
+                    }
+                    else if (locationId.StartsWith("center_"))
+                    {
+                        locationType = "center";
+                        if (int.TryParse(locationId.Substring(7), out int id))
+                        {
+                            selectedMedicalCenterId = id;
+                            locationIntId = id;
+                        }
                     }
                 }
-                else if (locationId.StartsWith("center_"))
+
+                ViewBag.SelectedBankId = selectedBankId;
+                ViewBag.SelectedMedicalCenterId = selectedMedicalCenterId;
+
+                if (selectedBankId == null && selectedMedicalCenterId == null && string.IsNullOrWhiteSpace(customAddress))
                 {
-                    locationType = "center";
-                    if (int.TryParse(locationId.Substring(7), out int id))
+                    // Chưa chọn nơi hiến máu, chỉ hiển thị form chọn
+                    ViewBag.Donors = null;
+                    return View();
+                }
+
+                // Lấy danh sách donor sẵn sàng có địa chỉ
+                var donors = _context.Donors
+                    .Include(d => d.BloodType)
+                    .Where(d => d.IsAvailable == true 
+                        && !string.IsNullOrEmpty(d.Address)
+                        && _context.DonationAppointments.Any(a => a.DonorID == d.DonorID && a.Status == "Confirmed"))
+                    .ToList();
+
+                // Lấy địa chỉ nơi hiến máu (ưu tiên customAddress nếu có)
+                string locationAddress = null;
+                if (!string.IsNullOrWhiteSpace(customAddress))
+                {
+                    locationAddress = customAddress;
+                }
+                else if (selectedBankId != null)
+                {
+                    var bloodBank = bloodBanks.FirstOrDefault(b => b.BloodBankID == selectedBankId);
+                    if (bloodBank == null || string.IsNullOrEmpty(bloodBank.Location))
                     {
-                        selectedMedicalCenterId = id;
-                        locationIntId = id;
+                        ViewBag.Donors = null;
+                        ViewBag.Error = "Không tìm thấy địa chỉ kho máu.";
+                        return View();
                     }
+                    locationAddress = bloodBank.Location;
                 }
-            }
+                else if (selectedMedicalCenterId != null)
+                {
+                    var medicalCenter = medicalCenters.FirstOrDefault(c => c.MedicalCenterID == selectedMedicalCenterId);
+                    if (medicalCenter == null || string.IsNullOrEmpty(medicalCenter.Location))
+                    {
+                        ViewBag.Donors = null;
+                        ViewBag.Error = "Không tìm thấy địa chỉ trung tâm y tế.";
+                        return View();
+                    }
+                    locationAddress = medicalCenter.Location;
+                }
 
-            ViewBag.SelectedBankId = selectedBankId;
-            ViewBag.SelectedMedicalCenterId = selectedMedicalCenterId;
+                // Gọi API geocode để lấy toạ độ cho locationAddress và donor
+                var apiKey = "5b3ce3597851110001cf62484675ccea183f4166ab762b8429b80eb8";
+                var httpClient = new HttpClient();
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            if (selectedBankId == null && selectedMedicalCenterId == null && string.IsNullOrWhiteSpace(customAddress))
-            {
-                // Chưa chọn nơi hiến máu, chỉ hiển thị form chọn
-                ViewBag.Donors = null;
-                return View();
-            }
+                async Task<(double lat, double lon)?> GeocodeAsync(string address)
+                {
+                    var url = $"https://api.openrouteservice.org/geocode/search?api_key={apiKey}&text={Uri.EscapeDataString(address)}&boundary.country=VN";
+                    var response = await httpClient.GetAsync(url);
+                    if (!response.IsSuccessStatusCode) return null;
+                    var json = await response.Content.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(json);
+                    var features = doc.RootElement.GetProperty("features");
+                    if (features.GetArrayLength() == 0) return null;
+                    var coords = features[0].GetProperty("geometry").GetProperty("coordinates");
+                    double lon = coords[0].GetDouble();
+                    double lat = coords[1].GetDouble();
+                    return (lat, lon);
+                }
 
-            // Lấy danh sách donor sẵn sàng có địa chỉ
-            var donors = _context.Donors
-                .Include(d => d.BloodType)
-                .Where(d => d.IsAvailable == true 
-                    && !string.IsNullOrEmpty(d.Address)
-                    && _context.DonationAppointments.Any(a => a.DonorID == d.DonorID && a.Status == "Confirmed"))
-                .ToList();
-
-            // Lấy địa chỉ nơi hiến máu (ưu tiên customAddress nếu có)
-            string locationAddress = null;
-            if (!string.IsNullOrWhiteSpace(customAddress))
-            {
-                locationAddress = customAddress;
-            }
-            else if (selectedBankId != null)
-            {
-                var bloodBank = bloodBanks.FirstOrDefault(b => b.BloodBankID == selectedBankId);
-                if (bloodBank == null || string.IsNullOrEmpty(bloodBank.Location))
+                // Lấy toạ độ nơi hiến máu (hoặc customAddress)
+                var locationCoord = await GeocodeAsync(locationAddress);
+                if (locationCoord == null)
                 {
                     ViewBag.Donors = null;
-                    ViewBag.Error = "Không tìm thấy địa chỉ kho máu.";
+                    ViewBag.Error = "Không lấy được toạ độ nơi hiến máu.";
                     return View();
                 }
-                locationAddress = bloodBank.Location;
-            }
-            else if (selectedMedicalCenterId != null)
-            {
-                var medicalCenter = medicalCenters.FirstOrDefault(c => c.MedicalCenterID == selectedMedicalCenterId);
-                if (medicalCenter == null || string.IsNullOrEmpty(medicalCenter.Location))
+
+                // Lấy toạ độ các donor
+                var geocodeTasks = donors.Select(async donor =>
+                {
+                    var coord = await GeocodeAsync(donor.Address);
+                    return (donor, coord);
+                }).ToList();
+
+                // Chờ tất cả task hoàn tất
+                var donorCoords = (await Task.WhenAll(geocodeTasks)).ToList();
+
+                // Lọc donor có toạ độ hợp lệ
+                var validDonors = donorCoords.Where(x => x.coord != null).ToList();
+                if (!validDonors.Any())
                 {
                     ViewBag.Donors = null;
-                    ViewBag.Error = "Không tìm thấy địa chỉ trung tâm y tế.";
+                    ViewBag.Error = "Không có người hiến máu nào có toạ độ hợp lệ.";
                     return View();
                 }
-                locationAddress = medicalCenter.Location;
-            }
 
-            // Gọi API geocode để lấy toạ độ cho locationAddress và donor
-            var apiKey = "5b3ce3597851110001cf62484675ccea183f4166ab762b8429b80eb8";
-            var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                // Gọi matrix API để tính khoảng cách
+                var locations = new List<double[]>();
+                // Vị trí đầu là nơi hiến máu
+                locations.Add(new double[] { locationCoord.Value.lon, locationCoord.Value.lat });
+                // Các vị trí donor
+                locations.AddRange(validDonors.Select(x => new double[] { x.coord.Value.lon, x.coord.Value.lat }));
 
-            async Task<(double lat, double lon)?> GeocodeAsync(string address)
-            {
-                var url = $"https://api.openrouteservice.org/geocode/search?api_key={apiKey}&text={Uri.EscapeDataString(address)}&boundary.country=VN";
-                var response = await httpClient.GetAsync(url);
-                if (!response.IsSuccessStatusCode) return null;
-                var json = await response.Content.ReadAsStringAsync();
-                using var doc = JsonDocument.Parse(json);
-                var features = doc.RootElement.GetProperty("features");
-                if (features.GetArrayLength() == 0) return null;
-                var coords = features[0].GetProperty("geometry").GetProperty("coordinates");
-                double lon = coords[0].GetDouble();
-                double lat = coords[1].GetDouble();
-                return (lat, lon);
-            }
+                var matrixBody = new
+                {
+                    locations = locations,
+                    metrics = new[] { "distance" },
+                    units = "km"
+                };
+                var matrixContent = new StringContent(JsonSerializer.Serialize(matrixBody), System.Text.Encoding.UTF8, "application/json");
+                httpClient.DefaultRequestHeaders.Remove("Authorization");
+                httpClient.DefaultRequestHeaders.Add("Authorization", apiKey);
+                var matrixResponse = await httpClient.PostAsync("https://api.openrouteservice.org/v2/matrix/driving-car", matrixContent);
+                if (!matrixResponse.IsSuccessStatusCode)
+                {
+                    ViewBag.Donors = null;
+                    ViewBag.Error = "Không thể tính khoảng cách (matrix API).";
+                    return View();
+                }
+                var matrixJson = await matrixResponse.Content.ReadAsStringAsync();
+                using var matrixDoc = JsonDocument.Parse(matrixJson);
+                var distances = matrixDoc.RootElement.GetProperty("distances");
+                // Dòng đầu là từ nơi hiến máu đến các donor
+                var distanceArr = distances[0];
 
-            // Lấy toạ độ nơi hiến máu (hoặc customAddress)
-            var locationCoord = await GeocodeAsync(locationAddress);
-            if (locationCoord == null)
-            {
-                ViewBag.Donors = null;
-                ViewBag.Error = "Không lấy được toạ độ nơi hiến máu.";
+                // Ghép donor với khoảng cách
+                var donorWithDistance = validDonors.Select((x, idx) => new { Donor = x.donor, Distance = distanceArr[idx + 1].GetDouble() }).OrderBy(x => x.Distance).ToList();
+                ViewBag.DonorDistances = donorWithDistance;
+                ViewBag.Donors = donorWithDistance.Select(x => x.Donor).ToList();
+                ViewBag.Error = null;
                 return View();
             }
-
-            // Lấy toạ độ các donor
-            var geocodeTasks = donors.Select(async donor =>
-            {
-                var coord = await GeocodeAsync(donor.Address);
-                return (donor, coord);
-            }).ToList();
-
-            // Chờ tất cả task hoàn tất
-            var donorCoords = (await Task.WhenAll(geocodeTasks)).ToList();
-
-            // Lọc donor có toạ độ hợp lệ
-            var validDonors = donorCoords.Where(x => x.coord != null).ToList();
-            if (!validDonors.Any())
+            catch (HttpRequestException)
             {
                 ViewBag.Donors = null;
-                ViewBag.Error = "Không có người hiến máu nào có toạ độ hợp lệ.";
+                ViewBag.Error = "Không thể kết nối tới dịch vụ bản đồ. Vui lòng kiểm tra kết nối mạng!";
                 return View();
             }
-
-            // Gọi matrix API để tính khoảng cách
-            var locations = new List<double[]>();
-            // Vị trí đầu là nơi hiến máu
-            locations.Add(new double[] { locationCoord.Value.lon, locationCoord.Value.lat });
-            // Các vị trí donor
-            locations.AddRange(validDonors.Select(x => new double[] { x.coord.Value.lon, x.coord.Value.lat }));
-
-            var matrixBody = new
-            {
-                locations = locations,
-                metrics = new[] { "distance" },
-                units = "km"
-            };
-            var matrixContent = new StringContent(JsonSerializer.Serialize(matrixBody), System.Text.Encoding.UTF8, "application/json");
-            httpClient.DefaultRequestHeaders.Remove("Authorization");
-            httpClient.DefaultRequestHeaders.Add("Authorization", apiKey);
-            var matrixResponse = await httpClient.PostAsync("https://api.openrouteservice.org/v2/matrix/driving-car", matrixContent);
-            if (!matrixResponse.IsSuccessStatusCode)
+            catch (TaskCanceledException)
             {
                 ViewBag.Donors = null;
-                ViewBag.Error = "Không thể tính khoảng cách (matrix API).";
+                ViewBag.Error = "Kết nối tới dịch vụ bản đồ bị quá thời gian. Vui lòng thử lại!";
                 return View();
             }
-            var matrixJson = await matrixResponse.Content.ReadAsStringAsync();
-            using var matrixDoc = JsonDocument.Parse(matrixJson);
-            var distances = matrixDoc.RootElement.GetProperty("distances");
-            // Dòng đầu là từ nơi hiến máu đến các donor
-            var distanceArr = distances[0];
-
-            // Ghép donor với khoảng cách
-            var donorWithDistance = validDonors.Select((x, idx) => new { Donor = x.donor, Distance = distanceArr[idx + 1].GetDouble() }).OrderBy(x => x.Distance).ToList();
-            ViewBag.DonorDistances = donorWithDistance;
-            ViewBag.Donors = donorWithDistance.Select(x => x.Donor).ToList();
-            ViewBag.Error = null;
-            return View();
+            catch (System.Net.Sockets.SocketException)
+            {
+                ViewBag.Donors = null;
+                ViewBag.Error = "Không thể kết nối tới dịch vụ bản đồ (lỗi mạng). Vui lòng kiểm tra lại kết nối Internet!";
+                return View();
+            }
+            catch (Exception)
+            {
+                ViewBag.Donors = null;
+                ViewBag.Error = "Đã xảy ra lỗi không xác định khi tìm kiếm người hiến máu gần nhất.";
+                return View();
+            }
         }
 
         // Hiển thị danh sách người hiến máu gần nhất trong bán kính 20km
