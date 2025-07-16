@@ -31,9 +31,25 @@ namespace BloodDonation.Controllers
             return !string.IsNullOrEmpty(username) && role?.ToLower() == "staff";
         }
 
+        // Helper method to set notification badge for staff
+        private void SetStaffNotificationBadge()
+        {
+            var username = HttpContext.Session.GetString("Username");
+            if (!string.IsNullOrEmpty(username))
+            {
+                var staffAccount = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "staff");
+                if (staffAccount != null)
+                {
+                    int unreadCount = _context.Notifications.Count(n => n.AccountID == staffAccount.AccountID && !n.IsRead);
+                    ViewBag.UnreadNotificationCount = unreadCount;
+                }
+            }
+        }
+
         // Hiển thị danh sách các yêu cầu đăng ký hiến máu
         public IActionResult DonationList()
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
             var appointments = _context.DonationAppointments
@@ -48,6 +64,7 @@ namespace BloodDonation.Controllers
 
         public IActionResult DonorRequestDetails(int id)
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
             // Lấy appointment theo ID (AppointmentID)
@@ -87,6 +104,7 @@ namespace BloodDonation.Controllers
 
         public IActionResult BloodInventory()
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
             var inventories = _context.BloodInventories
@@ -281,6 +299,7 @@ namespace BloodDonation.Controllers
 
         public IActionResult BloodRequestList()
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
             var approvedRequests = _context.BloodRequests
@@ -329,6 +348,7 @@ namespace BloodDonation.Controllers
 
         public IActionResult ProcessBloodRequest(int id)
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
             var request = _context.BloodRequests
@@ -361,6 +381,7 @@ namespace BloodDonation.Controllers
         [HttpPost]
         public IActionResult CompleteBloodRequest(int id, string note, int SelectedBloodTypeID)
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
             var request = _context.BloodRequests
@@ -414,6 +435,7 @@ namespace BloodDonation.Controllers
 
         public IActionResult AppointmentDetail(int id)
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
             var appointment = _context.DonationAppointments
@@ -439,6 +461,7 @@ namespace BloodDonation.Controllers
         // Hiển thị chi tiết yêu cầu máu
         public IActionResult BloodRequestDetails(int id)
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
 
@@ -504,6 +527,7 @@ namespace BloodDonation.Controllers
         [HttpPost]
         public IActionResult ProcessBloodRequestFromDetails(int bloodRequestId, string action, int? selectedBloodTypeId = null, decimal? quantity = null)
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
 
@@ -594,6 +618,7 @@ namespace BloodDonation.Controllers
         // Hiển thị danh sách người hiến máu gần nhất
         public async Task<IActionResult> NearestDonors(string locationId = null, string customAddress = null)
         {
+            SetStaffNotificationBadge();
             var bloodBanks = _context.BloodBanks.ToList();
             var medicalCenters = _context.MedicalCenters.ToList();
             ViewBag.BloodBanks = bloodBanks;
@@ -762,6 +787,7 @@ namespace BloodDonation.Controllers
         // Hiển thị danh sách người hiến máu gần nhất trong bán kính 20km
         public async Task<IActionResult> NearestDonorsWithin20km(int? bloodBankId = null, string customAddress = null, int? bloodRequestId = null)
         {
+            SetStaffNotificationBadge();
             if (bloodRequestId.HasValue)
             {
                 var bloodRequest = _context.BloodRequests

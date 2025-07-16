@@ -39,7 +39,13 @@
             <!-- Sidebar -->
             <div class="col-md-2 sidebar d-flex flex-column justify-content-between">
                 <div>
-                    <h5 class="mb-4 text-danger fw-bold">🩸 Blood Bank Staff</h5>
+                    <h5 class="mb-4 text-danger fw-bold">
+                        🩸 Blood Bank Staff
+                        @if (ViewBag.UnreadNotificationCount > 0)
+                        {
+                            <span class="badge bg-danger ms-2" id="notificationBadge-staff">@ViewBag.UnreadNotificationCount</span>
+                        }
+                    </h5>
 
                     <a href="@Url.Action("DonationList", "Staff")"
                        class="nav-link @(currentAction == "DonationList" ? "active" : "")">

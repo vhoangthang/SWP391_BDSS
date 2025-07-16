@@ -56,6 +56,29 @@ namespace BloodDonation.Controllers
         }
 
         [HttpPost]
+        public IActionResult MarkAsReadStaff(int id)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+
+            var staff = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "staff");
+            if (staff == null)
+                return Json(new { success = false, message = "Không tìm thấy tài khoản staff" });
+
+            var notification = _context.Notifications.FirstOrDefault(n => n.NotificationID == id && n.AccountID == staff.AccountID);
+            if (notification == null)
+                return Json(new { success = false, message = "Không tìm thấy thông báo" });
+
+            if (!notification.IsRead)
+            {
+                notification.IsRead = true;
+                _context.SaveChanges();
+            }
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
         public IActionResult SendInviteNotification(int donorId, int bloodRequestId)
         {
             var donor = _context.Donors.Include(d => d.Account).FirstOrDefault(d => d.DonorID == donorId);
