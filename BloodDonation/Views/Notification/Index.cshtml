@@ -46,11 +46,11 @@
                         </p>
                         @if (n.Type == "Invite" && !n.IsConfirmed)
                         {
-                            <form asp-action="ConfirmDonation" asp-controller="Notification" method="post" style="display:inline;">
+                            <form asp-action="ConfirmDonation" asp-controller="Notification" method="post" class="confirm-donation-form" style="display:inline;">
                                 <input type="hidden" name="notificationId" value="@n.NotificationID" />
                                 <button type="submit" class="btn btn-success btn-sm mt-2">Xác nhận đi hiến máu</button>
                             </form>
-                            <form asp-action="RejectDonation" asp-controller="Notification" method="post" style="display:inline;">
+                            <form asp-action="RejectDonation" asp-controller="Notification" method="post" class="reject-donation-form" style="display:inline;">
                                 <input type="hidden" name="notificationId" value="@n.NotificationID" />
                                 <button type="submit" class="btn btn-secondary btn-sm mt-2 ms-2">Từ chối</button>
                             </form>
@@ -58,6 +58,10 @@
                         else if (n.Type == "Invite" && n.IsConfirmed)
                         {
                             <span class="text-success">Đã xác nhận</span>
+                        }
+                        else if (n.Type == "Invite" && n.IsConfirmed == false)
+                        {
+                            <span class="text-danger">Đã từ chối</span>
                         }
                         <button class="btn btn-danger btn-sm mt-2 btn-delete-notification" data-id="@n.NotificationID" type="button">Xóa</button>
                     </div>
@@ -114,6 +118,17 @@
                         alert(res.message || "Xóa không thành công!");
                     }
                 });
+            }
+        });
+        // Xác nhận popup cho xác nhận hoặc từ chối hiến máu
+        $(".confirm-donation-form").on("submit", function(e) {
+            if (!confirm("Bạn có chắc chắn muốn xác nhận đi hiến máu không?")) {
+                e.preventDefault();
+            }
+        });
+        $(".reject-donation-form").on("submit", function(e) {
+            if (!confirm("Bạn có chắc chắn muốn từ chối lời mời hiến máu không?")) {
+                e.preventDefault();
             }
         });
     });
