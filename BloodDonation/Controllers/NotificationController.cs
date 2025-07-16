@@ -285,6 +285,26 @@ namespace BloodDonation.Controllers
             return Json(new { success = true });
         }
 
+        [HttpPost]
+        public IActionResult DeleteNotificationStaff(int notificationId)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+
+            var staff = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "staff");
+            if (staff == null)
+                return Json(new { success = false, message = "Không tìm thấy tài khoản staff" });
+
+            var notification = _context.Notifications.FirstOrDefault(n => n.NotificationID == notificationId && n.AccountID == staff.AccountID);
+            if (notification == null)
+                return Json(new { success = false, message = "Không tìm thấy thông báo" });
+
+            _context.Notifications.Remove(notification);
+            _context.SaveChanges();
+            return Json(new { success = true });
+        }
+
         public IActionResult StaffNotifications()
         {
             var username = HttpContext.Session.GetString("Username");
