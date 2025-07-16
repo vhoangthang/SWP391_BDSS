@@ -62,10 +62,18 @@ namespace BloodDonation.Controllers
             if (donor == null)
                 return NotFound();
 
+            // Lấy thông tin blood request và medical center
+            var bloodRequest = _context.BloodRequests.Include(br => br.MedicalCenter).FirstOrDefault(br => br.BloodRequestID == bloodRequestId);
+            string medicalCenterInfo = "";
+            if (bloodRequest != null && bloodRequest.MedicalCenter != null)
+            {
+                medicalCenterInfo = $"\nĐịa điểm: {bloodRequest.MedicalCenter.Name} ({bloodRequest.MedicalCenter.Location})";
+            }
+
             var notification = new Notification
             {
                 DonorID = donorId,
-                Message = "Bạn được mời tham gia hiến máu cho một trường hợp cần thiết. Vui lòng xác nhận nếu bạn đồng ý.",
+                Message = "Bạn được mời tham gia hiến máu cho một trường hợp cần thiết. Vui lòng xác nhận nếu bạn đồng ý." + medicalCenterInfo,
                 SentAt = DateTime.Now,
                 IsRead = false,
                 Type = "Invite",
