@@ -3,13 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BloodDonation.Models
 {
-    [Table("Account")] // ✅ đặt ở đây
+    [Table("Account")]
     public class Account
     {
         [Key]
         public int AccountID { get; set; }
 
-        public int? MedicalCenterID { get; set; } // Có thể NULL
+        public int? MedicalCenterID { get; set; }
 
         [Required]
         [MaxLength(50)]
@@ -17,7 +17,7 @@ namespace BloodDonation.Models
 
         [Required]
         [MaxLength(50)]
-        public string Password { get; set; } // Nên mã hóa khi lưu thực tế
+        public string Password { get; set; }
 
         [Required]
         [MaxLength(100)]

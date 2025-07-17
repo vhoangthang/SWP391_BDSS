@@ -63,10 +63,10 @@ namespace BloodDonation.Controllers
             var account = new Account
             {
                 Username = model.Username,
-                Password = model.Password, // NÊN mã hóa mật khẩu ở đây!
+                Password = model.Password, 
                 Email = model.Email,
-                Role = "Donor", // Giá trị mặc định cho tài khoản thường
-                PermissionLevel = 1 // Giá trị mặc định
+                Role = "Donor", 
+                PermissionLevel = 1 
             };
             _context.Accounts.Add(account);
             await _context.SaveChangesAsync();
@@ -190,7 +190,6 @@ namespace BloodDonation.Controllers
             account.Password = newPassword;
             _context.SaveChanges();
 
-            // ✅ Sửa lại redirect cho đúng
             return RedirectToAction("Index", "Login");
         }
 

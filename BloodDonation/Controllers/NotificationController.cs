@@ -24,7 +24,7 @@ namespace BloodDonation.Controllers
             if (donor == null)
                 return RedirectToAction("Index", "Login");
 
-            // Chỉ lấy thông báo có AccountID đúng với tài khoản donor
+            // Only get notifications with the correct AccountID
             var notifications = _context.Notifications
                 .Where(n => n.AccountID == donor.AccountID)
                 .OrderByDescending(n => n.SentAt)
@@ -85,7 +85,7 @@ namespace BloodDonation.Controllers
             if (donor == null)
                 return NotFound();
 
-            // Lấy thông tin blood request và medical center
+            // Get blood request and medical center information
             var bloodRequest = _context.BloodRequests.Include(br => br.MedicalCenter).FirstOrDefault(br => br.BloodRequestID == bloodRequestId);
             string medicalCenterInfo = "";
             if (bloodRequest != null && bloodRequest.MedicalCenter != null)
@@ -125,14 +125,14 @@ namespace BloodDonation.Controllers
             notification.IsConfirmed = true;
             _context.SaveChanges();
 
-            // Lấy thông tin BloodRequest liên quan
+            // Get related BloodRequest information
             var bloodRequest = _context.BloodRequests
                 .Include(br => br.MedicalCenter)
                 .FirstOrDefault(br => br.BloodRequestID == notification.BloodRequestID);
 
             if (bloodRequest != null)
             {
-                // Cập nhật MedicalCenterID của đơn hiến máu gần nhất (Confirmed) thành MedicalCenterID của BloodRequest
+                // Update the MedicalCenterID of the nearest donation appointment (Confirmed) to the MedicalCenterID of the BloodRequest
                 var appointment = _context.DonationAppointments
                     .Where(a => a.DonorID == notification.DonorID && a.Status == "Confirmed")
                     .OrderByDescending(a => a.AppointmentDate)
@@ -142,7 +142,7 @@ namespace BloodDonation.Controllers
                     appointment.MedicalCenterID = bloodRequest.MedicalCenterID;
                     _context.SaveChanges();
                 }
-                // Gửi thông báo cho tất cả staff (không lọc theo MedicalCenterID)
+                // Send notification to all staff (not filtered by MedicalCenterID)
                 var staffAccounts = _context.Accounts.Where(a => a.Role.ToLower() == "staff").ToList();
                 foreach (var staffAccount in staffAccounts)
                 {
@@ -160,7 +160,7 @@ namespace BloodDonation.Controllers
                     _context.Notifications.Add(staffNotification);
                 }
 
-                // Medical center notification giữ nguyên
+                // Medical center notification remains unchanged
                 var medicalCenterAccount = _context.Accounts.FirstOrDefault(a => a.Role.ToLower() == "medicalcenter" && a.MedicalCenterID == bloodRequest.MedicalCenterID);
                 if (medicalCenterAccount != null)
                 {
@@ -181,7 +181,7 @@ namespace BloodDonation.Controllers
             }
             else
             {
-                // Nếu không có BloodRequestID, gửi cho tất cả staff
+                // If no BloodRequestID, send to all staff
                 var allStaff = _context.Accounts.Where(a => a.Role.ToLower() == "staff").ToList();
                 foreach (var staffAccount in allStaff)
                 {
@@ -213,24 +213,24 @@ namespace BloodDonation.Controllers
             if (notification == null)
                 return NotFound();
 
-            notification.IsConfirmed = false; // Đánh dấu đã từ chối
+            notification.IsConfirmed = false; // Mark as rejected
             _context.SaveChanges();
 
-            // Lấy thông tin BloodRequest liên quan
+            // Get related BloodRequest information
             var bloodRequest = _context.BloodRequests
                 .Include(br => br.MedicalCenter)
                 .FirstOrDefault(br => br.BloodRequestID == notification.BloodRequestID);
 
             if (bloodRequest != null)
             {
-                // Gửi thông báo cho tất cả staff liên quan
+                // Send notification to all related staff
                 var staffAccounts = _context.Accounts.Where(a => a.Role.ToLower() == "staff").ToList();
                 foreach (var staffAccount in staffAccounts)
                 {
                     var staffNotification = new Notification
                     {
                         DonorID = notification.DonorID,
-                        Message = $"Donor {notification.Donor.Name} (ID: {notification.Donor.DonorID}, Nhóm máu: {notification.Donor.BloodType?.Type}) đã từ chối lời mời hiến máu.",
+                        Message = $"Donor {notification.Donor.Name} (ID: {notification.Donor.DonorID}, Blood Type: {notification.Donor.BloodType?.Type}) has rejected the donation invitation.",
                         SentAt = DateTime.Now,
                         IsRead = false,
                         Type = "DonorRejected",
@@ -244,7 +244,7 @@ namespace BloodDonation.Controllers
             }
             else
             {
-                // Nếu không có BloodRequestID, gửi cho tất cả staff
+                // If no BloodRequestID, send to all staff
                 var allStaff = _context.Accounts.Where(a => a.Role.ToLower() == "staff").ToList();
                 foreach (var staffAccount in allStaff)
                 {
@@ -315,7 +315,7 @@ namespace BloodDonation.Controllers
             if (staffAccount == null)
                 return RedirectToAction("Index", "Login");
 
-            // Thêm logic badge
+            // Add badge logic
             int unreadCount = 0;
             unreadCount = _context.Notifications.Count(n => n.AccountID == staffAccount.AccountID && !n.IsRead);
             ViewBag.UnreadNotificationCount = unreadCount;

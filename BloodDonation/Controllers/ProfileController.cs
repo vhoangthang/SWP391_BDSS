@@ -59,7 +59,7 @@ namespace BloodDonation.Controllers
                 donor = new BloodDonation.Models.Donor { AccountID = account.AccountID };
             }
 
-            // Kiểm tra quyền chỉnh sửa IsAvailable: chỉ cho phép nếu có đơn đăng ký hiến máu Pending hoặc Confirmed
+            // Check if user can edit IsAvailable: only allow if there is a pending or confirmed donation appointment
             var canEditIsAvailable = _context.DonationAppointments.Any(a => a.DonorID == donor.DonorID && (a.Status == "Pending" || a.Status == "Confirmed"));
             ViewBag.CanEditIsAvailable = canEditIsAvailable;
 
@@ -85,12 +85,12 @@ namespace BloodDonation.Controllers
             var existingDonor = _context.Donors.FirstOrDefault(d => d.AccountID == donor.AccountID);
             if (existingDonor == null)
             {
-                // Tạo mới Donor
+                // Create new Donor
                 _context.Donors.Add(donor);
             }
             else
             {
-                // Cập nhật thông tin
+                // Update information
                 existingDonor.Name = donor.Name;
                 existingDonor.DateOfBirth = donor.DateOfBirth;
                 existingDonor.Gender = donor.Gender;

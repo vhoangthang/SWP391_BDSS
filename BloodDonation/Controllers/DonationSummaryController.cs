@@ -87,12 +87,12 @@ namespace BloodDonation.Controllers
             {
                 if (appointment.Status == "Completed")
                 {
-                    // Không cho xóa, có thể trả về thông báo hoặc đơn giản là không làm gì
+                    // Do not delete, return a message or simply do nothing
                     return RedirectToAction("Index");
                 }
                 else if (appointment.Status == "Pending")
                 {
-                    // Xóa như cũ
+                    // Delete as before
                     var surveys = _context.HealthSurveys
                         .Where(h => h.AppointmentID != null && h.AppointmentID == appointmentId)
                         .ToList();
@@ -105,9 +105,9 @@ namespace BloodDonation.Controllers
                 }
                 else if (appointment.Status == "Confirmed")
                 {
-                    // Chuyển trạng thái sang Cancelled
+                    // Change status to Cancelled
                     appointment.Status = "Cancelled";
-                    // Nếu donor đang sẵn sàng thì chuyển về không sẵn sàng
+                    // If donor is available, change to not available
                     var donor = _context.Donors.FirstOrDefault(d => d.DonorID == appointment.DonorID);
                     if (donor != null && donor.IsAvailable == true)
                     {

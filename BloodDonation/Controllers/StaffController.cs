@@ -46,7 +46,7 @@ namespace BloodDonation.Controllers
             }
         }
 
-        // Hiển thị danh sách các yêu cầu đăng ký hiến máu
+        // Display the list of blood donation registration requests
         public IActionResult DonationList()
         {
             SetStaffNotificationBadge();
@@ -67,7 +67,7 @@ namespace BloodDonation.Controllers
             SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
-            // Lấy appointment theo ID (AppointmentID)
+            // Get the appointment by ID (AppointmentID)
             var appointment = _context.DonationAppointments
                 .Include(x => x.Donor)
                     .ThenInclude(d => d.Account)
@@ -80,7 +80,7 @@ namespace BloodDonation.Controllers
                 return NotFound();
             }
 
-            // Parse JSON từ chuỗi HealthSurvey nếu có
+            // Parse JSON from HealthSurvey string if available
             Dictionary<string, object> healthSurvey = new();
 
             if (!string.IsNullOrEmpty(appointment.HealthSurvey))
@@ -91,8 +91,8 @@ namespace BloodDonation.Controllers
                 }
                 catch (Exception ex)
                 {
-                    // Log nếu JSON lỗi (tùy bạn xử lý)
-                    Console.WriteLine("Lỗi parse JSON: " + ex.Message);
+                    // Log if JSON parsing fails (optional handling)
+                    Console.WriteLine("Error parsing JSON: " + ex.Message);
                 }
             }
 
@@ -111,16 +111,16 @@ namespace BloodDonation.Controllers
                 .Include(b => b.BloodType)
                 .ToList();
 
-            // Tính tổng số lượng máu
+            // Calculate the total blood quantity
             decimal totalQuantity = inventories.Sum(b => b.Quantity);
 
-            // Gửi vào View qua ViewBag hoặc ViewModel
+            // Pass to View via ViewBag or ViewModel
             ViewBag.TotalQuantity = totalQuantity;
 
             return View(inventories);
         }
 
-        //Xác nhận yêu cầu hiến máu và cập nhật kho máu
+        //Confirm donation request and update blood inventory
         [HttpPost]
         public IActionResult ConfirmDonation(int AppointmentID, string IsEligible, decimal QuantityDonated, string action)
         {
@@ -133,13 +133,13 @@ namespace BloodDonation.Controllers
 
                 if (appointment == null)
                 {
-                    TempData["Error"] = "❌ Không tìm thấy lịch hẹn.";
+                    TempData["Error"] = "❌ Appointment not found.";
                     return RedirectToAction("DonationList");
                 }
 
                 if (appointment.Status == "Completed" || appointment.Status == "Cancelled")
                 {
-                    TempData["Error"] = "⚠️ Lịch hẹn đã hoàn thành hoặc đã bị hủy. Không thể chỉnh sửa.";
+                    TempData["Error"] = "⚠️ Appointment is already completed or cancelled. Cannot modify.";
                     return RedirectToAction("DonationList");
                 }
 
@@ -151,27 +151,27 @@ namespace BloodDonation.Controllers
                     case "completed":
                         if (appointment.Status == "Completed")
                         {
-                            TempData["Error"] = "⚠️ Lịch hẹn đã hoàn thành trước đó.";
+                            TempData["Error"] = "⚠️ Appointment was already completed.";
                             return RedirectToAction("DonationList");
                         }
 
                         if (appointment.BloodTypeID <= 0)
                         {
-                            TempData["Error"] = "⚠️ Thiếu thông tin nhóm máu.";
+                            TempData["Error"] = "⚠️ Missing blood type information.";
                             return RedirectToAction("DonationList");
                         }
 
                         if (QuantityDonated <= 0)
                         {
-                            TempData["Error"] = "⚠️ Số lượng máu hiến phải lớn hơn 0.";
+                            TempData["Error"] = "⚠️ Blood donation quantity must be greater than 0.";
                             return RedirectToAction("DonationList");
                         }
 
                         appointment.Status = "Completed";
                         appointment.QuantityDonated = QuantityDonated;
-                        appointment.AppointmentDate = DateTime.Now; // Cập nhật ngày hoàn thành
+                        appointment.AppointmentDate = DateTime.Now; // Update completion date
 
-                        // Nếu donor đang sẵn sàng thì chuyển về không sẵn sàng
+                        // If donor is available, set to unavailable
                         var donorEntity = _context.Donors.FirstOrDefault(d => d.DonorID == appointment.DonorID);
                         if (donorEntity != null && donorEntity.IsAvailable == true)
                         {
@@ -179,7 +179,7 @@ namespace BloodDonation.Controllers
                             _context.SaveChanges();
                         }
 
-                        // ✅ Cập nhật hoặc tạo mới kho máu
+                        // ✅ Update or create blood inventory
                         var inventory = _context.BloodInventories.FirstOrDefault(b => b.BloodTypeID == appointment.BloodTypeID);
                         if (inventory != null)
                         {
@@ -191,14 +191,14 @@ namespace BloodDonation.Controllers
                             var newInventory = new BloodInventory
                             {
                                 BloodTypeID = appointment.BloodTypeID,
-                                BloodBankID = 1, // TODO: Lấy đúng BloodBankID nếu có logic, tạm mặc định là 1
+                                BloodBankID = 1, // TODO: Get correct BloodBankID if logic exists, default to 1
                                 Quantity = QuantityDonated,
                                 LastUpdated = DateTime.Now
                             };
                             _context.BloodInventories.Add(newInventory);
                         }
 
-                        // *** TẠO CERTIFICATE ***
+                        // *** CREATE CERTIFICATE ***
                         var existingCertificate = _context.DonationCertificates
                             .FirstOrDefault(c => c.AppointmentID == appointment.AppointmentID);
                         if (existingCertificate == null)
@@ -207,7 +207,7 @@ namespace BloodDonation.Controllers
                             var bloodType = _context.BloodTypes.FirstOrDefault(b => b.BloodTypeID == appointment.BloodTypeID);
                             var medicalCenter = _context.MedicalCenters.FirstOrDefault(m => m.MedicalCenterID == appointment.MedicalCenterID);
 
-                            string details = $"Chứng chỉ hiến máu cho {(donor?.Name ?? "Người hiến máu")}, nhóm máu {bloodType?.Type ?? "?"}, hiến {appointment.QuantityDonated}CC tại {medicalCenter?.Name ?? "cơ sở y tế"} ngày {appointment.AppointmentDate:dd/MM/yyyy}.";
+                            string details = $"Donation certificate for {(donor?.Name ?? "Donor")}, blood type {bloodType?.Type ?? "?"}, donated {appointment.QuantityDonated}CC at {medicalCenter?.Name ?? "Medical Center"} on {appointment.AppointmentDate:dd/MM/yyyy}.";
 
                             var certificate = new DonationCertificate
                             {
@@ -226,14 +226,14 @@ namespace BloodDonation.Controllers
                         }
                         else
                         {
-                            TempData["Error"] = "❌ Người hiến máu không đủ điều kiện.";
+                            TempData["Error"] = "❌ Donor is not eligible.";
                             return RedirectToAction("DonationList");
                         }
                         break;
 
                     case "reject":
                         appointment.Status = "Rejected";
-                        // Nếu donor đang sẵn sàng thì chuyển về không sẵn sàng
+                        // If donor is available, set to unavailable
                         var donorReject = _context.Donors.FirstOrDefault(d => d.DonorID == appointment.DonorID);
                         if (donorReject != null && donorReject.IsAvailable == true)
                         {
@@ -250,11 +250,11 @@ namespace BloodDonation.Controllers
                         break;
 
                     default:
-                        TempData["Error"] = "❌ Hành động không hợp lệ.";
+                        TempData["Error"] = "❌ Invalid action.";
                         return RedirectToAction("DonationList");
                 }
 
-                // Thêm notification nếu trạng thái là Confirmed hoặc Rejected
+                // Add notification if status is Confirmed or Rejected
                 if (appointment.Status == "Confirmed" || appointment.Status == "Rejected")
                 {
                     var donor = _context.Donors.Include(d => d.Account).FirstOrDefault(d => d.DonorID == appointment.DonorID);
@@ -262,13 +262,13 @@ namespace BloodDonation.Controllers
                     switch (appointment.Status)
                     {
                         case "Confirmed":
-                            notificationMessage = "Đơn của bạn đã được chấp nhận.";
+                            notificationMessage = "Your request has been approved.";
                             break;
                         case "Rejected":
-                            notificationMessage = "Đơn của bạn đã bị từ chối.";
+                            notificationMessage = "Your request has been rejected.";
                             break;
                         default:
-                            notificationMessage = $"Đơn hiến máu của bạn đã chuyển sang trạng thái: {appointment.Status}";
+                            notificationMessage = $"Your donation request status has changed to: {appointment.Status}";
                             break;
                     }
                     var notification = new Notification
@@ -279,18 +279,18 @@ namespace BloodDonation.Controllers
                         IsRead = false,
                         Type = "AppointmentStatus",
                         IsConfirmed = false,
-                        AccountID = donor?.AccountID // Sửa lại dòng này để luôn gán đúng AccountID
+                        AccountID = donor?.AccountID // Ensure correct AccountID is always assigned
                     };
                     _context.Notifications.Add(notification);
                 }
 
-                // ✅ Lưu thay đổi
+                // ✅ Save changes
                 _context.SaveChanges();
-                TempData["Message"] = "✅ Trạng thái đã được cập nhật.";
+                TempData["Message"] = "✅ Status updated.";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"❌ Lỗi xảy ra: {ex.Message}";
+                TempData["Error"] = $"❌ An error occurred: {ex.Message}";
                 Console.WriteLine($"[ERROR] ConfirmDonation: {ex.Message}");
             }
 
@@ -311,7 +311,7 @@ namespace BloodDonation.Controllers
             return View(approvedRequests);
         }
 
-        // Hàm lọc nhóm máu tương hợp
+        // Function to filter compatible blood types
         public static List<string> GetCompatibleBloodTypes(string recipientBloodType)
         {
             var allTypes = new List<string> { "O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+" };
@@ -331,7 +331,7 @@ namespace BloodDonation.Controllers
                     compatible.AddRange(new[] { "B-", "O-" });
                     break;
                 case "AB+":
-                    compatible.AddRange(allTypes); // Nhận được tất cả
+                    compatible.AddRange(allTypes); // Accept all
                     break;
                 case "AB-":
                     compatible.AddRange(new[] { "AB-", "A-", "B-", "O-" });
@@ -359,9 +359,9 @@ namespace BloodDonation.Controllers
             if (request == null || request.Status == "Completed" || request.Status == "Rejected")
                 return NotFound();
 
-            // Lấy danh sách nhóm máu tương hợp
+            // Get the list of compatible blood types
             var compatibleTypes = GetCompatibleBloodTypes(request.BloodType?.Type);
-            // Nếu chỉ có đúng 1 nhóm máu tương hợp và đó là nhóm máu được yêu cầu, chỉ cho chọn đúng nhóm máu đó
+            // If only one compatible blood type and it matches the request, only allow that type
             if (compatibleTypes.Count == 1 && compatibleTypes[0] == request.BloodType?.Type)
             {
                 var onlyType = _context.BloodTypes.Where(bt => bt.Type == request.BloodType.Type).ToList();
@@ -390,27 +390,29 @@ namespace BloodDonation.Controllers
 
             if (request == null)
             {
-                TempData["Error"] = "❌ Yêu cầu không tồn tại.";
+                TempData["Error"] = "❌ Request not found.";
                 return RedirectToAction("BloodRequestList");
             }
 
-            // ❌ Nếu trạng thái không phải Approved thì không xử lý
+            // ❌ Nếu trạng thái không phải Approved, không xử lý
+            // If status is not Approved, do not process
             if (!string.Equals(request.Status, "Approved", StringComparison.OrdinalIgnoreCase))
             {
-                TempData["Error"] = "⚠️ Chỉ xử lý các yêu cầu có trạng thái 'Approved'.";
+                TempData["Error"] = "⚠️ Only process requests with 'Approved' status.";
                 return RedirectToAction("BloodRequestList");
             }
 
-            // Kiểm tra nhóm máu được chọn có tương hợp không
+            // Kiểm tra nếu nhóm máu được chọn tương hợp
+            // Check if the selected blood type is compatible
             var compatibleTypes = GetCompatibleBloodTypes(request.BloodType?.Type);
             var selectedBloodType = _context.BloodTypes.FirstOrDefault(bt => bt.BloodTypeID == SelectedBloodTypeID);
             if (selectedBloodType == null || !compatibleTypes.Contains(selectedBloodType.Type))
             {
-                TempData["Error"] = "❌ Nhóm máu được chọn không tương hợp với yêu cầu.";
+                TempData["Error"] = "❌ Selected blood type is not compatible with the request.";
                 return RedirectToAction("ProcessBloodRequest", new { id });
             }
 
-            int bloodBankId = 1; // Mặc định
+            int bloodBankId = 1; // Default
             var inventory = _context.BloodInventories
                 .FirstOrDefault(b => b.BloodTypeID == SelectedBloodTypeID && b.BloodBankID == bloodBankId);
 
@@ -421,12 +423,12 @@ namespace BloodDonation.Controllers
 
                 request.Status = "Completed";
                 request.BloodGiven = selectedBloodType.Type;
-                TempData["Message"] = "✅ Yêu cầu đã được xử lý và cập nhật kho máu.";
+                TempData["Message"] = "✅ Request processed and blood inventory updated.";
             }
             else
             {
                 request.Status = "Pending";
-                TempData["Info"] = "⚠️ Kho máu không đủ. Yêu cầu chuyển sang trạng thái chờ.";
+                TempData["Info"] = "⚠️ Blood inventory insufficient. Request transferred to pending state.";
             }
 
             _context.SaveChanges();
@@ -448,17 +450,17 @@ namespace BloodDonation.Controllers
                 return NotFound();
             }
 
-            // Flag xác định có được phép xử lý hay không
+            // Flag to determine if processing is allowed
             ViewBag.AllowEdit = appointment.Status == "Pending" || appointment.Status == "Confirmed";
 
-            // Nếu bạn cần gửi survey nữa
+            // If you need to send the survey again
             var surveyDict = JsonSerializer.Deserialize<Dictionary<string, bool>>(appointment.HealthSurvey ?? "{}");
             ViewData["HealthSurvey"] = surveyDict;
 
             return View(appointment);
         }
 
-        // Hiển thị chi tiết yêu cầu máu
+        // Display blood request details
         public IActionResult BloodRequestDetails(int id)
         {
             SetStaffNotificationBadge();
@@ -475,22 +477,22 @@ namespace BloodDonation.Controllers
                 return NotFound();
             }
 
-            // Lấy thông tin kho máu cho nhóm máu yêu cầu
+            // Get blood inventory info for the requested blood type
             var bloodInventory = _context.BloodInventories
                 .Include(b => b.BloodType)
                 .Include(b => b.BloodBank)
                 .FirstOrDefault(b => b.BloodTypeID == bloodRequest.BloodTypeID);
 
-            // Lấy tất cả nhóm máu để chọn loại tương hợp
+            // Get all blood types to select compatible types
             var allBloodTypes = _context.BloodTypes.ToList();
 
-            // Lấy thông tin kho máu cho tất cả nhóm máu
+            // Get blood inventory info for all blood types
             var allBloodInventories = _context.BloodInventories
                 .Include(b => b.BloodType)
                 .Include(b => b.BloodBank)
                 .ToList();
 
-            // Lấy người hiến máu gần nhất (cùng nhóm máu, sẵn sàng)
+            // Get nearest available donors with the same blood type
             var nearbyDonors = _context.Donors
                 .Include(d => d.Account)
                 .Where(d => d.BloodTypeID == bloodRequest.BloodTypeID && d.IsAvailable == true)
@@ -503,7 +505,7 @@ namespace BloodDonation.Controllers
             ViewBag.AllBloodTypes = allBloodTypes;
             ViewBag.AllBloodInventories = allBloodInventories;
 
-            // KHÔNG tính lại IsCompatible, chỉ lấy từ DB
+            // DO NOT recalculate IsCompatible, just use value from DB
             bool isCompatible = bloodRequest.IsCompatible;
             ViewBag.IsCompatible = isCompatible;
             if (!isCompatible)
@@ -523,7 +525,7 @@ namespace BloodDonation.Controllers
             return View(bloodRequest);
         }
 
-        // Xử lý yêu cầu máu trực tiếp từ trang chi tiết
+        // Handle blood request directly from details page
         [HttpPost]
         public IActionResult ProcessBloodRequestFromDetails(int bloodRequestId, string action, int? selectedBloodTypeId = null, decimal? quantity = null)
         {
@@ -538,11 +540,11 @@ namespace BloodDonation.Controllers
 
             if (bloodRequest == null)
             {
-                TempData["Error"] = "Không tìm thấy yêu cầu máu.";
+                TempData["Error"] = "Blood request not found.";
                 return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
             }
 
-            // Lấy danh sách nhóm máu tương thích
+            // Get the list of compatible blood types
             var compatibleTypes = GetCompatibleBloodTypes(bloodRequest.BloodType?.Type);
             bool isCompatible = !(compatibleTypes.Count == 1 && compatibleTypes[0] == bloodRequest.BloodType?.Type);
             ViewBag.IsCompatible = isCompatible;
@@ -551,48 +553,48 @@ namespace BloodDonation.Controllers
             {
                 case "approve":
                     bloodRequest.Status = "Approved";
-                    TempData["Message"] = "Yêu cầu đã được duyệt.";
+                    TempData["Message"] = "Request approved.";
                     break;
                 case "reject":
                     bloodRequest.Status = "Rejected";
-                    TempData["Message"] = "Yêu cầu đã bị từ chối.";
+                    TempData["Message"] = "Request rejected.";
                     break;
                 case "cancel":
                     bloodRequest.Status = "Canceled";
-                    TempData["Message"] = "Đơn đã được hủy.";
+                    TempData["Message"] = "Request cancelled.";
                     break;
                 case "complete":
-                    // Kiểm tra nhóm máu được chọn có hợp lệ không
+                    // Check if selected blood type is valid
                     if (!selectedBloodTypeId.HasValue)
                     {
-                        TempData["Error"] = "Vui lòng chọn nhóm máu để cấp phát.";
+                        TempData["Error"] = "Please select a blood type to allocate.";
                         return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
                     }
                     var selectedBloodType = _context.BloodTypes.FirstOrDefault(bt => bt.BloodTypeID == selectedBloodTypeId.Value);
                     if (selectedBloodType == null)
                     {
-                        TempData["Error"] = "Nhóm máu không hợp lệ.";
+                        TempData["Error"] = "Invalid blood type.";
                         return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
                     }
                     if (!isCompatible)
                     {
-                        // Chỉ cho phép chọn đúng nhóm máu yêu cầu
+                        // Only allow selecting the exact requested blood type
                         if (selectedBloodType.Type != bloodRequest.BloodType.Type)
                         {
-                            TempData["Error"] = "Chỉ được chọn đúng nhóm máu yêu cầu.";
+                            TempData["Error"] = "Only the exact requested blood type can be selected.";
                             return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
                         }
                     }
                     else
                     {
-                        // Phải nằm trong danh sách tương hợp
+                        // Must be in the compatible types list
                         if (!compatibleTypes.Contains(selectedBloodType.Type))
                         {
-                            TempData["Error"] = "Nhóm máu không tương thích.";
+                            TempData["Error"] = "Blood type not compatible.";
                             return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
                         }
                     }
-                    // Trừ kho máu
+                    // Deduct from blood inventory
                     if (quantity == null || quantity <= 0) quantity = bloodRequest.Quantity;
                     var inventory = _context.BloodInventories.FirstOrDefault(b => b.BloodTypeID == selectedBloodType.BloodTypeID);
                     if (inventory != null && inventory.Quantity >= quantity)
@@ -601,12 +603,12 @@ namespace BloodDonation.Controllers
                         inventory.LastUpdated = DateTime.Now;
                         bloodRequest.Status = "Completed";
                         bloodRequest.BloodGiven = selectedBloodType.Type;
-                        TempData["Message"] = "Yêu cầu đã được hoàn thành và kho máu đã được cập nhật.";
+                        TempData["Message"] = "Request completed and blood inventory updated.";
                     }
                     else
                     {
                         bloodRequest.Status = "Pending";
-                        TempData["Error"] = "Kho máu không đủ. Đơn chuyển sang trạng thái chờ.";
+                        TempData["Error"] = "Blood inventory insufficient. Request transferred to pending state.";
                     }
                     break;
             }
@@ -615,7 +617,7 @@ namespace BloodDonation.Controllers
             return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
         }
 
-        // Hiển thị danh sách người hiến máu gần nhất
+        // Display the list of nearest donors
         public async Task<IActionResult> NearestDonors(string locationId = null, string customAddress = null)
         {
             SetStaffNotificationBadge();
@@ -659,12 +661,12 @@ namespace BloodDonation.Controllers
 
                 if (selectedBankId == null && selectedMedicalCenterId == null && string.IsNullOrWhiteSpace(customAddress))
                 {
-                    // Chưa chọn nơi hiến máu, chỉ hiển thị form chọn
+                    // If no donation location selected, only show the selection form
                     ViewBag.Donors = null;
                     return View();
                 }
 
-                // Lấy danh sách donor sẵn sàng có địa chỉ
+                // Get list of available donors with address
                 var donors = _context.Donors
                     .Include(d => d.BloodType)
                     .Where(d => d.IsAvailable == true 
@@ -672,7 +674,7 @@ namespace BloodDonation.Controllers
                         && _context.DonationAppointments.Any(a => a.DonorID == d.DonorID && a.Status == "Confirmed"))
                     .ToList();
 
-                // Lấy địa chỉ nơi hiến máu (ưu tiên customAddress nếu có)
+                // Get donation location address (prefer customAddress if available)
                 string locationAddress = null;
                 if (!string.IsNullOrWhiteSpace(customAddress))
                 {
@@ -684,7 +686,7 @@ namespace BloodDonation.Controllers
                     if (bloodBank == null || string.IsNullOrEmpty(bloodBank.Location))
                     {
                         ViewBag.Donors = null;
-                        ViewBag.Error = "Không tìm thấy địa chỉ kho máu.";
+                        ViewBag.Error = "Blood bank location not found.";
                         return View();
                     }
                     locationAddress = bloodBank.Location;
@@ -695,13 +697,13 @@ namespace BloodDonation.Controllers
                     if (medicalCenter == null || string.IsNullOrEmpty(medicalCenter.Location))
                     {
                         ViewBag.Donors = null;
-                        ViewBag.Error = "Không tìm thấy địa chỉ trung tâm y tế.";
+                        ViewBag.Error = "Medical center location not found.";
                         return View();
                     }
                     locationAddress = medicalCenter.Location;
                 }
 
-                // Gọi API geocode để lấy toạ độ cho locationAddress và donor
+                // Call geocode API to get coordinates for locationAddress and donors
                 var apiKey = "5b3ce3597851110001cf62484675ccea183f4166ab762b8429b80eb8";
                 var httpClient = new HttpClient();
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -721,39 +723,39 @@ namespace BloodDonation.Controllers
                     return (lat, lon);
                 }
 
-                // Lấy toạ độ nơi hiến máu (hoặc customAddress)
+                // Get coordinates for donation location (or customAddress)
                 var locationCoord = await GeocodeAsync(locationAddress);
                 if (locationCoord == null)
                 {
                     ViewBag.Donors = null;
-                    ViewBag.Error = "Không lấy được toạ độ nơi hiến máu.";
+                    ViewBag.Error = "Could not get coordinates for blood donation location.";
                     return View();
                 }
 
-                // Lấy toạ độ các donor
+                // Get coordinates for donors
                 var geocodeTasks = donors.Select(async donor =>
                 {
                     var coord = await GeocodeAsync(donor.Address);
                     return (donor, coord);
                 }).ToList();
 
-                // Chờ tất cả task hoàn tất
+                // Wait for all geocode tasks to complete
                 var donorCoords = (await Task.WhenAll(geocodeTasks)).ToList();
 
-                // Lọc donor có toạ độ hợp lệ
+                // Filter donors with valid coordinates
                 var validDonors = donorCoords.Where(x => x.coord != null).ToList();
                 if (!validDonors.Any())
                 {
                     ViewBag.Donors = null;
-                    ViewBag.Error = "Không có người hiến máu nào có toạ độ hợp lệ.";
+                    ViewBag.Error = "No donors with valid coordinates found.";
                     return View();
                 }
 
-                // Gọi matrix API để tính khoảng cách
+                // Call matrix API to calculate distances
                 var locations = new List<double[]>();
-                // Vị trí đầu là nơi hiến máu
+                // First position is the donation location
                 locations.Add(new double[] { locationCoord.Value.lon, locationCoord.Value.lat });
-                // Các vị trí donor
+                // Donor positions
                 locations.AddRange(validDonors.Select(x => new double[] { x.coord.Value.lon, x.coord.Value.lat }));
 
                 var matrixBody = new
@@ -769,16 +771,16 @@ namespace BloodDonation.Controllers
                 if (!matrixResponse.IsSuccessStatusCode)
                 {
                     ViewBag.Donors = null;
-                    ViewBag.Error = "Không thể tính khoảng cách (matrix API).";
+                    ViewBag.Error = "Could not calculate distance (matrix API).";
                     return View();
                 }
                 var matrixJson = await matrixResponse.Content.ReadAsStringAsync();
                 using var matrixDoc = JsonDocument.Parse(matrixJson);
                 var distances = matrixDoc.RootElement.GetProperty("distances");
-                // Dòng đầu là từ nơi hiến máu đến các donor
+                // First row is from donation location to donors
                 var distanceArr = distances[0];
 
-                // Ghép donor với khoảng cách
+                // Combine donors with their distances
                 var donorWithDistance = validDonors.Select((x, idx) => new { Donor = x.donor, Distance = distanceArr[idx + 1].GetDouble() }).OrderBy(x => x.Distance).ToList();
                 ViewBag.DonorDistances = donorWithDistance;
                 ViewBag.Donors = donorWithDistance.Select(x => x.Donor).ToList();
@@ -788,30 +790,30 @@ namespace BloodDonation.Controllers
             catch (HttpRequestException)
             {
                 ViewBag.Donors = null;
-                ViewBag.Error = "Không thể kết nối tới dịch vụ bản đồ. Vui lòng kiểm tra kết nối mạng!";
+                ViewBag.Error = "Could not connect to map service. Please check your network connection!";
                 return View();
             }
             catch (TaskCanceledException)
             {
                 ViewBag.Donors = null;
-                ViewBag.Error = "Kết nối tới dịch vụ bản đồ bị quá thời gian. Vui lòng thử lại!";
+                ViewBag.Error = "Connection to map service timed out. Please try again!";
                 return View();
             }
             catch (System.Net.Sockets.SocketException)
             {
                 ViewBag.Donors = null;
-                ViewBag.Error = "Không thể kết nối tới dịch vụ bản đồ (lỗi mạng). Vui lòng kiểm tra lại kết nối Internet!";
+                ViewBag.Error = "Could not connect to map service (network error). Please check your Internet connection!";
                 return View();
             }
             catch (Exception)
             {
                 ViewBag.Donors = null;
-                ViewBag.Error = "Đã xảy ra lỗi không xác định khi tìm kiếm người hiến máu gần nhất.";
+                ViewBag.Error = "An unexpected error occurred while searching for nearest donors.";
                 return View();
             }
         }
 
-        // Hiển thị danh sách người hiến máu gần nhất trong bán kính 20km
+        // Display the list of nearest donors within a 20km radius
         public async Task<IActionResult> NearestDonorsWithin20km(int? bloodBankId = null, string customAddress = null, int? bloodRequestId = null)
         {
             SetStaffNotificationBadge();
@@ -826,14 +828,14 @@ namespace BloodDonation.Controllers
 
                     if (bloodRequest == null || bloodRequest.MedicalCenter == null)
                     {
-                        ViewBag.Error = "Không tìm thấy thông tin cơ sở y tế.";
+                        ViewBag.Error = "Medical center information not found.";
                         return View();
                     }
 
                     ViewBag.MedicalCenter = bloodRequest.MedicalCenter;
                     ViewBag.BloodRequestId = bloodRequestId;
 
-                    // Lọc donor tương hợp
+                    // Filter compatible donors
                     var donorsQuery = _context.Donors.Include(d => d.BloodType).Where(d => d.IsAvailable == true 
                         && !string.IsNullOrEmpty(d.Address)
                         && _context.DonationAppointments.Any(a => a.DonorID == d.DonorID && a.Status == "Confirmed"));
@@ -848,11 +850,12 @@ namespace BloodDonation.Controllers
                     }
                     var donors = donorsQuery.ToList();
 
+                    // Get medical center address (prefer customAddress if available)
                     string location = !string.IsNullOrWhiteSpace(customAddress) ? customAddress : bloodRequest.MedicalCenter.Location;
                     if (string.IsNullOrWhiteSpace(location))
                     {
                         ViewBag.Donors = null;
-                        ViewBag.Error = "Không tìm thấy địa chỉ cơ sở y tế.";
+                        ViewBag.Error = "Medical center location not found.";
                         return View();
                     }
 
@@ -879,7 +882,7 @@ namespace BloodDonation.Controllers
                     if (centerCoord == null)
                     {
                         ViewBag.Donors = null;
-                        ViewBag.Error = "Không lấy được tọa độ cơ sở y tế.";
+                        ViewBag.Error = "Could not get coordinates for medical center.";
                         return View();
                     }
 
@@ -894,7 +897,7 @@ namespace BloodDonation.Controllers
                     if (!validDonors.Any())
                     {
                         ViewBag.Donors = null;
-                        ViewBag.Error = "Không có người hiến máu nào có tọa độ hợp lệ.";
+                        ViewBag.Error = "No donors with valid coordinates found.";
                         return View();
                     }
 
@@ -915,7 +918,7 @@ namespace BloodDonation.Controllers
                     if (!matrixResponse.IsSuccessStatusCode)
                     {
                         ViewBag.Donors = null;
-                        ViewBag.Error = "Không thể tính khoảng cách (matrix API).";
+                        ViewBag.Error = "Could not calculate distance (matrix API).";
                         return View();
                     }
                     var matrixJson = await matrixResponse.Content.ReadAsStringAsync();
@@ -964,6 +967,7 @@ namespace BloodDonation.Controllers
 
                     var donors = donorsQuery.ToList();
 
+                    // Get blood bank address (prefer customAddress if available)
                     string bankLocation;
                     if (!string.IsNullOrWhiteSpace(customAddress))
                     {
@@ -975,7 +979,7 @@ namespace BloodDonation.Controllers
                         if (bloodBank == null || string.IsNullOrEmpty(bloodBank.Location))
                         {
                             ViewBag.Donors = null;
-                            ViewBag.Error = "Không tìm thấy địa chỉ kho máu.";
+                            ViewBag.Error = "Blood bank location not found.";
                             return View();
                         }
                         bankLocation = bloodBank.Location;
@@ -1004,7 +1008,7 @@ namespace BloodDonation.Controllers
                     if (bankCoord == null)
                     {
                         ViewBag.Donors = null;
-                        ViewBag.Error = "Không lấy được tọa độ kho máu.";
+                        ViewBag.Error = "Could not get coordinates for blood bank.";
                         return View();
                     }
 
@@ -1020,7 +1024,7 @@ namespace BloodDonation.Controllers
                     if (!validDonors.Any())
                     {
                         ViewBag.Donors = null;
-                        ViewBag.Error = "Không có người hiến máu nào có tọa độ hợp lệ.";
+                        ViewBag.Error = "No donors with valid coordinates found.";
                         return View();
                     }
 
@@ -1041,7 +1045,7 @@ namespace BloodDonation.Controllers
                     if (!matrixResponse.IsSuccessStatusCode)
                     {
                         ViewBag.Donors = null;
-                        ViewBag.Error = "Không thể tính khoảng cách (matrix API).";
+                        ViewBag.Error = "Could not calculate distance (matrix API).";
                         return View();
                     }
                     var matrixJson = await matrixResponse.Content.ReadAsStringAsync();
@@ -1062,25 +1066,25 @@ namespace BloodDonation.Controllers
             catch (HttpRequestException)
             {
                 ViewBag.Donors = null;
-                ViewBag.Error = "Không thể kết nối tới dịch vụ bản đồ. Vui lòng kiểm tra kết nối mạng!";
+                ViewBag.Error = "Could not connect to map service. Please check your network connection!";
                 return View();
             }
             catch (TaskCanceledException)
             {
                 ViewBag.Donors = null;
-                ViewBag.Error = "Kết nối tới dịch vụ bản đồ bị quá thời gian. Vui lòng thử lại!";
+                ViewBag.Error = "Connection to map service timed out. Please try again!";
                 return View();
             }
             catch (System.Net.Sockets.SocketException)
             {
                 ViewBag.Donors = null;
-                ViewBag.Error = "Không thể kết nối tới dịch vụ bản đồ (lỗi mạng). Vui lòng kiểm tra lại kết nối Internet!";
+                ViewBag.Error = "Could not connect to map service (network error). Please check your Internet connection!";
                 return View();
             }
             catch (Exception)
             {
                 ViewBag.Donors = null;
-                ViewBag.Error = "Đã xảy ra lỗi không xác định khi tìm kiếm người hiến máu gần nhất.";
+                ViewBag.Error = "An unexpected error occurred while searching for nearest donors.";
                 return View();
             }
         }

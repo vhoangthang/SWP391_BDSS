@@ -34,7 +34,7 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
-            // Thêm logic badge
+            // Add badge logic
             var medicalCenterAccount = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "medicalcenter");
             int unreadCount = 0;
             if (medicalCenterAccount != null)
@@ -107,7 +107,7 @@ namespace BloodDonation.Controllers
 
                     _logger.LogInformation($"BloodRequest created successfully with ID: {bloodRequest.BloodRequestID}");
 
-                    // Thêm thông báo thành công với thông tin status
+                    // Add success message with status
                     TempData["SuccessMessage"] = $"Đăng ký nhận máu thành công! Mã yêu cầu: {bloodRequest.BloodRequestID} - Trạng thái: {bloodRequest.Status}";
 
                     return RedirectToAction("Index");
@@ -135,7 +135,7 @@ namespace BloodDonation.Controllers
             return View("Index", model);
         }
 
-        // Hiển thị danh sách yêu cầu nhận máu của trung tâm y tế hiện tại
+        // Display list of blood requests for the current medical center
         public IActionResult BloodRequestList()
         {
             var medicalCenterId = HttpContext.Session.GetInt32("MedicalCenterID");
@@ -191,7 +191,7 @@ namespace BloodDonation.Controllers
             if (medicalCenterAccount == null)
                 return RedirectToAction("Index", "Login");
 
-            // Thêm logic badge
+            // Add badge logic
             int unreadCount = 0;
             unreadCount = _context.Notifications.Count(n => n.AccountID == medicalCenterAccount.AccountID && !n.IsRead);
             ViewBag.UnreadNotificationCount = unreadCount;
@@ -226,7 +226,7 @@ namespace BloodDonation.Controllers
             DonationAppointment appointment = null;
             if (notification.BloodRequestID.HasValue && notification.BloodRequest != null)
             {
-                // Lấy appointment gần nhất của donor có trạng thái Confirmed hoặc Completed
+                // Get the most recent appointment of the donor with status Confirmed or Completed
                 appointment = _context.DonationAppointments
                     .Include(a => a.Donor)
                     .Include(a => a.MedicalCenter)
@@ -237,7 +237,7 @@ namespace BloodDonation.Controllers
             }
             else
             {
-                // Nếu không có BloodRequestID, lấy appointment gần nhất của donor
+                // If no BloodRequestID, get the most recent appointment of the donor
                 appointment = _context.DonationAppointments
                     .Include(a => a.Donor)
                     .Include(a => a.MedicalCenter)
@@ -265,10 +265,10 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("MedicalCenterNotifications");
             }
 
-            // Tìm notification liên quan nếu có
+            // Find related notification if any
             var notification = _context.Notifications.FirstOrDefault(n => n.DonorID == appointment.DonorID && n.BloodRequestID != null);
 
-            // Tìm BloodRequest liên quan
+            // Find related BloodRequest
             BloodRequest bloodRequest = null;
             if (notification != null && notification.BloodRequestID.HasValue)
             {
@@ -279,24 +279,24 @@ namespace BloodDonation.Controllers
                 bloodRequest = _context.BloodRequests.FirstOrDefault(br => br.BloodTypeID == appointment.BloodTypeID && br.MedicalCenterID == appointment.MedicalCenterID);
             }
 
-            // Cập nhật trạng thái và thông tin cho cả hai bảng
+            // Update status and information for both tables
             if (bloodRequest != null)
             {
                 bloodRequest.Status = "Completed";
                 bloodRequest.BloodGiven = appointment.BloodType?.Type;
-                // Cập nhật QuantityDonated cho appointment
+                // Update QuantityDonated for the appointment
                 appointment.Status = "Completed";
                 appointment.QuantityDonated = bloodRequest.Quantity;
-                appointment.AppointmentDate = DateTime.Now; // Cập nhật ngày hoàn thành
+                appointment.AppointmentDate = DateTime.Now; // Update completion date
             }
             else
             {
-                // Nếu không tìm thấy bloodRequest vẫn cho phép hoàn thành appointment
+                // If bloodRequest is not found, still allow completing the appointment
                 appointment.Status = "Completed";
-                appointment.AppointmentDate = DateTime.Now; // Cập nhật ngày hoàn thành
+                appointment.AppointmentDate = DateTime.Now; // Update completion date
             }
 
-            // Lưu vào bảng DonorBloodRequest nếu có bloodRequest và donor
+            // Save to DonorBloodRequest table if bloodRequest and donor exist
             if (bloodRequest != null && appointment.Donor != null)
             {
                 var donorBloodRequest = new DonorBloodRequest
@@ -309,14 +309,14 @@ namespace BloodDonation.Controllers
                 _context.DonorBloodRequests.Add(donorBloodRequest);
             }
 
-            // Nếu donor đang sẵn sàng thì chuyển về không sẵn sàng
+            // If donor is available, change to not available
             if (appointment.Donor != null && appointment.Donor.IsAvailable == true)
             {
                 appointment.Donor.IsAvailable = false;
                 _context.SaveChanges();
             }
 
-            // Tạo chứng chỉ nếu chưa có
+            // Create certificate if it doesn't exist
             var existingCertificate = _context.DonationCertificates.FirstOrDefault(c => c.AppointmentID == appointment.AppointmentID);
             if (existingCertificate == null)
             {

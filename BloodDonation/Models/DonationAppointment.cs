@@ -22,7 +22,7 @@ namespace BloodDonation.Models
 
         [Required]
         [Column(TypeName = "nvarchar(10)")]
-        public string TimeSlot { get; set; } // "Sáng" hoặc "Chiều"
+        public string TimeSlot { get; set; }
 
 
         public int BloodTypeID { get; set; }

@@ -4,6 +4,6 @@
     public string Phone { get; set; }
     public string BloodType { get; set; }
     public DateTime RegisterDate { get; set; }
-    public string Status { get; set; } // "Pending", "Confirmed", "Completed"
+    public string Status { get; set; }
     public string Location { get; set; }
 }

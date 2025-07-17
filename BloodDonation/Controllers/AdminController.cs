@@ -48,11 +48,9 @@ namespace BloodDonation.Controllers
                     requests = g.Count(a => a.Status == "Requested")
                 }).ToListAsync();
 
-            // Danh sách nhóm máu chuẩn
-            // Danh sách 8 nhóm máu chuẩn
             var bloodTypes = new[] { "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-" };
 
-            // Lấy số lượt hiến thành công theo nhóm máu
+            // Successfull donation volume
             var completedDonations = await _context.DonationAppointments
                 .Where(a => a.Status == "Completed" && a.BloodType != null)
                 .GroupBy(a => a.BloodType.Type)
@@ -62,7 +60,7 @@ namespace BloodDonation.Controllers
                     count = g.Count()
                 }).ToListAsync();
 
-            // Ghép đủ 8 nhóm máu, nhóm nào không có thì count = 0
+            // If there are no bloodTypes, count = 0
             var bloodTypeDistribution = bloodTypes
                 .Select(bt => new
                 {
@@ -99,7 +97,7 @@ namespace BloodDonation.Controllers
             var donationHistory = await _context.DonationAppointments
                 .Include(a => a.Donor)
                     .ThenInclude(d => d.Account)
-                .Include(a => a.BloodType)        // ✅ Cần để hiển thị nhóm máu
+                .Include(a => a.BloodType)        // Needed to display blood type
                        
                 .Where(a => a.Status == "Completed")
                 .OrderByDescending(a => a.AppointmentDate)
@@ -146,7 +144,7 @@ namespace BloodDonation.Controllers
                 .OrderByDescending(br => br.RequestDate)
                 .ToListAsync();
 
-            // Lấy danh sách nhóm máu còn trong kho
+            // Get the list of blood types available in inventory
             var availableBloodTypes = await _context.BloodInventories
                 .Include(b => b.BloodType)
                 .Where(b => b.Quantity > 0)
@@ -172,7 +170,7 @@ namespace BloodDonation.Controllers
                 .OrderBy(bi => bi.BloodType.Type)
                 .ToListAsync();
 
-            // ✅ THÊM DÒNG NÀY
+            // Add all blood types to ViewBag for selection
             var allBloodTypes = await _context.BloodTypes.ToListAsync();
             ViewBag.AllBloodTypes = allBloodTypes;
 
@@ -228,7 +226,7 @@ namespace BloodDonation.Controllers
                 var bloodInventory = await _context.BloodInventories
                     .FirstOrDefaultAsync(i => i.BloodTypeID == bloodTypeId && i.BloodBankID == bloodBankId);
 
-                // Xác định số thay đổi dựa trên nút admin chọn
+                // Determine the change amount based on admin button selection
                 decimal change = operation == "subtract" ? -quantity : quantity;
 
                 if (bloodInventory != null)
@@ -266,7 +264,6 @@ namespace BloodDonation.Controllers
 
 
 
-        // ✅ Hàm kiểm tra tương hợp nhóm máu
         private bool CheckCompatibility(string donor, string recipient)
         {
             if (donor == "O-") return true;
@@ -298,7 +295,7 @@ namespace BloodDonation.Controllers
                 return Json(new { success = false, message = "Bạn không có quyền thực hiện thao tác này." });
             }
 
-            // Xóa các appointment có Status hoặc HealthSurvey bị NULL trước khi truy vấn Donor
+            // Delete null appointment
             var nullAppointments = _context.DonationAppointments
                 .Where(a => a.Status == null || a.HealthSurvey == null)
                 .ToList();
@@ -319,7 +316,7 @@ namespace BloodDonation.Controllers
                 return Json(new { success = false, message = "Không thể xóa tài khoản admin hoặc chính bạn." });
             }
 
-            // Xóa donor và các bản ghi liên quan nếu có
+            // delete donor
             var donor = await _context.Donors
                 .Include(d => d.DonorBloodRequests)
                 .Include(d => d.DonationAppointments)
@@ -330,21 +327,21 @@ namespace BloodDonation.Controllers
             {
                 if (donor.DonationAppointments != null)
                 {
-                    // Xóa các bản ghi liên quan đến các appointment còn lại
+                    // delete appointment
                     var validAppointments = donor.DonationAppointments
                         .Where(a => a.Status != null && a.HealthSurvey != null)
                         .ToList();
                     var appointmentIds = validAppointments.Select(a => a.AppointmentID).ToList();
 
-                    // Xóa HealthSurvey liên quan
+                    // delete healthsurvey
                     var surveys = _context.HealthSurveys.Where(s => appointmentIds.Contains(s.AppointmentID));
                     _context.HealthSurveys.RemoveRange(surveys);
 
-                    // Xóa DonationCertificate liên quan
+                    // delete certificate
                     var certificates = _context.DonationCertificates.Where(c => appointmentIds.Contains(c.AppointmentID));
                     _context.DonationCertificates.RemoveRange(certificates);
 
-                    // Xóa các appointment còn lại
+                    // delete another appointment
                     _context.DonationAppointments.RemoveRange(validAppointments);
                 }
                 if (donor.DonorBloodRequests != null)
@@ -384,7 +381,7 @@ namespace BloodDonation.Controllers
                 return Json(new { success = false, message = "Không tìm thấy tài khoản." });
             }
 
-            // Không cho phép đổi role của chính mình
+            
             if (user.Username == username)
             {
                 return Json(new { success = false, message = "Không thể đổi vai trò của chính bạn." });
@@ -396,7 +393,7 @@ namespace BloodDonation.Controllers
             else
                 user.MedicalCenterID = null;
 
-            // Cập nhật PermissionLevel đúng với Role
+            // Update permission
             switch (req.newRole.ToLower())
             {
                 case "donor":

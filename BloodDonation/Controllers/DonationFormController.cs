@@ -31,7 +31,7 @@ namespace BloodDonation.Controllers
             if (appointmentDateStr == null || timeSlot == null || bloodTypeId == null)
                 return Json(new { success = false, message = "Thiếu thông tin đặt lịch" });
 
-            // Lấy DonorID
+            // Get DonorID
             var username = HttpContext.Session.GetString("Username");
             var account = _context.Accounts.FirstOrDefault(a => a.Username == username);
             var donor = _context.Donors.FirstOrDefault(d => d.AccountID == account.AccountID);
@@ -39,7 +39,7 @@ namespace BloodDonation.Controllers
             if (donor == null)
                 return Json(new { success = false, message = "Không tìm thấy thông tin người hiến máu" });
 
-            // Nếu câu hỏi số 10 là 'true' và trạng thái hiện tại là false hoặc null thì cập nhật thành true
+            // If question 10 is 'true' and the current status is false or null, update to true
             if (model.Answers.TryGetValue("10_AnhChiSanSangHienMauNeuDuDieuKien", out var q10))
             {
                 donor.IsAvailable = (q10 == "true");
@@ -48,7 +48,7 @@ namespace BloodDonation.Controllers
 
             var now = DateTime.Now;
 
-            // Kiểm tra lịch hiến máu trong vòng 14 ngày gần nhất
+            // Check blood donation history in the last 14 days
             var lastAppointment = _context.DonationAppointments
                 .Where(a => a.DonorID == donor.DonorID && a.Status != "Cancelled" && a.Status != "Rejected")
                 .OrderByDescending(a => a.AppointmentDate)
@@ -63,10 +63,10 @@ namespace BloodDonation.Controllers
                 }
             }
 
-            // Lấy MedicalCenterID hợp lệ (ví dụ: lấy bản ghi đầu tiên)
+            // Get a valid MedicalCenterID (e.g., take the first record)
             var medicalCenterId = _context.MedicalCenters.Select(m => m.MedicalCenterID).FirstOrDefault();
 
-            // Kiểm tra loại trừ ở server-side
+            // Server-side exclusion check
             var answers = model.Answers;
             if (
                 (answers.TryGetValue("3_TruocDayAnhChiCoMacCacBenhLietKeKhong", out var q3) && q3 == "true") ||
@@ -79,7 +79,7 @@ namespace BloodDonation.Controllers
                 return Json(new { success = false, message = "Bạn không đủ điều kiện hiến máu do có tiền sử bệnh lý không phù hợp." });
             }
 
-            // Tạo Appointment
+            // Create Appointment
             var appointment = new DonationAppointment
             {
                 DonorID = donor.DonorID,
@@ -88,13 +88,13 @@ namespace BloodDonation.Controllers
                 BloodTypeID = bloodTypeId.Value,
                 MedicalCenterID = medicalCenterId,
                 Status = "Pending",
-                HealthSurvey = JsonConvert.SerializeObject(model.Answers) // Lưu JSON
+                HealthSurvey = JsonConvert.SerializeObject(model.Answers) // Save JSON
             };
 
             _context.DonationAppointments.Add(appointment);
-            _context.SaveChanges(); // để có AppointmentID
+            _context.SaveChanges(); // To get AppointmentID
 
-            // Lưu câu trả lời vào bảng HealthSurvey
+            // Save answers to HealthSurvey table
             return Json(new { success = true, appointmentId = appointment.AppointmentID });
         }
     }
