@@ -68,12 +68,6 @@ namespace BloodDonation.Controllers
                     count = completedDonations.FirstOrDefault(x => x.bloodType == bt)?.count ?? 0
                 }).ToList();
 
-
-
-
-
-
-
             ViewBag.TotalUsers = totalUsers;
             ViewBag.TotalBloodRequests = totalBloodRequests;
             ViewBag.TotalBloodInventory = totalBloodInventory;
@@ -262,8 +256,6 @@ namespace BloodDonation.Controllers
             }
         }
 
-
-
         private bool CheckCompatibility(string donor, string recipient)
         {
             if (donor == "O-") return true;
@@ -316,7 +308,7 @@ namespace BloodDonation.Controllers
                 return Json(new { success = false, message = "Không thể xóa tài khoản admin hoặc chính bạn." });
             }
 
-            // delete donor
+            // Delete donor
             var donor = await _context.Donors
                 .Include(d => d.DonorBloodRequests)
                 .Include(d => d.DonationAppointments)
@@ -327,21 +319,21 @@ namespace BloodDonation.Controllers
             {
                 if (donor.DonationAppointments != null)
                 {
-                    // delete appointment
+                    // Delete appointment
                     var validAppointments = donor.DonationAppointments
                         .Where(a => a.Status != null && a.HealthSurvey != null)
                         .ToList();
                     var appointmentIds = validAppointments.Select(a => a.AppointmentID).ToList();
 
-                    // delete healthsurvey
+                    // Delete healthsurvey
                     var surveys = _context.HealthSurveys.Where(s => appointmentIds.Contains(s.AppointmentID));
                     _context.HealthSurveys.RemoveRange(surveys);
 
-                    // delete certificate
+                    // Delete certificate
                     var certificates = _context.DonationCertificates.Where(c => appointmentIds.Contains(c.AppointmentID));
                     _context.DonationCertificates.RemoveRange(certificates);
 
-                    // delete another appointment
+                    // Delete another appointment
                     _context.DonationAppointments.RemoveRange(validAppointments);
                 }
                 if (donor.DonorBloodRequests != null)
@@ -397,15 +389,19 @@ namespace BloodDonation.Controllers
             switch (req.newRole.ToLower())
             {
                 case "donor":
+                    user.Role = "Donor";
                     user.PermissionLevel = 1;
                     break;
                 case "medicalcenter":
+                    user.Role = "MedicalCenter";
                     user.PermissionLevel = 1;
                     break;
                 case "staff":
+                    user.Role = "Staff";
                     user.PermissionLevel = 2;
                     break;
                 case "admin":
+                    user.Role = "Admin";
                     user.PermissionLevel = 3;
                     break;
             }
@@ -437,7 +433,7 @@ namespace BloodDonation.Controllers
                 }
             }
 
-            return View(newsList); // Truyền đúng kiểu List<News>
+            return View(newsList);
         }
 
         [HttpPost]
