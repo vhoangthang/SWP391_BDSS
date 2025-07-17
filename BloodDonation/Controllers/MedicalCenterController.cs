@@ -191,16 +191,25 @@ namespace BloodDonation.Controllers
             if (medicalCenterAccount == null)
                 return RedirectToAction("Index", "Login");
 
-            // Add badge logic
-            int unreadCount = 0;
-            unreadCount = _context.Notifications.Count(n => n.AccountID == medicalCenterAccount.AccountID && !n.IsRead);
-            ViewBag.UnreadNotificationCount = unreadCount;
+            // Get the MedicalCenterID of the current account
+            var medicalCenterId = medicalCenterAccount.MedicalCenterID;
 
+            // Get all MedicalCenter AccountIDs of the same facility
+            var accountIds = _context.Accounts
+                .Where(a => a.MedicalCenterID == medicalCenterId && a.Role.ToLower() == "medicalcenter")
+                .Select(a => a.AccountID)
+                .ToList();
+
+            // Get notifications of all these accounts
             var notifications = _context.Notifications
                 .Include(n => n.Donor)
-                .Where(n => n.AccountID == medicalCenterAccount.AccountID)
+                .Where(n => accountIds.Contains((int)n.AccountID))
                 .OrderByDescending(n => n.SentAt)
                 .ToList();
+
+            // Number of unreads
+            int unreadCount = _context.Notifications.Count(n => accountIds.Contains((int)n.AccountID) && !n.IsRead);
+            ViewBag.UnreadNotificationCount = unreadCount;
 
             return View("MedicalCenterNotifications", notifications);
         }
