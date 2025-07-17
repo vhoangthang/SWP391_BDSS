@@ -34,6 +34,15 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
+            // Add badge logic
+            var medicalCenterAccount = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "medicalcenter");
+            int unreadCount = 0;
+            if (medicalCenterAccount != null)
+            {
+                unreadCount = _context.Notifications.Count(n => n.AccountID == medicalCenterAccount.AccountID && !n.IsRead);
+            }
+            ViewBag.UnreadNotificationCount = unreadCount;
+
             // Debug: Log all blood types
             var bloodTypes = _context.BloodTypes.ToList();
             foreach (var bt in bloodTypes)
@@ -98,7 +107,7 @@ namespace BloodDonation.Controllers
 
                     _logger.LogInformation($"BloodRequest created successfully with ID: {bloodRequest.BloodRequestID}");
 
-                    // Thêm thông báo thành công với thông tin status
+                    // Add success message with status
                     TempData["SuccessMessage"] = $"Đăng ký nhận máu thành công! Mã yêu cầu: {bloodRequest.BloodRequestID} - Trạng thái: {bloodRequest.Status}";
 
                     return RedirectToAction("Index");
@@ -126,7 +135,7 @@ namespace BloodDonation.Controllers
             return View("Index", model);
         }
 
-        // Hiển thị danh sách yêu cầu nhận máu của trung tâm y tế hiện tại
+        // Display list of blood requests for the current medical center
         public IActionResult BloodRequestList()
         {
             var medicalCenterId = HttpContext.Session.GetInt32("MedicalCenterID");
@@ -182,53 +191,64 @@ namespace BloodDonation.Controllers
             if (medicalCenterAccount == null)
                 return RedirectToAction("Index", "Login");
 
+            // Get the MedicalCenterID of the current account
+            var medicalCenterId = medicalCenterAccount.MedicalCenterID;
+
+            // Get all MedicalCenter AccountIDs of the same facility
+            var accountIds = _context.Accounts
+                .Where(a => a.MedicalCenterID == medicalCenterId && a.Role.ToLower() == "medicalcenter")
+                .Select(a => a.AccountID)
+                .ToList();
+
+            // Get notifications of all these accounts
             var notifications = _context.Notifications
                 .Include(n => n.Donor)
-                .Where(n => n.AccountID == medicalCenterAccount.AccountID)
+                .Where(n => accountIds.Contains((int)n.AccountID))
                 .OrderByDescending(n => n.SentAt)
                 .ToList();
+
+            // Number of unreads
+            int unreadCount = 0;
+            unreadCount = _context.Notifications.Count(n => n.AccountID == medicalCenterAccount.AccountID && !n.IsRead);
+            unreadCount = _context.Notifications.Count(n => accountIds.Contains((int)n.AccountID) && !n.IsRead);
+            ViewBag.UnreadNotificationCount = unreadCount;
 
             return View("MedicalCenterNotifications", notifications);
         }
 
         public IActionResult NotificationDetail(int notificationId)
         {
+            if (notificationId <= 0)
+            {
+                TempData["Error"] = "Không tìm thấy thông báo phù hợp.";
+                return RedirectToAction("MedicalCenterNotifications");
+            }
             var notification = _context.Notifications
                 .Include(n => n.Donor)
+                    .ThenInclude(d => d.Account)
                 .Include(n => n.BloodRequest)
                 .FirstOrDefault(n => n.NotificationID == notificationId);
             if (notification == null)
-                return NotFound();
+            {
+                TempData["Error"] = "Không tìm thấy thông báo phù hợp.";
+                return RedirectToAction("MedicalCenterNotifications");
+            }
 
             DonationAppointment appointment = null;
             if (notification.BloodRequestID.HasValue && notification.BloodRequest != null)
             {
-                // Tìm appointment phù hợp nhất với donor, bloodtype, medicalcenter, chưa completed, ngày gần nhất
+                // Get the most recent appointment of the donor with status Confirmed or Completed
                 appointment = _context.DonationAppointments
                     .Include(a => a.Donor)
                     .Include(a => a.MedicalCenter)
                     .Include(a => a.BloodType)
-                    .Where(a => a.DonorID == notification.DonorID
-                        && a.BloodTypeID == notification.BloodRequest.BloodTypeID
-                        && a.MedicalCenterID == notification.BloodRequest.MedicalCenterID
-                        && a.Status != "Completed")
+                    .Where(a => a.DonorID == notification.DonorID && (a.Status == "Confirmed" || a.Status == "Completed"))
                     .OrderByDescending(a => a.AppointmentDate)
                     .FirstOrDefault();
-                // Nếu không có, lấy appointment gần nhất của donor tại medical center
-                if (appointment == null)
-                {
-                    appointment = _context.DonationAppointments
-                        .Include(a => a.Donor)
-                        .Include(a => a.MedicalCenter)
-                        .Include(a => a.BloodType)
-                        .Where(a => a.DonorID == notification.DonorID && a.MedicalCenterID == notification.BloodRequest.MedicalCenterID)
-                        .OrderByDescending(a => a.AppointmentDate)
-                        .FirstOrDefault();
-                }
             }
             else
             {
-                // Nếu không có BloodRequestID, lấy appointment gần nhất của donor
+                // If no BloodRequestID, get the most recent appointment of the donor
                 appointment = _context.DonationAppointments
                     .Include(a => a.Donor)
                     .Include(a => a.MedicalCenter)
@@ -256,10 +276,10 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("MedicalCenterNotifications");
             }
 
-            // Tìm notification liên quan nếu có
+            // Find related notification if any
             var notification = _context.Notifications.FirstOrDefault(n => n.DonorID == appointment.DonorID && n.BloodRequestID != null);
 
-            // Tìm BloodRequest liên quan
+            // Find related BloodRequest
             BloodRequest bloodRequest = null;
             if (notification != null && notification.BloodRequestID.HasValue)
             {
@@ -270,29 +290,44 @@ namespace BloodDonation.Controllers
                 bloodRequest = _context.BloodRequests.FirstOrDefault(br => br.BloodTypeID == appointment.BloodTypeID && br.MedicalCenterID == appointment.MedicalCenterID);
             }
 
-            // Cập nhật trạng thái và thông tin cho cả hai bảng
+            // Update status and information for both tables
             if (bloodRequest != null)
             {
                 bloodRequest.Status = "Completed";
                 bloodRequest.BloodGiven = appointment.BloodType?.Type;
-                // Cập nhật QuantityDonated cho appointment
+                // Update QuantityDonated for the appointment
                 appointment.Status = "Completed";
                 appointment.QuantityDonated = bloodRequest.Quantity;
+                appointment.AppointmentDate = DateTime.Now; // Update completion date
             }
             else
             {
-                // Nếu không tìm thấy bloodRequest vẫn cho phép hoàn thành appointment
+                // If bloodRequest is not found, still allow completing the appointment
                 appointment.Status = "Completed";
+                appointment.AppointmentDate = DateTime.Now; // Update completion date
             }
 
-            // Nếu donor đang sẵn sàng thì chuyển về không sẵn sàng
+            // Save to DonorBloodRequest table if bloodRequest and donor exist
+            if (bloodRequest != null && appointment.Donor != null)
+            {
+                var donorBloodRequest = new DonorBloodRequest
+                {
+                    BloodRequestID = bloodRequest.BloodRequestID,
+                    DonorID = appointment.Donor.DonorID,
+                    DonationDate = DateTime.Now,
+                    QuantityDonated = bloodRequest.Quantity
+                };
+                _context.DonorBloodRequests.Add(donorBloodRequest);
+            }
+
+            // If donor is available, change to not available
             if (appointment.Donor != null && appointment.Donor.IsAvailable == true)
             {
                 appointment.Donor.IsAvailable = false;
                 _context.SaveChanges();
             }
 
-            // Tạo chứng chỉ nếu chưa có
+            // Create certificate if it doesn't exist
             var existingCertificate = _context.DonationCertificates.FirstOrDefault(c => c.AppointmentID == appointment.AppointmentID);
             if (existingCertificate == null)
             {
@@ -308,7 +343,50 @@ namespace BloodDonation.Controllers
             }
             _context.SaveChanges();
             TempData["Message"] = "Đã xác nhận hoàn thành và cấp chứng chỉ cho người hiến máu.";
-            return RedirectToAction("NotificationDetail", new { notificationId = appointmentId });
+            return RedirectToAction("NotificationDetail", new { notificationId = appointmentId, appointmentId = appointment.AppointmentID });
+        }
+
+        [HttpPost]
+        public IActionResult MarkAsRead(int id)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+
+            var account = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "medicalcenter");
+            if (account == null)
+                return Json(new { success = false, message = "Không tìm thấy tài khoản" });
+
+            var notification = _context.Notifications.FirstOrDefault(n => n.NotificationID == id && n.AccountID == account.AccountID);
+            if (notification == null)
+                return Json(new { success = false, message = "Không tìm thấy thông báo" });
+
+            if (!notification.IsRead)
+            {
+                notification.IsRead = true;
+                _context.SaveChanges();
+            }
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public IActionResult DeleteNotification(int notificationId)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+
+            var account = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "medicalcenter");
+            if (account == null)
+                return Json(new { success = false, message = "Không tìm thấy tài khoản" });
+
+            var notification = _context.Notifications.FirstOrDefault(n => n.NotificationID == notificationId && n.AccountID == account.AccountID);
+            if (notification == null)
+                return Json(new { success = false, message = "Không tìm thấy thông báo" });
+
+            _context.Notifications.Remove(notification);
+            _context.SaveChanges();
+            return Json(new { success = true });
         }
     }
 }

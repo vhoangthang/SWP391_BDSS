@@ -16,16 +16,20 @@
                         <th>#</th>
                         <th>Nội dung</th>
                         <th>Thời gian</th>
+                        <th>Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
                 @for (int i = 0; i < Model.Count; i++)
                 {
                     var n = Model[i];
-                    <tr class="@(n.IsRead ? "" : "table-warning")">
+                    <tr class="notification-row @(n.IsRead ? "" : "table-warning unread")" data-id="@n.NotificationID" style="cursor:pointer;">
                         <td>@(i+1)</td>
                         <td>@n.Message</td>
                         <td>@n.SentAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm btn-delete-notification" data-id="@n.NotificationID" type="button">Xóa</button>
+                        </td>
                     </tr>
                 }
                 </tbody>
@@ -36,4 +40,43 @@
             <div class="alert alert-info">Chưa có thông báo nào.</div>
         }
     </div>
-</div> 
+</div>
+
+@section Scripts {
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(function() {
+        $(".notification-row.unread").on("click", function() {
+            var $row = $(this);
+            var id = $row.data("id");
+            $.post("/Notification/MarkAsReadStaff", { id: id }, function(res) {
+                if (res.success) {
+                    $row.removeClass("table-warning unread");
+                    // Cập nhật badge
+                    var $badge = $("#notificationBadge");
+                    var count = parseInt($badge.text()) || 0;
+                    if (count > 0) $badge.text(count - 1);
+                }
+            });
+        });
+        $(".btn-delete-notification").on("click", function(e) {
+            e.stopPropagation();
+            var $btn = $(this);
+            var id = $btn.data("id");
+            if (confirm("Bạn có chắc muốn xóa thông báo này?")) {
+                $.post("/Notification/DeleteNotificationStaff", { notificationId: id }, function(res) {
+                    if (res.success) {
+                        $btn.closest("tr").fadeOut(300, function() { $(this).remove(); });
+                        // Cập nhật badge
+                        var $badge = $("#notificationBadge");
+                        var count = parseInt($badge.text()) || 0;
+                        if (count > 0) $badge.text(count - 1);
+                    } else {
+                        alert(res.message || "Xóa không thành công!");
+                    }
+                });
+            }
+        });
+    });
+</script>
+} 

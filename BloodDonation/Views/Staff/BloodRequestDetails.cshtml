@@ -137,7 +137,7 @@
     }
 </style>
 
-<!-- Thông báo trung tâm -->
+<!-- Central Notification -->
 @if (TempData["Message"] != null)
 {
     <div class="alert alert-success bdss-alert-center text-center" id="centerAlert" style="padding:2.2rem 1.5rem 1.2rem 1.5rem;">
@@ -237,7 +237,7 @@
                 </a>
             </div>
         </div>
-        <!-- Card thông tin bệnh viện bên phải -->
+        <!-- Hospital information card on the right -->
         <div class="col-lg-4">
             <div class="bdss-card">
                 <div class="bdss-title" style="font-size:1.2em; margin-bottom:1.2em;">Thông tin cơ sở y tế</div>
@@ -270,35 +270,42 @@
                         ; break;
                 }
                 <div class="mt-3">
-                    <span class="bdss-label">Chọn loại máu để xử lý</span>
-                    <form method="post" action="@Url.Action("ProcessBloodRequestFromDetails", "Staff")">
-                        <input type="hidden" name="bloodRequestId" value="@Model.BloodRequestID" />
-                        <select name="selectedBloodTypeId" class="form-select mb-3">
-                            @if (ViewBag.CompatibleBloodTypes != null)
-                            {
-                                foreach (var bt in ViewBag.CompatibleBloodTypes as List<BloodDonation.Models.BloodType>)
+                    @if (Model.Status != "Completed" && Model.Status != "Rejected" && Model.Status != "Canceled")
+                    {
+                        <span class="bdss-label">Chọn loại máu để xử lý</span>
+                        <form method="post" action="@Url.Action("ProcessBloodRequestFromDetails", "Staff")">
+                            <input type="hidden" name="bloodRequestId" value="@Model.BloodRequestID" />
+                            <select name="selectedBloodTypeId" class="form-select mb-3">
+                                @if (ViewBag.CompatibleBloodTypes != null)
                                 {
-                                    <option value="@bt.BloodTypeID">@bt.Type</option>
+                                    foreach (var bt in ViewBag.CompatibleBloodTypes as List<BloodDonation.Models.BloodType>)
+                                    {
+                                        <option value="@bt.BloodTypeID">@bt.Type</option>
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                <option disabled>Không có nhóm máu tương thích</option>
-                            }
-                        </select>
-                        <span class="bdss-label">Ghi chú xử lý</span>
-                        <textarea class="form-control" name="note" rows="2" placeholder="Nhập ghi chú xử lý..."></textarea>
-                        @if (Model.Status == "Completed")
-                        {
-                            <div class="text-center mt-4 mb-2">
-                                <span style="color:#22c55e; font-size:1.25em; font-weight:700;">Đã hoàn thành</span>
-                            </div>
-                        }
-                        else
-                        {
+                                else
+                                {
+                                    <option disabled>Không có nhóm máu tương thích</option>
+                                }
+                            </select>
+                            <span class="bdss-label">Ghi chú xử lý</span>
+                            <textarea class="form-control" name="note" rows="2" placeholder="Nhập ghi chú xử lý..."></textarea>
                             <button type="submit" name="action" value="complete" class="bdss-btn-blue">Hoàn thành đơn</button>
-                        }
-                    </form>
+                            <button type="submit" name="action" value="cancel" class="bdss-btn-red mt-2">Hủy đơn</button>
+                        </form>
+                    }
+                    else if (Model.Status == "Completed")
+                    {
+                        <div class="text-center mt-4 mb-2">
+                            <span style="color:#22c55e; font-size:1.25em; font-weight:700;">Đã hoàn thành</span>
+                        </div>
+                    }
+                    else if (Model.Status == "Rejected" || Model.Status == "Canceled")
+                    {
+                        <div class="text-center mt-4 mb-2">
+                            <span style="color:#b91c1c; background:#f3f4f6; font-size:1.25em; font-weight:700; padding:0.5em 1.5em; border-radius:1em; display:inline-block;">Đơn đã bị từ chối</span>
+                        </div>
+                    }
                 </div>
             </div>
         </div>

@@ -100,7 +100,17 @@
 
     <div class="row mb-3">
         <div class="col-md-4">
-            <input type="text" class="form-control" placeholder="Tìm kiếm..." />
+            <input id="searchInput" type="text" class="form-control" placeholder="Tìm kiếm theo tên cơ sở, nhóm máu, ID..." />
+        </div>
+        <div class="col-md-3">
+            <select id="statusFilter" class="form-select">
+                <option value="">Tất cả trạng thái</option>
+                <option value="pending">Chờ duyệt</option>
+                <option value="approved">Đã duyệt</option>
+                <option value="completed">Hoàn thành</option>
+                <option value="rejected">Từ chối</option>
+                <option value="canceled">Đã hủy</option>
+            </select>
         </div>
     </div>
 
@@ -118,67 +128,96 @@
                     <th></th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="bloodRequestTableBody">
                 @foreach (var req in Model)
                 {
-                    if (req.Status == "Approved" || req.Status == "Completed")
-                    {
-                        <tr>
-                            <td>
-                                <div class="bdss-name">@req.MedicalCenter?.Name</div>
-                            </td>
-                            <td class="text-center">@req.BloodType?.Type</td>
-                            <td class="text-center">@req.RequestDate.ToString("yyyy-MM-dd")</td>
-                            <td class="text-center">@req.Quantity</td>
-                            <td class="text-center">
-                                @if (req.IsEmergency)
-                                {
-                                    <span class="bdss-badge-soft bdss-badge-soft-danger"><span style="font-size:1.1em;">&#9888;</span> Khẩn cấp</span>
-                                }
-                                else
-                                {
-                                    <span class="bdss-badge-soft bdss-badge-soft-warning"><span style="font-size:1.1em;">&#9200;</span> Thông thường</span>
-                                }
-                            </td>
-                            <td class="text-center">
-                                @if (req.IsCompatible)
-                                {
-                                    <span class="bdss-badge-soft bdss-badge-soft-success">Tương hợp</span>
-                                }
-                                else
-                                {
-                                    <span class="bdss-badge-soft bdss-badge-soft-danger">Không tương hợp</span>
-                                }
-                            </td>
-                            <td class="text-center">
-                                @switch (req.Status)
-                                {
-                                    case "Pending":
-                                        <span class="bdss-badge-soft bdss-badge-soft-warning"><span style="font-size:1.1em;">&#x23F3;</span> Chờ duyệt</span>
-                                        ; break;
-                                    case "Approved":
-                                        <span class="bdss-badge-soft bdss-badge-soft-primary"><span style="font-size:1.1em;">&#x2714;</span> Đã duyệt</span>
-                                        ; break;
-                                    case "Completed":
-                                        <span class="bdss-badge-soft bdss-badge-soft-success"><span style="font-size:1.1em;">&#x2714;</span> Hoàn thành</span>
-                                        ; break;
-                                    case "Rejected":
-                                        <span class="bdss-badge-soft bdss-badge-soft-danger"><span style="font-size:1.1em;">&#x2716;</span> Từ chối</span>
-                                        ; break;
-                                    default:
-                                        <span class="bdss-badge-soft bdss-badge-soft-secondary">@req.Status</span>
-                                        ; break;
-                                }
-                            </td>
-                            <td class="text-end">
-                                <a href="@Url.Action("BloodRequestDetails", "Staff", new { id = req.BloodRequestID })" class="bdss-link-blue">
-                                    Chi tiết
-                                </a>
-                            </td>
-                        </tr>
-                    }
+    if (req.Status == "Approved" || req.Status == "Completed")
+    {
+                    <tr>
+                        <td class="center name-col">@req.MedicalCenter?.Name</td>
+                        <td class="text-center blood-col">@req.BloodType?.Type</td>
+                        <td class="text-center date-col">@req.RequestDate.ToString("yyyy-MM-dd")</td>
+                        <td class="text-center quantity-col">@req.Quantity</td>
+                        <td class="text-center emergency-col">
+                            @if (req.IsEmergency)
+                            {
+                                <span class="bdss-badge-soft bdss-badge-soft-danger"><span style="font-size:1.1em;">&#9888;</span> Khẩn cấp</span>
+                            }
+                            else
+                            {
+                                <span class="bdss-badge-soft bdss-badge-soft-warning"><span style="font-size:1.1em;">&#9200;</span> Thông thường</span>
+                            }
+                        </td>
+                        <td class="text-center compatible-col">
+                            @if (req.IsCompatible)
+                            {
+                                <span class="bdss-badge-soft bdss-badge-soft-success">Tương hợp</span>
+                            }
+                            else
+                            {
+                                <span class="bdss-badge-soft bdss-badge-soft-danger">Không tương hợp</span>
+                            }
+                        </td>
+                        <td class="text-center status-col" data-status="@req.Status?.ToLower()">
+                            @switch (req.Status)
+                            {
+                                case "Pending":
+                                    <span class="bdss-badge-soft bdss-badge-soft-warning"><span style="font-size:1.1em;">&#x23F3;</span> Chờ duyệt</span>
+                                    ; break;
+                                case "Approved":
+                                    <span class="bdss-badge-soft bdss-badge-soft-primary"><span style="font-size:1.1em;">&#x2714;</span> Đã duyệt</span>
+                                    ; break;
+                                case "Completed":
+                                    <span class="bdss-badge-soft bdss-badge-soft-success"><span style="font-size:1.1em;">&#x2714;</span> Hoàn thành</span>
+                                    ; break;
+                                case "Rejected":
+                                case "Canceled":
+                                    <span class="bdss-badge-soft bdss-badge-soft-danger"><span style="font-size:1.1em;">&#x2716;</span> Từ chối</span>
+                                    ; break;
+                                default:
+                                    <span class="bdss-badge-soft bdss-badge-soft-secondary">@req.Status</span>
+                                    ; break;
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a href="@Url.Action("BloodRequestDetails", "Staff", new { id = req.BloodRequestID })" class="bdss-link-blue">
+                                Chi tiết
+                            </a>
+                        </td>
+                    </tr>
+                }
                 }
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const tableBody = document.getElementById('bloodRequestTableBody');
+        function normalize(str) {
+            return (str || '').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+        }
+        function filterTable() {
+            const keyword = normalize(searchInput.value.trim());
+            const status = statusFilter.value;
+            Array.from(tableBody.rows).forEach(row => {
+                const name = row.querySelector('.name-col')?.textContent.trim() || '';
+                const blood = row.querySelector('.blood-col')?.textContent.trim() || '';
+                const statusVal = row.querySelector('.status-col')?.getAttribute('data-status') || '';
+                let match = true;
+                if (keyword) {
+                    match = normalize(name).includes(keyword) || normalize(blood).includes(keyword);
+                }
+                if (match && status) {
+                    match = statusVal === status;
+                }
+                row.style.display = match ? '' : 'none';
+            });
+        }
+        searchInput.addEventListener('input', filterTable);
+        statusFilter.addEventListener('change', filterTable);
+    });
+</script>

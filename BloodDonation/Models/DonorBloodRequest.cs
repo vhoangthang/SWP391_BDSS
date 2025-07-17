@@ -19,15 +19,11 @@ namespace BloodDonation.Models
         [Column(TypeName = "decimal(10,2)")]
         public decimal? QuantityDonated { get; set; }
 
-        public string? Status { get; set; } = "Pending";
-
         [ForeignKey("BloodRequestID")]
         public BloodRequest BloodRequest { get; set; }
 
         [ForeignKey("DonorID")]
         public Donor Donor { get; set; }
-
-        //public virtual DonationAppointment? DonationAppointment { get; set; }
 
     }
 }

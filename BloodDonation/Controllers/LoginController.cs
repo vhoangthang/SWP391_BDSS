@@ -26,8 +26,8 @@ namespace BloodDonation.Controllers
         }
         public ActionResult Logout()
         {
-            HttpContext.Session.Clear(); // Xóa toàn bộ session
-            return RedirectToAction("Index", "Home"); // Chuyển về trang chủ
+            HttpContext.Session.Clear(); // Clear all session
+            return RedirectToAction("Index", "Home"); // Redirect to home page
         }
 
         // POST: Login
@@ -61,7 +61,8 @@ namespace BloodDonation.Controllers
                             {
                                 _logger.LogWarning($"Account {acc.Username} has role 'medicalcenter' but no MedicalCenterID assigned");
                                 ModelState.AddModelError("", "Tài khoản chưa được liên kết với trung tâm y tế.");
-                                return View(model);
+                                var vm = new LoginRegisterViewModel { Login = model, Register = new RegisterViewModel() };
+                                return View("~/Views/Login/Index.cshtml", vm);
                             }
                             return RedirectToAction("Index", "MedicalCenter");
                         case "staff":
@@ -74,7 +75,8 @@ namespace BloodDonation.Controllers
                 ModelState.AddModelError("", "Sai thông tin đăng nhập.");
             }
 
-            return View(model);
+            var vmError = new LoginRegisterViewModel { Login = model, Register = new RegisterViewModel() };
+            return View("~/Views/Login/Index.cshtml", vmError);
         }
     }
 }

@@ -42,9 +42,16 @@
                 window.location.href = '/DonationSummary/Index?appointmentId=' + data.appointmentId;
             } else {
                 alert("Lỗi: " + data.message);
-                if (data.message && data.message.includes("14 ngày")) {
+                if (data.code === "NO_DONOR") {
+                    window.location.href = '/';
+                } else if (data.message && data.message.includes("14 ngày")) {
                     window.location.href = '/';
                 }
             }
         });
+});
+
+document.getElementById('backToHomeBtn').addEventListener('click', function() {
+    fetch('/DonationForm/ClearBookingSession', { method: 'POST' })
+        .then(() => { window.location.href = '/'; });
 });

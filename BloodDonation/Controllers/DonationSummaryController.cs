@@ -22,7 +22,8 @@ namespace BloodDonation.Controllers
             { "6_KhoiBenhSauMacCacBenh1Thang", "6. Trong 01 tháng gần đây, anh/chị có khỏi bệnh viêm tiết niệu, viêm phổi, rubella không?" },
             { "7_BiCumCamLanhHoNhucDauSotDauHong14Ngay", "7. Trong 14 ngày gần đây, anh/chị có bị cảm, sốt, đau họng không?" },
             { "8_DungThuocKhangSinhKhangViêmAspirinCorticoide7Ngay", "8. Trong 07 ngày gần đây, anh/chị có dùng thuốc kháng sinh, aspirin, corticoid không?" },
-            { "9_CauHoiDanhChoPhuNu", "9. Câu hỏi dành cho phụ nữ:" },
+            { "9_DangMangThaiHoacNuoiConDuoi12Thang", "9.1 Đang mang thai hoặc nuôi con dưới 12 tháng tuổi?" },
+            { "9_ChamDutThaiKy12ThangGanDay", "9.2 Chấm dứt thai kỳ trong 12 tháng gần đây?" },
             { "10_AnhChiSanSangHienMauNeuDuDieuKien", "10. Anh/chị có sẵn sàng hiến máu mọi lúc khi cần không?" }
         };
 
@@ -42,7 +43,6 @@ namespace BloodDonation.Controllers
             var account = _context.Accounts.FirstOrDefault(a => a.Username == username);
             if (account == null)
             {
-                // Hoặc xử lý lỗi theo cách khác
                 return RedirectToAction("Index", "Login");
             }
 
@@ -50,26 +50,30 @@ namespace BloodDonation.Controllers
                 .Include(d => d.Account)
                 .FirstOrDefault(d => d.AccountID == account.AccountID);
 
+            DonationSummaryViewModel viewModel;
+
             if (donor == null)
             {
-                // Hoặc xử lý lỗi
-                return RedirectToAction("Index", "Login");
+                TempData["NeedUpdateProfile"] = true;
+                return RedirectToAction("Index", "Home");
             }
-
-            var appointments = _context.DonationAppointments
-                .Include(a => a.BloodType)
-                .Include(a => a.MedicalCenter)
-                .Where(a => a.DonorID == donor.DonorID)
-                .OrderByDescending(a => a.AppointmentDate)
-                .ToList();
-
-            ViewBag.HealthSurveyQuestions = HealthSurveyQuestions;
-
-            var viewModel = new DonationSummaryViewModel
+            else
             {
-                Appointments = appointments,
-                Donor = donor
-            };
+                var appointments = _context.DonationAppointments
+                    .Include(a => a.BloodType)
+                    .Include(a => a.MedicalCenter)
+                    .Where(a => a.DonorID == donor.DonorID)
+                    .OrderByDescending(a => a.AppointmentDate)
+                    .ToList();
+
+                ViewBag.HealthSurveyQuestions = HealthSurveyQuestions;
+
+                viewModel = new DonationSummaryViewModel
+                {
+                    Appointments = appointments,
+                    Donor = donor
+                };
+            }
 
             return View(viewModel);
         }
@@ -83,12 +87,12 @@ namespace BloodDonation.Controllers
             {
                 if (appointment.Status == "Completed")
                 {
-                    // Không cho xóa, có thể trả về thông báo hoặc đơn giản là không làm gì
+                    // Do not delete, return a message or simply do nothing
                     return RedirectToAction("Index");
                 }
                 else if (appointment.Status == "Pending")
                 {
-                    // Xóa như cũ
+                    // Delete as before
                     var surveys = _context.HealthSurveys
                         .Where(h => h.AppointmentID != null && h.AppointmentID == appointmentId)
                         .ToList();
@@ -101,8 +105,15 @@ namespace BloodDonation.Controllers
                 }
                 else if (appointment.Status == "Confirmed")
                 {
-                    // Chuyển trạng thái sang Cancelled
+                    // Change status to Cancelled
                     appointment.Status = "Cancelled";
+                    // If donor is available, change to not available
+                    var donor = _context.Donors.FirstOrDefault(d => d.DonorID == appointment.DonorID);
+                    if (donor != null && donor.IsAvailable == true)
+                    {
+                        donor.IsAvailable = false;
+                        _context.SaveChanges();
+                    }
                     _context.SaveChanges();
                 }
             }

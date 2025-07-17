@@ -16,7 +16,7 @@
     <h1>Phiếu đăng ký hiến máu</h1>
     <div class="form-container">
         <form id="donationForm">
-            <!-- Các câu hỏi -->
+            <!-- All the question -->
             <div class="question">
                 <label>1. Anh/chị từng hiến máu chưa?</label>
                 <div><input type="radio" name="1_AnhChiDaTungHienMauChua" value="true" required> Có</div>
@@ -82,10 +82,12 @@
                 <div><input type="radio" name="10_AnhChiSanSangHienMauNeuDuDieuKien" value="false" required> Trạng thái Không sẵn sàng</div>
             </div>
 
-            <button type="submit" class="submit-btn">Gửi đăng ký</button>
+            <div style="display: flex; gap: 16px; margin-top: 20px;">
+                <button type="submit" class="submit-btn">Gửi đăng ký</button>
+                <button type="button" id="backToHomeBtn" class="back-home-btn">Quay về trang chủ</button>
+            </div>
         </form>
     </div>
-
     <script src="/js/DonationBookingForm.js"></script>
 </body>
 </html>

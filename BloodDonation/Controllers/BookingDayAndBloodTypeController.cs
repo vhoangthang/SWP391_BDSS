@@ -19,7 +19,7 @@ namespace BloodDonation.Controllers
         public IActionResult Index()
         {
             ViewBag.BloodTypes = new SelectList(_context.BloodTypes.ToList(), "BloodTypeID", "Type");
-            // Lấy username từ session
+            // Get username from session
             var username = HttpContext.Session.GetString("Username");
             int? userBloodTypeId = null;
             if (!string.IsNullOrEmpty(username))
@@ -48,7 +48,7 @@ namespace BloodDonation.Controllers
                 return View(model);
             }
 
-            // Lưu thông tin vào session để chuyển sang form 2
+            // Save in session
             HttpContext.Session.SetString("AppointmentDate", model.AppointmentDate?.ToString("yyyy-MM-dd"));
             HttpContext.Session.SetString("TimeSlot", model.TimeSlot);
             HttpContext.Session.SetInt32("BloodTypeID", model.BloodTypeID);

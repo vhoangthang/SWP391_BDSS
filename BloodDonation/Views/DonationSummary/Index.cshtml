@@ -15,8 +15,20 @@
     }
 }
 
+@if (ViewBag.NeedUpdateProfile != null && (bool)ViewBag.NeedUpdateProfile)
+{
+    <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.3); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+        <div style="background: #fff; padding: 32px 40px; border-radius: 12px; box-shadow: 0 2px 16px rgba(0,0,0,0.15); text-align: center; max-width: 90vw;">
+            <h2 style="color: #d9534f; margin-bottom: 16px;">Bạn cần cập nhật hồ sơ để sử dụng chức năng này!</h2>
+            <div style="margin-bottom: 24px;">Vui lòng cập nhật hồ sơ cá nhân để xem lịch sử hiến máu.</div>
+            <a href="/Profile/Edit" class="btn btn-primary" style="margin-right: 16px;">Cập nhật hồ sơ</a>
+            <a href="/Home/Index" class="btn btn-secondary">Quay lại trang chủ</a>
+        </div>
+    </div>
+}
+
 <div class="donation-summary-container">
-    <h1>Tóm tắt đăng ký hiến máu</h1>
+    <h1>Lịch Sử Hiến Máu</h1>
 
     <h2>Thông tin cá nhân</h2>
     <ul>
@@ -33,21 +45,23 @@
     
     @if (appointments != null && appointments.Any())
     {
+        var latestAppointmentId = appointments.OrderByDescending(a => a.AppointmentID).FirstOrDefault()?.AppointmentID;
         @foreach (var appointment in appointments)
         {
             <div class="appointment-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; background-color: #f9f9f9;">
-                <h3>Phiếu đăng ký #@appointment.AppointmentID</h3>
-                
+                <h3>Phiếu đăng ký số @appointment.AppointmentID</h3>
+                <button class="btn btn-primary" type="button" onclick="toggleDetails('details-@appointment.AppointmentID')">
+                    Hiển thị/Ẩn chi tiết
+                </button>
+                <div id="details-@appointment.AppointmentID" style="margin-top: 15px; display: @(appointment.AppointmentID == latestAppointmentId ? "block" : "none");">
                 <div class="appointment-info">
                     <ul>
-                        <li><strong>Ngày hẹn:</strong> @appointment.AppointmentDate.ToShortDateString()</li>
-                        <li><strong>Khung giờ:</strong> @appointment.TimeSlot</li>
-                        <li><strong>Nhóm máu:</strong> @appointment.BloodType?.Type</li>
+                        <li><strong>Ngày hiến:</strong> @appointment.AppointmentDate.ToShortDateString() / <strong>Khung giờ:</strong> @appointment.TimeSlot</li>
                         <li><strong>Địa điểm:</strong> @appointment.MedicalCenter?.Name</li>
-                        <li><strong>Trạng thái:</strong> @appointment.Status</li>
+                        <li><strong>Nhóm máu:</strong> @appointment.BloodType?.Type / <strong>Trạng thái:</strong> @appointment.Status</li>
                     </ul>
                 </div>
-
+                
                 @if (!string.IsNullOrEmpty(appointment.HealthSurvey))
                 {
                     <h4>Kết quả khảo sát sức khỏe</h4>
@@ -100,7 +114,7 @@
                         </tbody>
                     </table>
                 }
-
+                </div>
                 @if (appointment.Status == "Pending" || appointment.Status == "Confirmed")
                 {
                     <form asp-action="Delete" method="post" style="display:inline;">
@@ -115,11 +129,26 @@
                         Bạn không thể xoá phiếu này.
                     </div>
                 }
-            </div>
+            
+        </div>
         }
     }
     else
     {
         <p>Bạn chưa có phiếu đăng ký hiến máu nào.</p>
     }
-</div> 
+</div>
+<div class="mb-3 mt-4 text-center">
+    <a class="btn btn-secondary" href="/Home/Index"><i class="fa fa-arrow-left"></i> Quay lại</a>
+</div>
+
+<script>
+    function toggleDetails(id) {
+        const element = document.getElementById(id);
+        if (element.style.display === "none" || element.style.display === "") {
+            element.style.display = "block";
+        } else {
+            element.style.display = "none";
+        }
+    }
+</script>

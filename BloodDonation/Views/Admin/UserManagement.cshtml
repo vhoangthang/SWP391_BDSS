@@ -1,6 +1,7 @@
 @model List<BloodDonation.Models.Account>
 @{
     Layout = null;
+    var medicalCenters = ViewBag.MedicalCenters as List<BloodDonation.Models.MedicalCenter>;
 }
 
 <!DOCTYPE html>
@@ -25,6 +26,7 @@
                         <li><a href="#" class="active"><i class="fas fa-users"></i> Quản lý người dùng</a></li>
                         <li><a href="@Url.Action("BloodRequestManagement", "Admin")"><i class="fas fa-clipboard-list"></i> Yêu cầu nhận máu</a></li>
                         <li><a href="@Url.Action("BloodInventoryManagement", "Admin")"><i class="fas fa-boxes"></i> Kho máu</a></li>
+                        <li><a href="@Url.Action("DonationHistory", "Admin")"><i class="fas fa-history"></i> Lịch sử hiến máu</a></li>
                         <li><a href="@Url.Action("Logout", "Login")"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
                     </ul>
                 </div>
@@ -117,12 +119,18 @@
                                                 }
                                             </td>
                                             <td>
-                                                <button class="btn btn-sm btn-outline-primary" onclick="editUser(@user.AccountID)">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(@user.AccountID)">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                                <div style="display:flex; gap:4px; align-items:center;">
+                                                    <select class="form-select form-select-sm" style="width:auto; display:inline-block;" onchange="onRoleChange(@user.AccountID, this)">
+                                                        <option value="donor" selected="@(user.Role.ToLower() == "donor")">Donor</option>
+                                                        <option value="staff" selected="@(user.Role.ToLower() == "staff")">Staff</option>
+                                                        <option value="admin" selected="@(user.Role.ToLower() == "admin")">Admin</option>
+                                                        <option value="medicalcenter" selected="@(user.Role.ToLower() == "medicalcenter")">MedicalCenter</option>
+                                                    </select>
+                                                    <span id="mc-picker-@user.AccountID" style="display:none; margin-left:8px;"></span>
+                                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(@user.AccountID, '@user.Username', '@user.Role')" @(user.Role.ToLower()=="admin" ? "disabled" : "")>
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     }
@@ -135,7 +143,93 @@
         </div>
     </div>
 
+    <div id="medicalCenterOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:#fff; padding:32px 40px; border-radius:12px; box-shadow:0 2px 16px rgba(0,0,0,0.2); min-width:320px; text-align:center; position:relative;">
+            <button onclick="closeMedicalCenterOverlay()" style="position:absolute; top:8px; right:12px; background:none; border:none; font-size:20px;">&times;</button>
+            <div style="font-size:20px; font-weight:600; color:#c00; margin-bottom:16px;">Vui lòng chọn cơ sở y tế!</div>
+            <div>Để phân quyền MedicalCenter, bạn cần chọn một cơ sở y tế cụ thể cho tài khoản này.</div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/admin.js"></script>
+    <script>
+    function deleteUser(id, username, role) {
+        if (role.toLowerCase() === 'admin') {
+            alert('Không thể xóa tài khoản admin!');
+            return;
+        }
+        if (confirm('Bạn có chắc chắn muốn xóa tài khoản ' + username + ' không?')) {
+            fetch('/Admin/DeleteUser', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) location.reload();
+            });
+        }
+    }
+
+    function onRoleChange(id, selectEl) {
+        var newRole = selectEl.value;
+        var mcPicker = document.getElementById('mc-picker-' + id);
+        if (newRole === 'medicalcenter') {
+                // Display dropdown to select Medical Center
+            let html = '<select id="mc-select-' + id + '" class="form-select form-select-sm" style="width:auto; display:inline-block;">';
+            html += '<option value="">Chọn cơ sở y tế</option>';
+            @foreach (var mc in medicalCenters)
+            {
+                <text>html += '<option value="@mc.MedicalCenterID">@mc.Name</option>';</text>
+            }
+            html += '</select>';
+            html += '<button class="btn btn-sm btn-success ms-2" onclick="confirmChangeMedicalCenter(' + id + ')">OK</button>';
+            mcPicker.innerHTML = html;
+            mcPicker.style.display = '';
+        } else {
+            mcPicker.innerHTML = '';
+            mcPicker.style.display = 'none';
+            changeUserRole(id, newRole);
+        }
+    }
+
+    function confirmChangeMedicalCenter(id) {
+        var mcSelect = document.getElementById('mc-select-' + id);
+        var mcId = mcSelect.value;
+        if (!mcId) {
+            showMedicalCenterOverlay();
+            return;
+        }
+        changeUserRole(id, 'medicalcenter', mcId);
+    }
+
+    function showMedicalCenterOverlay() {
+        document.getElementById('medicalCenterOverlay').style.display = 'flex';
+    }
+
+    function closeMedicalCenterOverlay() {
+        document.getElementById('medicalCenterOverlay').style.display = 'none';
+    }
+
+    function changeUserRole(id, newRole, medicalCenterId) {
+        var body = { id: id, newRole: newRole };
+        if (newRole === 'medicalcenter') body.medicalCenterId = parseInt(medicalCenterId);
+        if (newRole.toLowerCase() === 'admin') {
+            if (!confirm('Bạn có chắc chắn muốn phân quyền admin cho tài khoản này?')) return;
+        }
+        fetch('/Admin/ChangeUserRole', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            if (data.success) location.reload();
+        });
+    }
+    </script>
 </body>
 </html> 

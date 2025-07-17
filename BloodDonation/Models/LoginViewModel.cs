@@ -2,8 +2,8 @@
 
 namespace BloodDonation.Models
 {
-        public class LoginViewModel
-        {
+    public class LoginViewModel
+    {
         [Required(ErrorMessage = "Vui lòng nhập tên đăng nhập")]
         public string Username { get; set; }
 

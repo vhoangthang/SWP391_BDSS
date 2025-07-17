@@ -10,7 +10,7 @@ namespace BloodDonation.Models
         public DateTime? AppointmentDate { get; set; }
 
         [Required]
-        public string TimeSlot { get; set; } // "Sáng" hoặc "Chiều"
+        public string TimeSlot { get; set; }
 
         [Required]
         public int BloodTypeID { get; set; }

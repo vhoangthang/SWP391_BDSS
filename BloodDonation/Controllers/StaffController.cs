@@ -31,9 +31,25 @@ namespace BloodDonation.Controllers
             return !string.IsNullOrEmpty(username) && role?.ToLower() == "staff";
         }
 
-        // Hiển thị danh sách các yêu cầu đăng ký hiến máu
+        // Helper method to set notification badge for staff
+        private void SetStaffNotificationBadge()
+        {
+            var username = HttpContext.Session.GetString("Username");
+            if (!string.IsNullOrEmpty(username))
+            {
+                var staffAccount = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "staff");
+                if (staffAccount != null)
+                {
+                    int unreadCount = _context.Notifications.Count(n => n.AccountID == staffAccount.AccountID && !n.IsRead);
+                    ViewBag.UnreadNotificationCount = unreadCount;
+                }
+            }
+        }
+
+        // Display the list of blood donation registration requests
         public IActionResult DonationList()
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
             var appointments = _context.DonationAppointments
@@ -48,11 +64,13 @@ namespace BloodDonation.Controllers
 
         public IActionResult DonorRequestDetails(int id)
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
-            // Lấy appointment theo ID (AppointmentID)
+            // Get the appointment by ID (AppointmentID)
             var appointment = _context.DonationAppointments
                 .Include(x => x.Donor)
+                    .ThenInclude(d => d.Account)
                 .Include(x => x.MedicalCenter)
                 .Include(x => x.BloodType)
                 .FirstOrDefault(x => x.AppointmentID == id);
@@ -62,19 +80,19 @@ namespace BloodDonation.Controllers
                 return NotFound();
             }
 
-            // Parse JSON từ chuỗi HealthSurvey nếu có
-            Dictionary<string, bool> healthSurvey = new();
+            // Parse JSON from HealthSurvey string if available
+            Dictionary<string, object> healthSurvey = new();
 
             if (!string.IsNullOrEmpty(appointment.HealthSurvey))
             {
                 try
                 {
-                    healthSurvey = JsonSerializer.Deserialize<Dictionary<string, bool>>(appointment.HealthSurvey);
+                    healthSurvey = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(appointment.HealthSurvey);
                 }
                 catch (Exception ex)
                 {
-                    // Log nếu JSON lỗi (tùy bạn xử lý)
-                    Console.WriteLine("Lỗi parse JSON: " + ex.Message);
+                    // Log if JSON parsing fails (optional handling)
+                    Console.WriteLine("Error parsing JSON: " + ex.Message);
                 }
             }
 
@@ -86,22 +104,23 @@ namespace BloodDonation.Controllers
 
         public IActionResult BloodInventory()
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
             var inventories = _context.BloodInventories
                 .Include(b => b.BloodType)
                 .ToList();
 
-            // Tính tổng số lượng máu
+            // Calculate the total blood quantity
             decimal totalQuantity = inventories.Sum(b => b.Quantity);
 
-            // Gửi vào View qua ViewBag hoặc ViewModel
+            // Pass to View via ViewBag or ViewModel
             ViewBag.TotalQuantity = totalQuantity;
 
             return View(inventories);
         }
 
-        //Xác nhận yêu cầu hiến máu và cập nhật kho máu
+        //Confirm donation request and update blood inventory
         [HttpPost]
         public IActionResult ConfirmDonation(int AppointmentID, string IsEligible, decimal QuantityDonated, string action)
         {
@@ -114,7 +133,13 @@ namespace BloodDonation.Controllers
 
                 if (appointment == null)
                 {
-                    TempData["Error"] = "❌ Không tìm thấy lịch hẹn.";
+                    TempData["Error"] = "❌ Appointment not found.";
+                    return RedirectToAction("DonationList");
+                }
+
+                if (appointment.Status == "Completed" || appointment.Status == "Cancelled")
+                {
+                    TempData["Error"] = "⚠️ Appointment is already completed or cancelled. Cannot modify.";
                     return RedirectToAction("DonationList");
                 }
 
@@ -126,26 +151,27 @@ namespace BloodDonation.Controllers
                     case "completed":
                         if (appointment.Status == "Completed")
                         {
-                            TempData["Error"] = "⚠️ Lịch hẹn đã hoàn thành trước đó.";
+                            TempData["Error"] = "⚠️ Appointment was already completed.";
                             return RedirectToAction("DonationList");
                         }
 
                         if (appointment.BloodTypeID <= 0)
                         {
-                            TempData["Error"] = "⚠️ Thiếu thông tin nhóm máu.";
+                            TempData["Error"] = "⚠️ Missing blood type information.";
                             return RedirectToAction("DonationList");
                         }
 
                         if (QuantityDonated <= 0)
                         {
-                            TempData["Error"] = "⚠️ Số lượng máu hiến phải lớn hơn 0.";
+                            TempData["Error"] = "⚠️ Blood donation quantity must be greater than 0.";
                             return RedirectToAction("DonationList");
                         }
 
                         appointment.Status = "Completed";
                         appointment.QuantityDonated = QuantityDonated;
+                        appointment.AppointmentDate = DateTime.Now; // Update completion date
 
-                        // Nếu donor đang sẵn sàng thì chuyển về không sẵn sàng
+                        // If donor is available, set to unavailable
                         var donorEntity = _context.Donors.FirstOrDefault(d => d.DonorID == appointment.DonorID);
                         if (donorEntity != null && donorEntity.IsAvailable == true)
                         {
@@ -153,7 +179,7 @@ namespace BloodDonation.Controllers
                             _context.SaveChanges();
                         }
 
-                        // ✅ Cập nhật hoặc tạo mới kho máu
+                        // ✅ Update or create blood inventory
                         var inventory = _context.BloodInventories.FirstOrDefault(b => b.BloodTypeID == appointment.BloodTypeID);
                         if (inventory != null)
                         {
@@ -165,14 +191,14 @@ namespace BloodDonation.Controllers
                             var newInventory = new BloodInventory
                             {
                                 BloodTypeID = appointment.BloodTypeID,
-                                BloodBankID = 1, // TODO: Lấy đúng BloodBankID nếu có logic, tạm mặc định là 1
+                                BloodBankID = 1, // TODO: Get correct BloodBankID if logic exists, default to 1
                                 Quantity = QuantityDonated,
                                 LastUpdated = DateTime.Now
                             };
                             _context.BloodInventories.Add(newInventory);
                         }
 
-                        // *** TẠO CERTIFICATE ***
+                        // *** CREATE CERTIFICATE ***
                         var existingCertificate = _context.DonationCertificates
                             .FirstOrDefault(c => c.AppointmentID == appointment.AppointmentID);
                         if (existingCertificate == null)
@@ -181,7 +207,7 @@ namespace BloodDonation.Controllers
                             var bloodType = _context.BloodTypes.FirstOrDefault(b => b.BloodTypeID == appointment.BloodTypeID);
                             var medicalCenter = _context.MedicalCenters.FirstOrDefault(m => m.MedicalCenterID == appointment.MedicalCenterID);
 
-                            string details = $"Chứng chỉ hiến máu cho {(donor?.Name ?? "Người hiến máu")}, nhóm máu {bloodType?.Type ?? "?"}, hiến {appointment.QuantityDonated}CC tại {medicalCenter?.Name ?? "cơ sở y tế"} ngày {appointment.AppointmentDate:dd/MM/yyyy}.";
+                            string details = $"Donation certificate for {(donor?.Name ?? "Donor")}, blood type {bloodType?.Type ?? "?"}, donated {appointment.QuantityDonated}CC at {medicalCenter?.Name ?? "Medical Center"} on {appointment.AppointmentDate:dd/MM/yyyy}.";
 
                             var certificate = new DonationCertificate
                             {
@@ -197,51 +223,74 @@ namespace BloodDonation.Controllers
                         if (isEligible)
                         {
                             appointment.Status = "Confirmed";
-                            appointment.AppointmentDate = DateTime.Now;
                         }
                         else
                         {
-                            TempData["Error"] = "❌ Người hiến máu không đủ điều kiện.";
+                            TempData["Error"] = "❌ Donor is not eligible.";
                             return RedirectToAction("DonationList");
                         }
                         break;
 
                     case "reject":
                         appointment.Status = "Rejected";
+                        // If donor is available, set to unavailable
+                        var donorReject = _context.Donors.FirstOrDefault(d => d.DonorID == appointment.DonorID);
+                        if (donorReject != null && donorReject.IsAvailable == true)
+                        {
+                            donorReject.IsAvailable = false;
+                            _context.SaveChanges();
+                        }
                         break;
 
                     case "approve":
                         appointment.Status = "Approved";
                         break;
+                    case "cancel":
+                        appointment.Status = "Cancelled";
+                        break;
 
                     default:
-                        TempData["Error"] = "❌ Hành động không hợp lệ.";
+                        TempData["Error"] = "❌ Invalid action.";
                         return RedirectToAction("DonationList");
                 }
 
-                // Thêm notification nếu trạng thái là Confirmed hoặc Rejected
+                // Add notification if status is Confirmed or Rejected
                 if (appointment.Status == "Confirmed" || appointment.Status == "Rejected")
                 {
+                    var donor = _context.Donors.Include(d => d.Account).FirstOrDefault(d => d.DonorID == appointment.DonorID);
+                    string notificationMessage;
+                    switch (appointment.Status)
+                    {
+                        case "Confirmed":
+                            notificationMessage = "Your request has been approved.";
+                            break;
+                        case "Rejected":
+                            notificationMessage = "Your request has been rejected.";
+                            break;
+                        default:
+                            notificationMessage = $"Your donation request status has changed to: {appointment.Status}";
+                            break;
+                    }
                     var notification = new Notification
                     {
                         DonorID = appointment.DonorID,
-                        Message = $"Đơn hiến máu của bạn đã chuyển sang trạng thái: {appointment.Status}",
+                        Message = notificationMessage,
                         SentAt = DateTime.Now,
                         IsRead = false,
                         Type = "AppointmentStatus",
                         IsConfirmed = false,
-                        AccountID = null
+                        AccountID = donor?.AccountID // Ensure correct AccountID is always assigned
                     };
                     _context.Notifications.Add(notification);
                 }
 
-                // ✅ Lưu thay đổi
+                // ✅ Save changes
                 _context.SaveChanges();
-                TempData["Message"] = "✅ Trạng thái đã được cập nhật.";
+                TempData["Message"] = "✅ Status updated.";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"❌ Lỗi xảy ra: {ex.Message}";
+                TempData["Error"] = $"❌ An error occurred: {ex.Message}";
                 Console.WriteLine($"[ERROR] ConfirmDonation: {ex.Message}");
             }
 
@@ -250,6 +299,7 @@ namespace BloodDonation.Controllers
 
         public IActionResult BloodRequestList()
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
             var approvedRequests = _context.BloodRequests
@@ -261,7 +311,7 @@ namespace BloodDonation.Controllers
             return View(approvedRequests);
         }
 
-        // Hàm lọc nhóm máu tương hợp
+        // Function to filter compatible blood types
         public static List<string> GetCompatibleBloodTypes(string recipientBloodType)
         {
             var allTypes = new List<string> { "O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+" };
@@ -281,7 +331,7 @@ namespace BloodDonation.Controllers
                     compatible.AddRange(new[] { "B-", "O-" });
                     break;
                 case "AB+":
-                    compatible.AddRange(allTypes); // Nhận được tất cả
+                    compatible.AddRange(allTypes); // Accept all
                     break;
                 case "AB-":
                     compatible.AddRange(new[] { "AB-", "A-", "B-", "O-" });
@@ -298,6 +348,7 @@ namespace BloodDonation.Controllers
 
         public IActionResult ProcessBloodRequest(int id)
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
             var request = _context.BloodRequests
@@ -308,9 +359,9 @@ namespace BloodDonation.Controllers
             if (request == null || request.Status == "Completed" || request.Status == "Rejected")
                 return NotFound();
 
-            // Lấy danh sách nhóm máu tương hợp
+            // Get the list of compatible blood types
             var compatibleTypes = GetCompatibleBloodTypes(request.BloodType?.Type);
-            // Nếu chỉ có đúng 1 nhóm máu tương hợp và đó là nhóm máu được yêu cầu, chỉ cho chọn đúng nhóm máu đó
+            // If only one compatible blood type and it matches the request, only allow that type
             if (compatibleTypes.Count == 1 && compatibleTypes[0] == request.BloodType?.Type)
             {
                 var onlyType = _context.BloodTypes.Where(bt => bt.Type == request.BloodType.Type).ToList();
@@ -330,6 +381,7 @@ namespace BloodDonation.Controllers
         [HttpPost]
         public IActionResult CompleteBloodRequest(int id, string note, int SelectedBloodTypeID)
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
             var request = _context.BloodRequests
@@ -338,27 +390,29 @@ namespace BloodDonation.Controllers
 
             if (request == null)
             {
-                TempData["Error"] = "❌ Yêu cầu không tồn tại.";
+                TempData["Error"] = "❌ Request not found.";
                 return RedirectToAction("BloodRequestList");
             }
 
-            // ❌ Nếu trạng thái không phải Approved thì không xử lý
+            // ❌ Nếu trạng thái không phải Approved, không xử lý
+            // If status is not Approved, do not process
             if (!string.Equals(request.Status, "Approved", StringComparison.OrdinalIgnoreCase))
             {
-                TempData["Error"] = "⚠️ Chỉ xử lý các yêu cầu có trạng thái 'Approved'.";
+                TempData["Error"] = "⚠️ Only process requests with 'Approved' status.";
                 return RedirectToAction("BloodRequestList");
             }
 
-            // Kiểm tra nhóm máu được chọn có tương hợp không
+            // Kiểm tra nếu nhóm máu được chọn tương hợp
+            // Check if the selected blood type is compatible
             var compatibleTypes = GetCompatibleBloodTypes(request.BloodType?.Type);
             var selectedBloodType = _context.BloodTypes.FirstOrDefault(bt => bt.BloodTypeID == SelectedBloodTypeID);
             if (selectedBloodType == null || !compatibleTypes.Contains(selectedBloodType.Type))
             {
-                TempData["Error"] = "❌ Nhóm máu được chọn không tương hợp với yêu cầu.";
+                TempData["Error"] = "❌ Selected blood type is not compatible with the request.";
                 return RedirectToAction("ProcessBloodRequest", new { id });
             }
 
-            int bloodBankId = 1; // Mặc định
+            int bloodBankId = 1; // Default
             var inventory = _context.BloodInventories
                 .FirstOrDefault(b => b.BloodTypeID == SelectedBloodTypeID && b.BloodBankID == bloodBankId);
 
@@ -369,12 +423,12 @@ namespace BloodDonation.Controllers
 
                 request.Status = "Completed";
                 request.BloodGiven = selectedBloodType.Type;
-                TempData["Message"] = "✅ Yêu cầu đã được xử lý và cập nhật kho máu.";
+                TempData["Message"] = "✅ Request processed and blood inventory updated.";
             }
             else
             {
                 request.Status = "Pending";
-                TempData["Info"] = "⚠️ Kho máu không đủ. Yêu cầu chuyển sang trạng thái chờ.";
+                TempData["Info"] = "⚠️ Blood inventory insufficient. Request transferred to pending state.";
             }
 
             _context.SaveChanges();
@@ -383,6 +437,7 @@ namespace BloodDonation.Controllers
 
         public IActionResult AppointmentDetail(int id)
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
             var appointment = _context.DonationAppointments
@@ -395,19 +450,20 @@ namespace BloodDonation.Controllers
                 return NotFound();
             }
 
-            // Flag xác định có được phép xử lý hay không
+            // Flag to determine if processing is allowed
             ViewBag.AllowEdit = appointment.Status == "Pending" || appointment.Status == "Confirmed";
 
-            // Nếu bạn cần gửi survey nữa
+            // If you need to send the survey again
             var surveyDict = JsonSerializer.Deserialize<Dictionary<string, bool>>(appointment.HealthSurvey ?? "{}");
             ViewData["HealthSurvey"] = surveyDict;
 
             return View(appointment);
         }
 
-        // Hiển thị chi tiết yêu cầu máu
+        // Display blood request details
         public IActionResult BloodRequestDetails(int id)
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
 
@@ -421,22 +477,22 @@ namespace BloodDonation.Controllers
                 return NotFound();
             }
 
-            // Lấy thông tin kho máu cho nhóm máu yêu cầu
+            // Get blood inventory info for the requested blood type
             var bloodInventory = _context.BloodInventories
                 .Include(b => b.BloodType)
                 .Include(b => b.BloodBank)
                 .FirstOrDefault(b => b.BloodTypeID == bloodRequest.BloodTypeID);
 
-            // Lấy tất cả nhóm máu để chọn loại tương hợp
+            // Get all blood types to select compatible types
             var allBloodTypes = _context.BloodTypes.ToList();
 
-            // Lấy thông tin kho máu cho tất cả nhóm máu
+            // Get blood inventory info for all blood types
             var allBloodInventories = _context.BloodInventories
                 .Include(b => b.BloodType)
                 .Include(b => b.BloodBank)
                 .ToList();
 
-            // Lấy người hiến máu gần nhất (cùng nhóm máu, sẵn sàng)
+            // Get nearest available donors with the same blood type
             var nearbyDonors = _context.Donors
                 .Include(d => d.Account)
                 .Where(d => d.BloodTypeID == bloodRequest.BloodTypeID && d.IsAvailable == true)
@@ -449,7 +505,7 @@ namespace BloodDonation.Controllers
             ViewBag.AllBloodTypes = allBloodTypes;
             ViewBag.AllBloodInventories = allBloodInventories;
 
-            // KHÔNG tính lại IsCompatible, chỉ lấy từ DB
+            // DO NOT recalculate IsCompatible, just use value from DB
             bool isCompatible = bloodRequest.IsCompatible;
             ViewBag.IsCompatible = isCompatible;
             if (!isCompatible)
@@ -469,10 +525,11 @@ namespace BloodDonation.Controllers
             return View(bloodRequest);
         }
 
-        // Xử lý yêu cầu máu trực tiếp từ trang chi tiết
+        // Handle blood request directly from details page
         [HttpPost]
         public IActionResult ProcessBloodRequestFromDetails(int bloodRequestId, string action, int? selectedBloodTypeId = null, decimal? quantity = null)
         {
+            SetStaffNotificationBadge();
             if (!IsStaffLoggedIn())
                 return RedirectToAction("Index", "Login");
 
@@ -483,11 +540,11 @@ namespace BloodDonation.Controllers
 
             if (bloodRequest == null)
             {
-                TempData["Error"] = "Không tìm thấy yêu cầu máu.";
+                TempData["Error"] = "Blood request not found.";
                 return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
             }
 
-            // Lấy danh sách nhóm máu tương thích
+            // Get the list of compatible blood types
             var compatibleTypes = GetCompatibleBloodTypes(bloodRequest.BloodType?.Type);
             bool isCompatible = !(compatibleTypes.Count == 1 && compatibleTypes[0] == bloodRequest.BloodType?.Type);
             ViewBag.IsCompatible = isCompatible;
@@ -496,44 +553,48 @@ namespace BloodDonation.Controllers
             {
                 case "approve":
                     bloodRequest.Status = "Approved";
-                    TempData["Message"] = "Yêu cầu đã được duyệt.";
+                    TempData["Message"] = "Request approved.";
                     break;
                 case "reject":
                     bloodRequest.Status = "Rejected";
-                    TempData["Message"] = "Yêu cầu đã bị từ chối.";
+                    TempData["Message"] = "Request rejected.";
+                    break;
+                case "cancel":
+                    bloodRequest.Status = "Canceled";
+                    TempData["Message"] = "Request cancelled.";
                     break;
                 case "complete":
-                    // Kiểm tra nhóm máu được chọn có hợp lệ không
+                    // Check if selected blood type is valid
                     if (!selectedBloodTypeId.HasValue)
                     {
-                        TempData["Error"] = "Vui lòng chọn nhóm máu để cấp phát.";
+                        TempData["Error"] = "Please select a blood type to allocate.";
                         return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
                     }
                     var selectedBloodType = _context.BloodTypes.FirstOrDefault(bt => bt.BloodTypeID == selectedBloodTypeId.Value);
                     if (selectedBloodType == null)
                     {
-                        TempData["Error"] = "Nhóm máu không hợp lệ.";
+                        TempData["Error"] = "Invalid blood type.";
                         return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
                     }
                     if (!isCompatible)
                     {
-                        // Chỉ cho phép chọn đúng nhóm máu yêu cầu
+                        // Only allow selecting the exact requested blood type
                         if (selectedBloodType.Type != bloodRequest.BloodType.Type)
                         {
-                            TempData["Error"] = "Chỉ được chọn đúng nhóm máu yêu cầu.";
+                            TempData["Error"] = "Only the exact requested blood type can be selected.";
                             return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
                         }
                     }
                     else
                     {
-                        // Phải nằm trong danh sách tương hợp
+                        // Must be in the compatible types list
                         if (!compatibleTypes.Contains(selectedBloodType.Type))
                         {
-                            TempData["Error"] = "Nhóm máu không tương thích.";
+                            TempData["Error"] = "Blood type not compatible.";
                             return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
                         }
                     }
-                    // Trừ kho máu
+                    // Deduct from blood inventory
                     if (quantity == null || quantity <= 0) quantity = bloodRequest.Quantity;
                     var inventory = _context.BloodInventories.FirstOrDefault(b => b.BloodTypeID == selectedBloodType.BloodTypeID);
                     if (inventory != null && inventory.Quantity >= quantity)
@@ -542,12 +603,12 @@ namespace BloodDonation.Controllers
                         inventory.LastUpdated = DateTime.Now;
                         bloodRequest.Status = "Completed";
                         bloodRequest.BloodGiven = selectedBloodType.Type;
-                        TempData["Message"] = "Yêu cầu đã được hoàn thành và kho máu đã được cập nhật.";
+                        TempData["Message"] = "Request completed and blood inventory updated.";
                     }
                     else
                     {
                         bloodRequest.Status = "Pending";
-                        TempData["Error"] = "Kho máu không đủ. Đơn chuyển sang trạng thái chờ.";
+                        TempData["Error"] = "Blood inventory insufficient. Request transferred to pending state.";
                     }
                     break;
             }
@@ -556,287 +617,476 @@ namespace BloodDonation.Controllers
             return RedirectToAction("BloodRequestDetails", new { id = bloodRequestId });
         }
 
-        // Hiển thị danh sách người hiến máu gần nhất
-        public async Task<IActionResult> NearestDonors(int? bloodBankId = null, string customAddress = null)
+        // Display the list of nearest donors
+        public async Task<IActionResult> NearestDonors(string locationId = null, string customAddress = null)
         {
-            var bloodBanks = _context.BloodBanks.ToList();
-            ViewBag.BloodBanks = bloodBanks;
-            ViewBag.CustomAddress = customAddress;
+            SetStaffNotificationBadge();
+            try
+            {
+                var bloodBanks = _context.BloodBanks.ToList();
+                var medicalCenters = _context.MedicalCenters.ToList();
+                ViewBag.BloodBanks = bloodBanks;
+                ViewBag.MedicalCenters = medicalCenters;
+                ViewBag.CustomAddress = customAddress;
 
-            int selectedBankId;
-            if (bloodBanks.Count == 1)
-            {
-                selectedBankId = bloodBanks.First().BloodBankID;
-            }
-            else if (bloodBankId.HasValue)
-            {
-                selectedBankId = bloodBankId.Value;
-            }
-            else
-            {
-                // Chưa chọn blood bank, chỉ hiển thị form chọn
-                ViewBag.SelectedBankId = null;
-                ViewBag.Donors = null;
-                return View();
-            }
+                int? selectedBankId = null;
+                int? selectedMedicalCenterId = null;
+                string locationType = null;
+                int locationIntId = 0;
 
-            ViewBag.SelectedBankId = selectedBankId;
-
-            // Lấy danh sách donor sẵn sàng có địa chỉ
-            var donors = _context.Donors
-                .Include(d => d.BloodType)
-                .Where(d => d.IsAvailable == true && !string.IsNullOrEmpty(d.Address))
-                .ToList();
-
-            // Lấy địa chỉ kho máu (ưu tiên customAddress nếu có)
-            string bankLocation;
-            if (!string.IsNullOrWhiteSpace(customAddress))
-            {
-                bankLocation = customAddress;
-            }
-            else
-            {
-                var bloodBank = bloodBanks.FirstOrDefault(b => b.BloodBankID == selectedBankId);
-                if (bloodBank == null || string.IsNullOrEmpty(bloodBank.Location))
+                if (!string.IsNullOrEmpty(locationId))
                 {
+                    if (locationId.StartsWith("bank_"))
+                    {
+                        locationType = "bank";
+                        if (int.TryParse(locationId.Substring(5), out int id))
+                        {
+                            selectedBankId = id;
+                            locationIntId = id;
+                        }
+                    }
+                    else if (locationId.StartsWith("center_"))
+                    {
+                        locationType = "center";
+                        if (int.TryParse(locationId.Substring(7), out int id))
+                        {
+                            selectedMedicalCenterId = id;
+                            locationIntId = id;
+                        }
+                    }
+                }
+
+                ViewBag.SelectedBankId = selectedBankId;
+                ViewBag.SelectedMedicalCenterId = selectedMedicalCenterId;
+
+                if (selectedBankId == null && selectedMedicalCenterId == null && string.IsNullOrWhiteSpace(customAddress))
+                {
+                    // If no donation location selected, only show the selection form
                     ViewBag.Donors = null;
-                    ViewBag.Error = "Không tìm thấy địa chỉ kho máu.";
                     return View();
                 }
-                bankLocation = bloodBank.Location;
-            }
 
-            // Gọi API geocode để lấy tọa độ cho bankLocation và donor
-            var apiKey = "5b3ce3597851110001cf62484675ccea183f4166ab762b8429b80eb8";
-            var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                // Get list of available donors with address
+                var donors = _context.Donors
+                    .Include(d => d.BloodType)
+                    .Where(d => d.IsAvailable == true 
+                        && !string.IsNullOrEmpty(d.Address)
+                        && _context.DonationAppointments.Any(a => a.DonorID == d.DonorID && a.Status == "Confirmed"))
+                    .ToList();
 
-            async Task<(double lat, double lon)?> GeocodeAsync(string address)
-            {
-                var url = $"https://api.openrouteservice.org/geocode/search?api_key={apiKey}&text={Uri.EscapeDataString(address)}&boundary.country=VN";
-                var response = await httpClient.GetAsync(url);
-                if (!response.IsSuccessStatusCode) return null;
-                var json = await response.Content.ReadAsStringAsync();
-                using var doc = JsonDocument.Parse(json);
-                var features = doc.RootElement.GetProperty("features");
-                if (features.GetArrayLength() == 0) return null;
-                var coords = features[0].GetProperty("geometry").GetProperty("coordinates");
-                double lon = coords[0].GetDouble();
-                double lat = coords[1].GetDouble();
-                return (lat, lon);
-            }
+                // Get donation location address (prefer customAddress if available)
+                string locationAddress = null;
+                if (!string.IsNullOrWhiteSpace(customAddress))
+                {
+                    locationAddress = customAddress;
+                }
+                else if (selectedBankId != null)
+                {
+                    var bloodBank = bloodBanks.FirstOrDefault(b => b.BloodBankID == selectedBankId);
+                    if (bloodBank == null || string.IsNullOrEmpty(bloodBank.Location))
+                    {
+                        ViewBag.Donors = null;
+                        ViewBag.Error = "Blood bank location not found.";
+                        return View();
+                    }
+                    locationAddress = bloodBank.Location;
+                }
+                else if (selectedMedicalCenterId != null)
+                {
+                    var medicalCenter = medicalCenters.FirstOrDefault(c => c.MedicalCenterID == selectedMedicalCenterId);
+                    if (medicalCenter == null || string.IsNullOrEmpty(medicalCenter.Location))
+                    {
+                        ViewBag.Donors = null;
+                        ViewBag.Error = "Medical center location not found.";
+                        return View();
+                    }
+                    locationAddress = medicalCenter.Location;
+                }
 
-            // Lấy tọa độ kho máu (hoặc customAddress)
-            var bankCoord = await GeocodeAsync(bankLocation);
-            if (bankCoord == null)
-            {
-                ViewBag.Donors = null;
-                ViewBag.Error = "Không lấy được tọa độ kho máu.";
+                // Call geocode API to get coordinates for locationAddress and donors
+                var apiKey = "5b3ce3597851110001cf62484675ccea183f4166ab762b8429b80eb8";
+                var httpClient = new HttpClient();
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                async Task<(double lat, double lon)?> GeocodeAsync(string address)
+                {
+                    var url = $"https://api.openrouteservice.org/geocode/search?api_key={apiKey}&text={Uri.EscapeDataString(address)}&boundary.country=VN";
+                    var response = await httpClient.GetAsync(url);
+                    if (!response.IsSuccessStatusCode) return null;
+                    var json = await response.Content.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(json);
+                    var features = doc.RootElement.GetProperty("features");
+                    if (features.GetArrayLength() == 0) return null;
+                    var coords = features[0].GetProperty("geometry").GetProperty("coordinates");
+                    double lon = coords[0].GetDouble();
+                    double lat = coords[1].GetDouble();
+                    return (lat, lon);
+                }
+
+                // Get coordinates for donation location (or customAddress)
+                var locationCoord = await GeocodeAsync(locationAddress);
+                if (locationCoord == null)
+                {
+                    ViewBag.Donors = null;
+                    ViewBag.Error = "Could not get coordinates for blood donation location.";
+                    return View();
+                }
+
+                // Get coordinates for donors
+                var geocodeTasks = donors.Select(async donor =>
+                {
+                    var coord = await GeocodeAsync(donor.Address);
+                    return (donor, coord);
+                }).ToList();
+
+                // Wait for all geocode tasks to complete
+                var donorCoords = (await Task.WhenAll(geocodeTasks)).ToList();
+
+                // Filter donors with valid coordinates
+                var validDonors = donorCoords.Where(x => x.coord != null).ToList();
+                if (!validDonors.Any())
+                {
+                    ViewBag.Donors = null;
+                    ViewBag.Error = "No donors with valid coordinates found.";
+                    return View();
+                }
+
+                // Call matrix API to calculate distances
+                var locations = new List<double[]>();
+                // First position is the donation location
+                locations.Add(new double[] { locationCoord.Value.lon, locationCoord.Value.lat });
+                // Donor positions
+                locations.AddRange(validDonors.Select(x => new double[] { x.coord.Value.lon, x.coord.Value.lat }));
+
+                var matrixBody = new
+                {
+                    locations = locations,
+                    metrics = new[] { "distance" },
+                    units = "km"
+                };
+                var matrixContent = new StringContent(JsonSerializer.Serialize(matrixBody), System.Text.Encoding.UTF8, "application/json");
+                httpClient.DefaultRequestHeaders.Remove("Authorization");
+                httpClient.DefaultRequestHeaders.Add("Authorization", apiKey);
+                var matrixResponse = await httpClient.PostAsync("https://api.openrouteservice.org/v2/matrix/driving-car", matrixContent);
+                if (!matrixResponse.IsSuccessStatusCode)
+                {
+                    ViewBag.Donors = null;
+                    ViewBag.Error = "Could not calculate distance (matrix API).";
+                    return View();
+                }
+                var matrixJson = await matrixResponse.Content.ReadAsStringAsync();
+                using var matrixDoc = JsonDocument.Parse(matrixJson);
+                var distances = matrixDoc.RootElement.GetProperty("distances");
+                // First row is from donation location to donors
+                var distanceArr = distances[0];
+
+                // Combine donors with their distances
+                var donorWithDistance = validDonors.Select((x, idx) => new { Donor = x.donor, Distance = distanceArr[idx + 1].GetDouble() }).OrderBy(x => x.Distance).ToList();
+                ViewBag.DonorDistances = donorWithDistance;
+                ViewBag.Donors = donorWithDistance.Select(x => x.Donor).ToList();
+                ViewBag.Error = null;
                 return View();
             }
-
-            // Lấy tọa độ các donor
-            var geocodeTasks = donors.Select(async donor =>
-            {
-                var coord = await GeocodeAsync(donor.Address);
-                return (donor, coord);
-            }).ToList();
-
-            // Chờ tất cả task hoàn tất
-            var donorCoords = (await Task.WhenAll(geocodeTasks)).ToList();
-
-
-            // Lọc donor có tọa độ hợp lệ
-            var validDonors = donorCoords.Where(x => x.coord != null).ToList();
-            if (!validDonors.Any())
+            catch (HttpRequestException)
             {
                 ViewBag.Donors = null;
-                ViewBag.Error = "Không có người hiến máu nào có tọa độ hợp lệ.";
+                ViewBag.Error = "Could not connect to map service. Please check your network connection!";
                 return View();
             }
-
-            // Gọi matrix API để tính khoảng cách
-            var locations = new List<double[]>();
-            // Vị trí đầu là kho máu
-            locations.Add(new double[] { bankCoord.Value.lon, bankCoord.Value.lat });
-            // Các vị trí donor
-            locations.AddRange(validDonors.Select(x => new double[] { x.coord.Value.lon, x.coord.Value.lat }));
-
-            var matrixBody = new
-            {
-                locations = locations,
-                metrics = new[] { "distance" },
-                units = "km"
-            };
-            var matrixContent = new StringContent(JsonSerializer.Serialize(matrixBody), System.Text.Encoding.UTF8, "application/json");
-            httpClient.DefaultRequestHeaders.Remove("Authorization");
-            httpClient.DefaultRequestHeaders.Add("Authorization", apiKey);
-            var matrixResponse = await httpClient.PostAsync("https://api.openrouteservice.org/v2/matrix/driving-car", matrixContent);
-            if (!matrixResponse.IsSuccessStatusCode)
+            catch (TaskCanceledException)
             {
                 ViewBag.Donors = null;
-                ViewBag.Error = "Không thể tính khoảng cách (matrix API).";
+                ViewBag.Error = "Connection to map service timed out. Please try again!";
                 return View();
             }
-            var matrixJson = await matrixResponse.Content.ReadAsStringAsync();
-            using var matrixDoc = JsonDocument.Parse(matrixJson);
-            var distances = matrixDoc.RootElement.GetProperty("distances");
-            // Dòng đầu là từ kho máu đến các donor
-            var distanceArr = distances[0];
-
-            // Ghép donor với khoảng cách
-            var donorWithDistance = validDonors.Select((x, idx) => new { Donor = x.donor, Distance = distanceArr[idx + 1].GetDouble() }).OrderBy(x => x.Distance).ToList();
-            ViewBag.DonorDistances = donorWithDistance;
-            ViewBag.Donors = donorWithDistance.Select(x => x.Donor).ToList();
-            ViewBag.Error = null;
-            return View();
+            catch (System.Net.Sockets.SocketException)
+            {
+                ViewBag.Donors = null;
+                ViewBag.Error = "Could not connect to map service (network error). Please check your Internet connection!";
+                return View();
+            }
+            catch (Exception)
+            {
+                ViewBag.Donors = null;
+                ViewBag.Error = "An unexpected error occurred while searching for nearest donors.";
+                return View();
+            }
         }
 
-        // Hiển thị danh sách người hiến máu gần nhất trong bán kính 20km
+        // Display the list of nearest donors within a 20km radius
         public async Task<IActionResult> NearestDonorsWithin20km(int? bloodBankId = null, string customAddress = null, int? bloodRequestId = null)
         {
-            var bloodBanks = _context.BloodBanks.ToList();
-            ViewBag.BloodBanks = bloodBanks;
-            ViewBag.CustomAddress = customAddress;
-            ViewBag.BloodRequestId = bloodRequestId;
-
-            int selectedBankId;
-            if (bloodBanks.Count == 1)
+            SetStaffNotificationBadge();
+            try
             {
-                selectedBankId = bloodBanks.First().BloodBankID;
-            }
-            else if (bloodBankId.HasValue)
-            {
-                selectedBankId = bloodBankId.Value;
-            }
-            else
-            {
-                ViewBag.SelectedBankId = null;
-                ViewBag.Donors = null;
-                return View();
-            }
-
-            ViewBag.SelectedBankId = selectedBankId;
-
-            // Default: all available donors with address
-            var donorsQuery = _context.Donors.Include(d => d.BloodType).Where(d => d.IsAvailable == true && !string.IsNullOrEmpty(d.Address));
-
-            // Nếu có bloodRequestId thì lọc theo tương hợp
-            if (bloodRequestId.HasValue)
-            {
-                var bloodRequest = _context.BloodRequests.Include(r => r.BloodType).FirstOrDefault(r => r.BloodRequestID == bloodRequestId.Value);
-                if (bloodRequest != null)
+                if (bloodRequestId.HasValue)
                 {
+                    var bloodRequest = _context.BloodRequests
+                        .Include(r => r.BloodType)
+                        .Include(r => r.MedicalCenter)
+                        .FirstOrDefault(r => r.BloodRequestID == bloodRequestId.Value);
+
+                    if (bloodRequest == null || bloodRequest.MedicalCenter == null)
+                    {
+                        ViewBag.Error = "Medical center information not found.";
+                        return View();
+                    }
+
+                    ViewBag.MedicalCenter = bloodRequest.MedicalCenter;
+                    ViewBag.BloodRequestId = bloodRequestId;
+
+                    // Filter compatible donors
+                    var donorsQuery = _context.Donors.Include(d => d.BloodType).Where(d => d.IsAvailable == true 
+                        && !string.IsNullOrEmpty(d.Address)
+                        && _context.DonationAppointments.Any(a => a.DonorID == d.DonorID && a.Status == "Confirmed"));
                     if (bloodRequest.IsCompatible)
                     {
-                        // Lấy các nhóm máu tương hợp
                         var compatibleTypes = GetCompatibleBloodTypes(bloodRequest.BloodType?.Type);
                         donorsQuery = donorsQuery.Where(d => compatibleTypes.Contains(d.BloodType.Type));
                     }
                     else
                     {
-                        // Chỉ lấy đúng nhóm máu cần
                         donorsQuery = donorsQuery.Where(d => d.BloodType.Type == bloodRequest.BloodType.Type);
                     }
-                }
-            }
+                    var donors = donorsQuery.ToList();
 
-            var donors = donorsQuery.ToList();
+                    // Get medical center address (prefer customAddress if available)
+                    string location = !string.IsNullOrWhiteSpace(customAddress) ? customAddress : bloodRequest.MedicalCenter.Location;
+                    if (string.IsNullOrWhiteSpace(location))
+                    {
+                        ViewBag.Donors = null;
+                        ViewBag.Error = "Medical center location not found.";
+                        return View();
+                    }
 
-            string bankLocation;
-            if (!string.IsNullOrWhiteSpace(customAddress))
-            {
-                bankLocation = customAddress;
-            }
-            else
-            {
-                var bloodBank = bloodBanks.FirstOrDefault(b => b.BloodBankID == selectedBankId);
-                if (bloodBank == null || string.IsNullOrEmpty(bloodBank.Location))
-                {
-                    ViewBag.Donors = null;
-                    ViewBag.Error = "Không tìm thấy địa chỉ kho máu.";
+                    var apiKey = "5b3ce3597851110001cf62484675ccea183f4166ab762b8429b80eb8";
+                    var httpClient = new HttpClient();
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    async Task<(double lat, double lon)?> GeocodeAsync(string address)
+                    {
+                        var url = $"https://api.openrouteservice.org/geocode/search?api_key={apiKey}&text={Uri.EscapeDataString(address)}&boundary.country=VN";
+                        var response = await httpClient.GetAsync(url);
+                        if (!response.IsSuccessStatusCode) return null;
+                        var json = await response.Content.ReadAsStringAsync();
+                        using var doc = JsonDocument.Parse(json);
+                        var features = doc.RootElement.GetProperty("features");
+                        if (features.GetArrayLength() == 0) return null;
+                        var coords = features[0].GetProperty("geometry").GetProperty("coordinates");
+                        double lon = coords[0].GetDouble();
+                        double lat = coords[1].GetDouble();
+                        return (lat, lon);
+                    }
+
+                    var centerCoord = await GeocodeAsync(location);
+                    if (centerCoord == null)
+                    {
+                        ViewBag.Donors = null;
+                        ViewBag.Error = "Could not get coordinates for medical center.";
+                        return View();
+                    }
+
+                    var geocodeTasks = donors.Select(async donor =>
+                    {
+                        var coord = await GeocodeAsync(donor.Address);
+                        return (donor, coord);
+                    }).ToList();
+
+                    var donorCoords = (await Task.WhenAll(geocodeTasks)).ToList();
+                    var validDonors = donorCoords.Where(x => x.coord != null).ToList();
+                    if (!validDonors.Any())
+                    {
+                        ViewBag.Donors = null;
+                        ViewBag.Error = "No donors with valid coordinates found.";
+                        return View();
+                    }
+
+                    var locations = new List<double[]>();
+                    locations.Add(new double[] { centerCoord.Value.lon, centerCoord.Value.lat });
+                    locations.AddRange(validDonors.Select(x => new double[] { x.coord.Value.lon, x.coord.Value.lat }));
+
+                    var matrixBody = new
+                    {
+                        locations = locations,
+                        metrics = new[] { "distance" },
+                        units = "km"
+                    };
+                    var matrixContent = new StringContent(JsonSerializer.Serialize(matrixBody), System.Text.Encoding.UTF8, "application/json");
+                    httpClient.DefaultRequestHeaders.Remove("Authorization");
+                    httpClient.DefaultRequestHeaders.Add("Authorization", apiKey);
+                    var matrixResponse = await httpClient.PostAsync("https://api.openrouteservice.org/v2/matrix/driving-car", matrixContent);
+                    if (!matrixResponse.IsSuccessStatusCode)
+                    {
+                        ViewBag.Donors = null;
+                        ViewBag.Error = "Could not calculate distance (matrix API).";
+                        return View();
+                    }
+                    var matrixJson = await matrixResponse.Content.ReadAsStringAsync();
+                    using var matrixDoc = JsonDocument.Parse(matrixJson);
+                    var distances = matrixDoc.RootElement.GetProperty("distances");
+                    var distanceArr = distances[0];
+
+                    var donorWithDistance = validDonors.Select((x, idx) => new { Donor = x.donor, Distance = distanceArr[idx + 1].GetDouble() })
+                        .Where(x => x.Distance <= 25)
+                        .OrderBy(x => x.Distance)
+                        .ToList();
+                    ViewBag.DonorDistances = donorWithDistance;
+                    ViewBag.Donors = donorWithDistance.Select(x => x.Donor).ToList();
+                    ViewBag.Error = null;
                     return View();
                 }
-                bankLocation = bloodBank.Location;
+                else
+                {
+                    var bloodBanks = _context.BloodBanks.ToList();
+                    ViewBag.BloodBanks = bloodBanks;
+                    ViewBag.CustomAddress = customAddress;
+                    ViewBag.BloodRequestId = bloodRequestId;
+
+                    int selectedBankId;
+                    if (bloodBanks.Count == 1)
+                    {
+                        selectedBankId = bloodBanks.First().BloodBankID;
+                    }
+                    else if (bloodBankId.HasValue)
+                    {
+                        selectedBankId = bloodBankId.Value;
+                    }
+                    else
+                    {
+                        ViewBag.SelectedBankId = null;
+                        ViewBag.Donors = null;
+                        return View();
+                    }
+
+                    ViewBag.SelectedBankId = selectedBankId;
+
+                    // Default: all available donors with address
+                    var donorsQuery = _context.Donors.Include(d => d.BloodType).Where(d => d.IsAvailable == true 
+                        && !string.IsNullOrEmpty(d.Address)
+                        && _context.DonationAppointments.Any(a => a.DonorID == d.DonorID && a.Status == "Confirmed"));
+
+                    var donors = donorsQuery.ToList();
+
+                    // Get blood bank address (prefer customAddress if available)
+                    string bankLocation;
+                    if (!string.IsNullOrWhiteSpace(customAddress))
+                    {
+                        bankLocation = customAddress;
+                    }
+                    else
+                    {
+                        var bloodBank = bloodBanks.FirstOrDefault(b => b.BloodBankID == selectedBankId);
+                        if (bloodBank == null || string.IsNullOrEmpty(bloodBank.Location))
+                        {
+                            ViewBag.Donors = null;
+                            ViewBag.Error = "Blood bank location not found.";
+                            return View();
+                        }
+                        bankLocation = bloodBank.Location;
+                    }
+
+                    var apiKey = "5b3ce3597851110001cf62484675ccea183f4166ab762b8429b80eb8";
+                    var httpClient = new HttpClient();
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    async Task<(double lat, double lon)?> GeocodeAsync(string address)
+                    {
+                        var url = $"https://api.openrouteservice.org/geocode/search?api_key={apiKey}&text={Uri.EscapeDataString(address)}&boundary.country=VN";
+                        var response = await httpClient.GetAsync(url);
+                        if (!response.IsSuccessStatusCode) return null;
+                        var json = await response.Content.ReadAsStringAsync();
+                        using var doc = JsonDocument.Parse(json);
+                        var features = doc.RootElement.GetProperty("features");
+                        if (features.GetArrayLength() == 0) return null;
+                        var coords = features[0].GetProperty("geometry").GetProperty("coordinates");
+                        double lon = coords[0].GetDouble();
+                        double lat = coords[1].GetDouble();
+                        return (lat, lon);
+                    }
+
+                    var bankCoord = await GeocodeAsync(bankLocation);
+                    if (bankCoord == null)
+                    {
+                        ViewBag.Donors = null;
+                        ViewBag.Error = "Could not get coordinates for blood bank.";
+                        return View();
+                    }
+
+                    var geocodeTasks = donors.Select(async donor =>
+                    {
+                        var coord = await GeocodeAsync(donor.Address);
+                        return (donor, coord);
+                    }).ToList();
+
+                    var donorCoords = (await Task.WhenAll(geocodeTasks)).ToList();
+
+                    var validDonors = donorCoords.Where(x => x.coord != null).ToList();
+                    if (!validDonors.Any())
+                    {
+                        ViewBag.Donors = null;
+                        ViewBag.Error = "No donors with valid coordinates found.";
+                        return View();
+                    }
+
+                    var locations = new List<double[]>();
+                    locations.Add(new double[] { bankCoord.Value.lon, bankCoord.Value.lat });
+                    locations.AddRange(validDonors.Select(x => new double[] { x.coord.Value.lon, x.coord.Value.lat }));
+
+                    var matrixBody = new
+                    {
+                        locations = locations,
+                        metrics = new[] { "distance" },
+                        units = "km"
+                    };
+                    var matrixContent = new StringContent(JsonSerializer.Serialize(matrixBody), System.Text.Encoding.UTF8, "application/json");
+                    httpClient.DefaultRequestHeaders.Remove("Authorization");
+                    httpClient.DefaultRequestHeaders.Add("Authorization", apiKey);
+                    var matrixResponse = await httpClient.PostAsync("https://api.openrouteservice.org/v2/matrix/driving-car", matrixContent);
+                    if (!matrixResponse.IsSuccessStatusCode)
+                    {
+                        ViewBag.Donors = null;
+                        ViewBag.Error = "Could not calculate distance (matrix API).";
+                        return View();
+                    }
+                    var matrixJson = await matrixResponse.Content.ReadAsStringAsync();
+                    using var matrixDoc = JsonDocument.Parse(matrixJson);
+                    var distances = matrixDoc.RootElement.GetProperty("distances");
+                    var distanceArr = distances[0];
+
+                    var donorWithDistance = validDonors.Select((x, idx) => new { Donor = x.donor, Distance = distanceArr[idx + 1].GetDouble() })
+                        .Where(x => x.Distance <= 25)
+                        .OrderBy(x => x.Distance)
+                        .ToList();
+                    ViewBag.DonorDistances = donorWithDistance;
+                    ViewBag.Donors = donorWithDistance.Select(x => x.Donor).ToList();
+                    ViewBag.Error = null;
+                    return View();
+                }
             }
-
-            var apiKey = "5b3ce3597851110001cf62484675ccea183f4166ab762b8429b80eb8";
-            var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            async Task<(double lat, double lon)?> GeocodeAsync(string address)
-            {
-                var url = $"https://api.openrouteservice.org/geocode/search?api_key={apiKey}&text={Uri.EscapeDataString(address)}&boundary.country=VN";
-                var response = await httpClient.GetAsync(url);
-                if (!response.IsSuccessStatusCode) return null;
-                var json = await response.Content.ReadAsStringAsync();
-                using var doc = JsonDocument.Parse(json);
-                var features = doc.RootElement.GetProperty("features");
-                if (features.GetArrayLength() == 0) return null;
-                var coords = features[0].GetProperty("geometry").GetProperty("coordinates");
-                double lon = coords[0].GetDouble();
-                double lat = coords[1].GetDouble();
-                return (lat, lon);
-            }
-
-            var bankCoord = await GeocodeAsync(bankLocation);
-            if (bankCoord == null)
+            catch (HttpRequestException)
             {
                 ViewBag.Donors = null;
-                ViewBag.Error = "Không lấy được tọa độ kho máu.";
+                ViewBag.Error = "Could not connect to map service. Please check your network connection!";
                 return View();
             }
-
-            var geocodeTasks = donors.Select(async donor =>
-            {
-                var coord = await GeocodeAsync(donor.Address);
-                return (donor, coord);
-            }).ToList();
-
-            var donorCoords = (await Task.WhenAll(geocodeTasks)).ToList();
-
-            var validDonors = donorCoords.Where(x => x.coord != null).ToList();
-            if (!validDonors.Any())
+            catch (TaskCanceledException)
             {
                 ViewBag.Donors = null;
-                ViewBag.Error = "Không có người hiến máu nào có tọa độ hợp lệ.";
+                ViewBag.Error = "Connection to map service timed out. Please try again!";
                 return View();
             }
-
-            var locations = new List<double[]>();
-            locations.Add(new double[] { bankCoord.Value.lon, bankCoord.Value.lat });
-            locations.AddRange(validDonors.Select(x => new double[] { x.coord.Value.lon, x.coord.Value.lat }));
-
-            var matrixBody = new
-            {
-                locations = locations,
-                metrics = new[] { "distance" },
-                units = "km"
-            };
-            var matrixContent = new StringContent(JsonSerializer.Serialize(matrixBody), System.Text.Encoding.UTF8, "application/json");
-            httpClient.DefaultRequestHeaders.Remove("Authorization");
-            httpClient.DefaultRequestHeaders.Add("Authorization", apiKey);
-            var matrixResponse = await httpClient.PostAsync("https://api.openrouteservice.org/v2/matrix/driving-car", matrixContent);
-            if (!matrixResponse.IsSuccessStatusCode)
+            catch (System.Net.Sockets.SocketException)
             {
                 ViewBag.Donors = null;
-                ViewBag.Error = "Không thể tính khoảng cách (matrix API).";
+                ViewBag.Error = "Could not connect to map service (network error). Please check your Internet connection!";
                 return View();
             }
-            var matrixJson = await matrixResponse.Content.ReadAsStringAsync();
-            using var matrixDoc = JsonDocument.Parse(matrixJson);
-            var distances = matrixDoc.RootElement.GetProperty("distances");
-            var distanceArr = distances[0];
-
-            // Filter only donors within 20km
-            var donorWithDistance = validDonors.Select((x, idx) => new { Donor = x.donor, Distance = distanceArr[idx + 1].GetDouble() })
-                .Where(x => x.Distance <= 25)
-                .OrderBy(x => x.Distance)
-                .ToList();
-            ViewBag.DonorDistances = donorWithDistance;
-            ViewBag.Donors = donorWithDistance.Select(x => x.Donor).ToList();
-            ViewBag.Error = null;
-            return View();
+            catch (Exception)
+            {
+                ViewBag.Donors = null;
+                ViewBag.Error = "An unexpected error occurred while searching for nearest donors.";
+                return View();
+            }
         }
     }
 }

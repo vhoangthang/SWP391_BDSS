@@ -22,7 +22,7 @@ namespace BloodDonation.Models
 
         [Required]
         [Column(TypeName = "nvarchar(10)")]
-        public string TimeSlot { get; set; } // "Sáng" hoặc "Chiều"
+        public string TimeSlot { get; set; }
 
 
         public int BloodTypeID { get; set; }
@@ -32,12 +32,13 @@ namespace BloodDonation.Models
 
         public DateTime AppointmentDate { get; set; }
 
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
         public Decimal QuantityDonated { get; set; }
 
         public string HealthSurvey { get; set; }
 
         public DonationCertificate DonationCertificate { get; set; }
+
     }
 }

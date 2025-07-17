@@ -67,9 +67,7 @@
         <div class="row gx-0 align-items-center">
             <div class="col-lg-8 text-center text-lg-start mb-2 mb-lg-0">
                 <div class="d-flex flex-wrap">
-                    <a href="#" class="text-muted small me-4"><i class="fas fa-map-marker-alt text-danger me-2"></i>Tìm địa điểm hiến máu</a>
-                    <a href="tel:19001234" class="text-muted small me-4"><i class="fas fa-phone-alt text-danger me-2"></i>1900 1234</a>
-                    <a href="mailto:info@hienmau.vn" class="text-muted small me-0"><i class="fas fa-envelope text-danger me-2"></i>info@hienmau.vn</a>
+                    <a href="mailto:adminbdss@gmail.com" class="text-muted small me-0"><i class="fas fa-envelope text-danger me-2"></i>adminbdss@gmail.com</a>
                 </div>
             </div>
             <div class="col-lg-4 text-center text-lg-end">
@@ -105,9 +103,6 @@
                                 <a asp-controller="Profile" asp-action="Index" class="dropdown-item">
                                     <i class="fas fa-user me-2"></i>Hồ sơ cá nhân
                                 </a>
-                                <a href="#" class="dropdown-item">
-                                    <i class="fas fa-cog me-2"></i>Cài đặt
-                                </a>
                                 <div class="dropdown-divider"></div>
                                 <a asp-controller="Login" asp-action="Logout" class="dropdown-item">
                                     <i class="fas fa-power-off me-2"></i>Đăng xuất
@@ -118,129 +113,65 @@
                     else
                     {
                         <a asp-controller="Login" asp-action="Index"><small class="me-3 text-dark"><i class="fa fa-sign-in-alt text-danger me-2"></i>Đăng nhập</small></a>
-                        <a asp-controller="Account" asp-action="Register"><small class="me-3 text-dark"><i class="fa fa-user-plus text-danger me-2"></i>Đăng ký</small></a>
                     }
                 </div>
             </div>
         </div>
     </div>
     <!-- Topbar End -->
-
-    <!-- Navbar & Hero Start -->
-    <div class="container-fluid position-relative p-0">
-        <nav class="navbar navbar-expand-lg navbar-light px-4 px-lg-5 py-3 py-lg-0">
-            <a asp-controller="Home" asp-action="Index" class="navbar-brand p-0">
-                <h1 class="text-danger"><i class="fas fa-tint me-3"></i>Hiến Máu</h1>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                <span class="fa fa-bars"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarCollapse">
-                <div class="navbar-nav ms-auto py-0">
-                    <a asp-controller="Home" asp-action="Index" class="nav-item nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Home" && ViewContext.RouteData.Values["action"].ToString() == "Index" ? "active" : "")">Trang chủ</a>
-                    @if (ViewBag.IsLoggedIn == true)
-                    {
-                        <a asp-controller="DonationSummary" asp-action="Index" class="nav-link nav-history-link">Lịch Sử Hiến Máu</a>
-                    }
-                    <a asp-controller="Certificate" asp-action="Index" class="nav-item nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Service" ? "active" : "")">Chứng nhận</a>
-                    <a asp-controller="Blog" asp-action="Index" class="nav-item nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Blog" ? "active" : "")">Tin tức</a>
-                    <a href="/FAQ.html" class="nav-item nav-link">Hỏi đáp</a>
-                    <div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                            Trang khác
-                        </a>
-                        <div class="dropdown-menu m-0">
-                            <a asp-controller="Feature" asp-action="Index" class="dropdown-item">Tính năng</a>
-                            <a asp-controller="Certificate" asp-action="Index" class="dropdown-item">Chứng nhận</a>
-                            <a asp-controller="Testimonial" asp-action="Index" class="dropdown-item">Cảm nhận</a>
-                            <a asp-controller="Offer" asp-action="Index" class="dropdown-item">Lợi ích</a>
-                            <a asp-controller="Faq" asp-action="Index" class="dropdown-item">FAQs</a>
-                        </div>
-                    </div>
-                    <a asp-controller="Contact" asp-action="Index" class="nav-item nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Contact" ? "active" : "")">Liên hệ</a>
-                </div>
-                @{
-                    var isLoggedInNav = !string.IsNullOrEmpty(Context.Session.GetString("Username"));
-                }
-            </div>
-        </nav>
-
-        <!-- Carousel Start -->
-        <div class="header-carousel owl-carousel">
-            <div class="header-carousel-item" style="overflow: hidden; height: 300px; position: relative;">
-                <img src="https://content.presspage.com/uploads/1873/1920_donatingblood.jpg?10000"
-                     class="img-fluid w-100"
-                     style="height: 100%; object-fit: cover; object-position: center;"
-                     alt="Hiến máu cứu người">
-
-                <!-- Overlay đen mờ -->
-                <div style="
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);">
-                </div>
-            </div>
-        </div>
-        <!-- Carousel End -->
-    </div>
-    <!-- Navbar & Hero End -->
-
     <!-- Main Content -->
     <main role="main" class="py-4" style="min-height: 400px;">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-3">
+            <div class="container">
+                <a class="navbar-brand fw-bold text-danger" asp-controller="Home" asp-action="Index"><i class="fas fa-tint"></i> LifeBlood</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="News" asp-action="Index">Tin tức</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
         @RenderBody()
     </main>
 
     <!-- Footer Start -->
     <div class="container-fluid footer py-5 wow fadeIn" data-wow-delay="0.2s">
-        <div class="container py-5 border-start-0 border-end-0" style="border: 1px solid; border-color: rgb(255, 255, 255, 0.08);">
-            <div class="row g-5">
-                <div class="col-md-6 col-lg-6 col-xl-4">
+        <div class="container py-5 border-start-0 border-end-0" style="border: 1px solid; border-color: rgba(255, 255, 255, 0.08);">
+            <div class="row g-5 justify-content-between">
+                <div class="col-md-6 col-lg-5 col-xl-4">
                     <div class="footer-item">
                         <a href="#" class="p-0">
                             <h4 class="text-white"><i class="fas fa-tint me-3"></i>LifeBlood</h4>
                         </a>
-                        <p class="mb-4">Lan tỏa yêu thương, kết nối sự sống.</p>
+                        <p class="mb-0">Lan tỏa yêu thương, kết nối sự sống.</p>
                     </div>
                 </div>
-                <div class="col-md-6 col-lg-6 col-xl-2">
-                    <div class="footer-item">
-                        <h4 class="text-white mb-4">Liên kết nhanh</h4>
-                        <a href="#about"><i class="fas fa-angle-right me-2"></i> Giới thiệu</a>
-                        <a href="#feature"><i class="fas fa-angle-right me-2"></i> Tính năng</a>
-                        <a href="#service"><i class="fas fa-angle-right me-2"></i> Dịch vụ</a>
-                        <a href="#contact"><i class="fas fa-angle-right me-2"></i> Liên hệ</a>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-6 col-xl-3">
-                    <div class="footer-item">
-                        <h4 class="text-white mb-4">Hỗ trợ</h4>
-                        <a href="#"><i class="fas fa-angle-right me-2"></i> Chính sách bảo mật</a>
-                        <a href="#"><i class="fas fa-angle-right me-2"></i> Điều khoản</a>
-                        <a href="#"><i class="fas fa-angle-right me-2"></i> Hỗ trợ</a>
-                        <a href="#faq"><i class="fas fa-angle-right me-2"></i> FAQ</a>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-6 col-xl-3">
+
+                <div class="col-md-6 col-lg-5 col-xl-4">
                     <div class="footer-item">
                         <h4 class="text-white mb-4">Liên hệ</h4>
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center mb-2">
                             <i class="fas fa-map-marker-alt text-danger me-3"></i>
-                            <p class="text-white mb-0">123 Đường Hiến Máu, Hà Nội</p>
+                            <p class="text-white mb-0">Trường Đại học FPT, TP.HCM</p>
                         </div>
                         <div class="d-flex align-items-center">
                             <i class="fas fa-envelope text-danger me-3"></i>
-                            <p class="text-white mb-0">info@hienmau.vn</p>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <i class="fa fa-phone-alt text-danger me-3"></i>
-                            <p class="text-white mb-0">1900 1234</p>
+                            <p class="text-white mb-0">adminbdss@gmail.com</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
     <!-- Footer End -->
 
     <!-- Copyright Start -->
@@ -248,10 +179,10 @@
         <div class="container">
             <div class="row g-4 align-items-center">
                 <div class="col-md-6 text-center text-md-start mb-md-0">
-                    <span class="text-body"><a href="#" class="border-bottom text-white"><i class="fas fa-copyright text-light me-2"></i>LifeBlood</a>, All rights reserved.</span>
+                    <span class="text-body"><a href="#" class="border-bottom text-white"><i class="fas fa-copyright text-light me-2"></i>BloodDonation</a>, All rights reserved.</span>
                 </div>
                 <div class="col-md-6 text-center text-md-end text-body">
-                    Thiết kế bởi <a class="border-bottom text-white" href="#">Nhóm LifeBlood</a>
+                    Thiết kế bởi <a class="border-bottom text-white" href="#">Team 7 - SE1837</a>
                 </div>
             </div>
         </div>

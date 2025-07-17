@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="~/css/notification.css" asp-append-version="true" />
 </head>
 
-
 <div class="notification-container">
     <div class="notification-header">
         <i class="fas fa-bell icon"></i>
@@ -47,15 +46,24 @@
                         </p>
                         @if (n.Type == "Invite" && !n.IsConfirmed)
                         {
-                            <form asp-action="ConfirmDonation" asp-controller="Notification" method="post" style="display:inline;">
+                            <form asp-action="ConfirmDonation" asp-controller="Notification" method="post" class="confirm-donation-form" style="display:inline;">
                                 <input type="hidden" name="notificationId" value="@n.NotificationID" />
                                 <button type="submit" class="btn btn-success btn-sm mt-2">Xác nhận đi hiến máu</button>
+                            </form>
+                            <form asp-action="RejectDonation" asp-controller="Notification" method="post" class="reject-donation-form" style="display:inline;">
+                                <input type="hidden" name="notificationId" value="@n.NotificationID" />
+                                <button type="submit" class="btn btn-secondary btn-sm mt-2 ms-2">Từ chối</button>
                             </form>
                         }
                         else if (n.Type == "Invite" && n.IsConfirmed)
                         {
                             <span class="text-success">Đã xác nhận</span>
                         }
+                        else if (n.Type == "Invite" && n.IsConfirmed == false)
+                        {
+                            <span class="text-danger">Đã từ chối</span>
+                        }
+                        <button class="btn btn-danger btn-sm mt-2 btn-delete-notification" data-id="@n.NotificationID" type="button">Xóa</button>
                     </div>
                     <div class="timestamp">
                         @n.SentAt.ToString("dd/MM/yyyy HH:mm")
@@ -76,6 +84,9 @@
         }
     </div>
 </div>
+<div class="mb-3 mt-4 text-center">
+    <a class="btn btn-secondary" href="/Home/Index"><i class="fa fa-arrow-left"></i> Quay lại</a>
+</div>
 
 @section Scripts {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -88,12 +99,37 @@
                 if (res.success) {
                     $item.removeClass("unread");
                     $item.find(".notification-dot").remove();
-                    // Giảm badge
+                    // Decrease badge
                     var $badge = $("#notificationBadge");
                     var count = parseInt($badge.text()) || 0;
                     if (count > 0) $badge.text(count - 1);
                 }
             });
+        });
+        $(".btn-delete-notification").on("click", function(e) {
+            e.stopPropagation();
+            var $btn = $(this);
+            var id = $btn.data("id");
+            if (confirm("Bạn có chắc muốn xóa thông báo này?")) {
+                $.post("/Notification/DeleteNotification", { notificationId: id }, function(res) {
+                    if (res.success) {
+                        $btn.closest(".notification-item").fadeOut(300, function() { $(this).remove(); });
+                    } else {
+                        alert(res.message || "Xóa không thành công!");
+                    }
+                });
+            }
+        });
+        // Xác nhận popup cho xác nhận hoặc từ chối hiến máu
+        $(".confirm-donation-form").on("submit", function(e) {
+            if (!confirm("Bạn có chắc chắn muốn xác nhận đi hiến máu không?")) {
+                e.preventDefault();
+            }
+        });
+        $(".reject-donation-form").on("submit", function(e) {
+            if (!confirm("Bạn có chắc chắn muốn từ chối lời mời hiến máu không?")) {
+                e.preventDefault();
+            }
         });
     });
 </script>

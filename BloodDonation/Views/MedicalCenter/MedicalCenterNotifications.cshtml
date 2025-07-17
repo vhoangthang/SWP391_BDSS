@@ -1,11 +1,8 @@
 @model List<BloodDonation.Models.Notification>
 @{
-    ViewData["Title"] = "Thông Báo Cơ Sở Y Tế";
-    Layout = "~/Views/Shared/_LayoutMain.cshtml";
-    ViewBag.HideLogo = true;
+    Layout = "~/Views/Shared/_LayoutMedicalCenter.cshtml";
 }
-
-<div class="container mt-4">
+<div class="main-content blood-request-list-page">
     <h3 class="fw-bold mb-3">🔔 Thông báo dành cho Cơ sở y tế</h3>
     <hr />
     <div class="notification-list">
@@ -24,14 +21,16 @@
                 @for (int i = 0; i < Model.Count; i++)
                 {
                     var n = Model[i];
-                    <tr class="@(n.IsRead ? "" : "table-warning")">
+                    var unreadClass = n.IsRead ? "" : "table-warning unread";
+                    <tr class="notification-row @unreadClass" data-id="@n.NotificationID" style="cursor:pointer;">
                         <td>@(i+1)</td>
-                        <td>@n.Message</td>
+                        <td>@n.Message @if (!n.IsRead) { <span class="notification-dot"></span> }</td>
                         <td>@n.SentAt.ToString("dd/MM/yyyy HH:mm")</td>
                         <td>
                             <a class="btn btn-sm btn-primary" href="@Url.Action("NotificationDetail", "MedicalCenter", new { notificationId = n.NotificationID })">
                                 Chi tiết
                             </a>
+                            <button class="btn btn-danger btn-sm btn-delete-notification" data-id="@n.NotificationID" type="button">Xóa</button>
                         </td>
                     </tr>
                 }
@@ -43,4 +42,41 @@
             <div class="alert alert-info">Chưa có thông báo nào.</div>
         }
     </div>
-</div> 
+</div>
+@section Scripts {
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(function() {
+        $(".notification-row.unread").on("click", function(e) {
+            // Nếu click vào nút Chi tiết hoặc Xóa thì không xử lý
+            if ($(e.target).closest("a,button").length > 0) return;
+            var $row = $(this);
+            var id = $row.data("id");
+            $.post("/MedicalCenter/MarkAsRead", { id: id }, function(res) {
+                if (res.success) {
+                    $row.removeClass("unread table-warning");
+                    $row.find(".notification-dot").remove();
+                    // Decrease badge
+                    var $badge = $("#notificationBadge");
+                    var count = parseInt($badge.text()) || 0;
+                    if (count > 0) $badge.text(count - 1);
+                }
+            });
+        });
+        $(".btn-delete-notification").on("click", function(e) {
+            e.stopPropagation();
+            var $btn = $(this);
+            var id = $btn.data("id");
+            if (confirm("Bạn có chắc muốn xóa thông báo này?")) {
+                $.post("/MedicalCenter/DeleteNotification", { notificationId: id }, function(res) {
+                    if (res.success) {
+                        $btn.closest("tr").fadeOut(300, function() { $(this).remove(); });
+                    } else {
+                        alert(res.message || "Xóa không thành công!");
+                    }
+                });
+            }
+        });
+    });
+</script>
+} 

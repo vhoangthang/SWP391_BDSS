@@ -3,6 +3,7 @@ using BloodDonation.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace BloodDonation.Controllers
 {
@@ -27,18 +28,22 @@ namespace BloodDonation.Controllers
                 .Include(d => d.Account)
                 .FirstOrDefault(d => d.Account.Username == username);
 
+            List<DonationCertificate> certificates;
+
             if (donor == null)
             {
-                TempData["Message"] = "Không tìm thấy thông tin người hiến máu.";
-                return RedirectToAction("Index", "Home");
+                ViewBag.NoCertificate = true;
+                certificates = new List<DonationCertificate>();
             }
-            
-            var certificates = _context.DonationCertificates
-                .Include(c => c.Appointment)
-                    .ThenInclude(a => a.MedicalCenter)
-                .Where(c => c.Appointment.DonorID == donor.DonorID)
-                .OrderByDescending(c => c.IssueDate)
-                .ToList();
+            else
+            {
+                certificates = _context.DonationCertificates
+                    .Include(c => c.Appointment)
+                        .ThenInclude(a => a.MedicalCenter)
+                    .Where(c => c.Appointment.DonorID == donor.DonorID)
+                    .OrderByDescending(c => c.IssueDate)
+                    .ToList();
+            }
 
             return View(certificates);
         }

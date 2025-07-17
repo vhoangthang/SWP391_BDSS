@@ -5,6 +5,15 @@
     var selectedBankId = ViewBag.SelectedBankId as int?;
     var donorDistances = ViewBag.DonorDistances;
     var error = ViewBag.Error as string;
+    var medicalCenters = ViewBag.MedicalCenters as List<BloodDonation.Models.MedicalCenter>;
+    var selectedMedicalCenterId = ViewBag.SelectedMedicalCenterId as int?;
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success text-center">
+        @TempData["SuccessMessage"]
+    </div>
 }
 
 <div class="container mt-4">
@@ -17,14 +26,26 @@
         <form method="get" class="mb-4">
             <div class="row g-2 align-items-end">
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">Chọn kho máu:</label>
-                    <select name="bloodBankId" class="form-select" required>
-                        <option value="">-- Chọn kho máu --</option>
-                        @foreach (var bank in bloodBanks)
+                    <label class="form-label fw-bold">Chọn nơi hiến máu:</label>
+                    <select name="locationId" class="form-select" required>
+                        <option value="">-- Chọn nơi hiến máu --</option>
+                        @if (bloodBanks != null)
                         {
-                            <option value="@bank.BloodBankID" selected="@(selectedBankId == bank.BloodBankID ? "selected" : null)">
-                                @bank.Name (@bank.Location)
-                            </option>
+                            foreach (var bank in bloodBanks)
+                            {
+                                <option value="@($"bank_{bank.BloodBankID}")" selected="@(selectedBankId == bank.BloodBankID ? "selected" : null)">
+                                    Kho máu: @bank.Name (@bank.Location)
+                                </option>
+                            }
+                        }
+                        @if (medicalCenters != null)
+                        {
+                            foreach (var center in medicalCenters)
+                            {
+                                <option value="@($"center_{center.MedicalCenterID}")" selected="@(selectedMedicalCenterId == center.MedicalCenterID ? "selected" : null)">
+                                    Trung tâm: @center.Name (@center.Location)
+                                </option>
+                            }
                         }
                     </select>
                 </div>
@@ -94,7 +115,7 @@
                                     <td>
                                         <form asp-action="SendInviteNotification" asp-controller="Notification" method="post">
                                             <input type="hidden" name="donorId" value="@donor.DonorID" />
-                                            <input type="hidden" name="bloodRequestId" value="@ViewBag.BloodRequestId" />
+                                            <input type="hidden" name="bloodRequestId" value="1" />
                                             <button type="submit" class="btn btn-warning btn-sm">Gửi thông báo mời hiến máu</button>
                                         </form>
                                     </td>

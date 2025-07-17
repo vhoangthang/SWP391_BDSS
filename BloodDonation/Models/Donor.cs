@@ -17,29 +17,29 @@ namespace BloodDonation.Models
         [ForeignKey("AccountID")]
         public Account Account { get; set; }
 
-        public int BloodTypeID { get; set; }
+        public int? BloodTypeID { get; set; }
 
         [ForeignKey("BloodTypeID")]
-        public BloodType BloodType { get; set; }
+        public BloodType? BloodType { get; set; }
 
-        [Required, MaxLength(255)]
-        public string Name { get; set; }
+        [MaxLength(255)]
+        public string? Name { get; set; }
 
         public DateTime? DateOfBirth { get; set; }
 
         [MaxLength(20)]
-        public string ContactNumber { get; set; }
+        public string? ContactNumber { get; set; }
 
         [StringLength(10)]
-        public string Gender { get; set; }
+        public string? Gender { get; set; }
 
         [MaxLength(255)]
-        public string Address { get; set; }
+        public string? Address { get; set; }
 
         public bool? IsAvailable { get; set; }
 
         [MaxLength(50)]
-        public string CCCD { get; set; }
+        public string? CCCD { get; set; }
 
         public ICollection<DonorBloodRequest> DonorBloodRequests { get; set; }
         public ICollection<DonationAppointment> DonationAppointments { get; set; }
