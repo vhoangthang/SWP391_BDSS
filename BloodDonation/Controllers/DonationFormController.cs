@@ -22,6 +22,15 @@ namespace BloodDonation.Controllers
         }
 
         [HttpPost]
+        public IActionResult ClearBookingSession()
+        {
+            HttpContext.Session.Remove("AppointmentDate");
+            HttpContext.Session.Remove("TimeSlot");
+            HttpContext.Session.Remove("BloodTypeID");
+            return Ok();
+        }
+
+        [HttpPost]
         public IActionResult SubmitSurvey([FromBody] HealthSurveyViewModel model)
         {
             var appointmentDateStr = HttpContext.Session.GetString("AppointmentDate");
@@ -37,7 +46,7 @@ namespace BloodDonation.Controllers
             var donor = _context.Donors.FirstOrDefault(d => d.AccountID == account.AccountID);
 
             if (donor == null)
-                return Json(new { success = false, message = "Không tìm thấy thông tin người hiến máu" });
+                return Json(new { success = false, message = "Không tìm thấy thông tin người hiến máu", code = "NO_DONOR" });
 
             // If question 10 is 'true' and the current status is false or null, update to true
             if (model.Answers.TryGetValue("10_AnhChiSanSangHienMauNeuDuDieuKien", out var q10))

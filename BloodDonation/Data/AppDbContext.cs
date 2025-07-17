@@ -12,7 +12,7 @@ namespace BloodDonation.Data
         {
         }
 
-        // Các bảng trong DB sẽ được ánh xạ qua DbSet:
+        //DB information here
         public DbSet<BloodBank> BloodBanks { get; set; }
         public DbSet<MedicalCenter> MedicalCenters { get; set; }
         public DbSet<BloodType> BloodTypes { get; set; }
