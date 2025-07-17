@@ -34,7 +34,27 @@
 <div class="container mt-4 mb-5">
     <h2 class="fw-bold mb-4" style="color:#22c55e; margin-top: 48px;"><i class="fas fa-newspaper"></i> Tin tức</h2>
     <div class="mb-4">
-        <iframe src="https://giotmauvang.org.vn/news" width="100%" height="800" style="border-radius:12px;border:1px solid #eee;"></iframe>
+        <h4>Danh sách tin tức</h4>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Tiêu đề</th>
+                    <th>Liên kết</th>
+                    <th>Thời gian</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Title</td>
+                        <td><a href="@item.Url" target="_blank">Xem chi tiết</a></td>
+                        <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
     <h4 class="mb-3">Các nguồn tin tức & cộng đồng nổi bật:</h4>
     <ul class="custom-link-list-news">
