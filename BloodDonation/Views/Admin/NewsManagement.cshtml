@@ -1,0 +1,65 @@
+﻿@model List<BloodDonation.Models.News>
+@{
+    ViewData["Title"] = "Quản lý tin tức";
+    var editingNews = ViewBag.EditingNews as BloodDonation.Models.News;
+}
+
+<div class="container mt-4">
+    <h2>Quản lý tin tức</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <div class="row">
+        <!-- Danh sách tin tức -->
+        <div class="col-md-7">
+            <h4>Danh sách tin</h4>
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Tiêu đề</th>
+                        <th>Liên kết</th>
+                        <th>Ngày tạo</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Title</td>
+                            <td><a href="@item.Url" target="_blank">Xem</a></td>
+                            <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <a class="btn btn-sm btn-primary" href="@Url.Action("NewsManagement", new { editId = item.NewsId })">Sửa</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Form sửa tin -->
+        <div class="col-md-5">
+            @if (editingNews != null)
+            {
+                <h4>Chỉnh sửa tin: @editingNews.Title</h4>
+                <form asp-action="EditNews" method="post">
+                    <input type="hidden" name="NewsId" value="@editingNews.NewsId" />
+                    <div class="mb-3">
+                        <label>Tiêu đề</label>
+                        <input name="Title" class="form-control" value="@editingNews.Title" required />
+                    </div>
+                    <div class="mb-3">
+                        <label>Đường dẫn</label>
+                        <input name="Url" class="form-control" value="@editingNews.Url" required />
+                    </div>
+                    <button type="submit" class="btn btn-success">Lưu</button>
+                    <a href="@Url.Action("NewsManagement")" class="btn btn-secondary">Hủy</a>
+                </form>
+            }
+        </div>
+    </div>
+</div>

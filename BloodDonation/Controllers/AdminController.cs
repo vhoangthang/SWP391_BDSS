@@ -414,6 +414,54 @@ namespace BloodDonation.Controllers
             return Json(new { success = true, message = "Cập nhật vai trò thành công." });
         }
 
+        public async Task<IActionResult> NewsManagement(int? editId = null)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            var role = HttpContext.Session.GetString("Role");
+
+            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            var newsList = await _context.News
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+
+            if (editId.HasValue)
+            {
+                var editingNews = await _context.News.FindAsync(editId.Value);
+                if (editingNews != null)
+                {
+                    ViewBag.EditingNews = editingNews;
+                }
+            }
+
+            return View(newsList); // Truyền đúng kiểu List<News>
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditNews(News updatedNews)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.NewsList = await _context.News.OrderByDescending(n => n.CreatedAt).ToListAsync();
+                ViewBag.EditingNews = updatedNews;
+                return View("NewsManagement", ViewBag.NewsList);
+            }
+
+            var news = await _context.News.FindAsync(updatedNews.NewsId);
+            if (news == null) return NotFound();
+
+            news.Title = updatedNews.Title;
+            news.Url = updatedNews.Url;
+            news.UpdatedAt = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Cập nhật tin tức thành công!";
+            return RedirectToAction("NewsManagement");
+        }
+
 
     }
 }

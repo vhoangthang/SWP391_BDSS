@@ -26,7 +26,7 @@ namespace BloodDonation.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<HealthSurvey> HealthSurveys { get; set; }
 
-        
+        public DbSet<News> News { get; set; }
 
 
 
