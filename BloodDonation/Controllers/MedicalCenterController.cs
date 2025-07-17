@@ -208,7 +208,9 @@ namespace BloodDonation.Controllers
                 .ToList();
 
             // Number of unreads
-            int unreadCount = _context.Notifications.Count(n => accountIds.Contains((int)n.AccountID) && !n.IsRead);
+            int unreadCount = 0;
+            unreadCount = _context.Notifications.Count(n => n.AccountID == medicalCenterAccount.AccountID && !n.IsRead);
+            unreadCount = _context.Notifications.Count(n => accountIds.Contains((int)n.AccountID) && !n.IsRead);
             ViewBag.UnreadNotificationCount = unreadCount;
 
             return View("MedicalCenterNotifications", notifications);
