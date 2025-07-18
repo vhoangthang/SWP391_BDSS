@@ -458,6 +458,58 @@ namespace BloodDonation.Controllers
             return RedirectToAction("NewsManagement");
         }
 
+        public IActionResult CreateNews()
+        {
+            var username = HttpContext.Session.GetString("Username");
+            var role = HttpContext.Session.GetString("Role");
+
+            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            return View();
+        }
+
+        // POST: Xử lý thêm tin tức mới từ Ajax
+        [HttpPost]
+        public async Task<IActionResult> CreateNews(string Title, string Url)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            var role = HttpContext.Session.GetString("Role");
+
+            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
+            {
+                return Json(new { success = false, message = "Bạn không có quyền thực hiện thao tác này." });
+            }
+
+            // Kiểm tra dữ liệu đầu vào
+            if (string.IsNullOrEmpty(Title) || string.IsNullOrEmpty(Url))
+            {
+                return Json(new { success = false, message = "Tiêu đề và URL không được để trống." });
+            }
+
+            try
+            {
+                // Tạo tin tức mới
+                var newNews = new News
+                {
+                    Title = Title,
+                    Url = Url,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
+
+                _context.News.Add(newNews);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra khi thêm tin tức: " + ex.Message });
+            }
+        }
 
     }
 }

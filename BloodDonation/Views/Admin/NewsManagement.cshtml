@@ -1,7 +1,6 @@
 ﻿@model List<BloodDonation.Models.News>
 @{
     Layout = null;
-    var editingNews = ViewBag.EditingNews as BloodDonation.Models.News;
 }
 
 <!DOCTYPE html>
@@ -48,8 +47,31 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Nút Thêm Tin Tức -->
+                    <div class="mb-3">
+                        <button class="btn btn-success" id="addNewsBtn">Thêm tin tức</button>
+                    </div>
+
+                    <!-- Form nhập tin tức mới -->
+                    <div class="mb-3" id="addNewsForm" style="display:none;">
+                        <h4>Thêm tin tức mới</h4>
+                        <form id="newNewsForm">
+                            <div class="mb-3">
+                                <label>Tiêu đề</label>
+                                <input type="text" id="title" name="Title" class="form-control" required />
+                            </div>
+                            <div class="mb-3">
+                                <label>Đường dẫn</label>
+                                <input type="url" id="url" name="Url" class="form-control" required />
+                            </div>
+                            <button type="submit" class="btn btn-success">Lưu</button>
+                            <button type="button" id="cancelAddNews" class="btn btn-secondary">Hủy</button>
+                        </form>
+                    </div>
+
                     <div class="row">
-                        <!-- List News -->
+                        <!-- Danh sách tin tức -->
                         <div class="col-md-12">
                             <h4>Danh sách tin</h4>
                             <table class="table table-bordered table-striped">
@@ -61,7 +83,7 @@
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="newsList">
                                     @foreach (var item in Model)
                                     {
                                         <tr>
@@ -69,39 +91,67 @@
                                             <td><a href="@item.Url" target="_blank">Xem</a></td>
                                             <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
                                             <td>
-                                                <a class="btn btn-sm btn-primary" href="@Url.Action("NewsManagement", new { editId = item.NewsId })">Sửa</a>
+                                                <button class="btn btn-sm btn-primary">Sửa</button>
                                             </td>
                                         </tr>
                                     }
                                 </tbody>
                             </table>
                         </div>
-                        <div class="dropdown-divider"></div>
-                        <!-- Form Edit -->
-                        <div class="col-md-12">
-                            <br/>
-                            @if (editingNews != null)
-                            {
-                                <h4>Chỉnh sửa tin: @editingNews.Title</h4>
-                                <form asp-action="EditNews" method="post">
-                                    <input type="hidden" name="NewsId" value="@editingNews.NewsId" />
-                                    <div class="mb-3">
-                                        <label>Tiêu đề</label>
-                                        <input name="Title" class="form-control" value="@editingNews.Title" required />
-                                    </div>
-                                    <div class="mb-3">
-                                        <label>Đường dẫn</label>
-                                        <input name="Url" class="form-control" value="@editingNews.Url" required />
-                                    </div>
-                                    <button type="submit" class="btn btn-success">Lưu</button>
-                                    <a href="@Url.Action("NewsManagement")" class="btn btn-secondary">Hủy</a>
-                                </form>
-                            }
-                        </div>
-                    </div>
                     </div>
                 </div>
+            </div>
         </div>
     </div>
+
+    <!-- Script Ajax -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Hiển thị form thêm tin tức khi nhấn nút Thêm tin tức
+            $("#addNewsBtn").click(function () {
+                $("#addNewsForm").show();
+            });
+
+            // Hủy form thêm tin tức
+            $("#cancelAddNews").click(function () {
+                $("#addNewsForm").hide();
+            });
+
+            // Gửi form thêm tin tức mới qua Ajax
+            $("#newNewsForm").submit(function (e) {
+                e.preventDefault();
+
+                var title = $("#title").val();
+                var url = $("#url").val();
+
+                // Gửi dữ liệu qua Ajax
+                $.ajax({
+                    url: '@Url.Action("CreateNews", "Admin")',  // Đảm bảo action URL là đúng
+                    type: 'POST',
+                    data: {
+                        Title: title,
+                        Url: url
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            // Thêm tin tức vào danh sách mà không reload trang
+                            var newRow = '<tr><td>' + title + '</td><td><a href="' + url + '" target="_blank">Xem</a></td><td>' + new Date().toLocaleDateString() + '</td><td><button class="btn btn-sm btn-primary">Sửa</button></td></tr>';
+                            $("#newsList").prepend(newRow);
+
+                            // Ẩn form và reset form
+                            $("#addNewsForm").hide();
+                            $("#newNewsForm")[0].reset();
+                        } else {
+                            alert(response.message || "Có lỗi xảy ra khi thêm tin tức.");
+                        }
+                    },
+                    error: function () {
+                        alert("Có lỗi xảy ra trong quá trình xử lý yêu cầu.");
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
