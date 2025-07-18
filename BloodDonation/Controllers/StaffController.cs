@@ -171,7 +171,7 @@ namespace BloodDonation.Controllers
                         appointment.QuantityDonated = QuantityDonated;
                         appointment.AppointmentDate = DateTime.Now; // Update completion date
 
-                        // If donor is available, set to unavailable
+                        //If donor is available, set to unavailable
                         var donorEntity = _context.Donors.FirstOrDefault(d => d.DonorID == appointment.DonorID);
                         if (donorEntity != null && donorEntity.IsAvailable == true)
                         {
@@ -179,7 +179,7 @@ namespace BloodDonation.Controllers
                             _context.SaveChanges();
                         }
 
-                        // ✅ Update or create blood inventory
+                        //Update or create blood inventory
                         var inventory = _context.BloodInventories.FirstOrDefault(b => b.BloodTypeID == appointment.BloodTypeID);
                         if (inventory != null)
                         {
@@ -284,7 +284,7 @@ namespace BloodDonation.Controllers
                     _context.Notifications.Add(notification);
                 }
 
-                // ✅ Save changes
+                //Save changes
                 _context.SaveChanges();
                 TempData["Message"] = "✅ Status updated.";
             }
@@ -394,7 +394,6 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("BloodRequestList");
             }
 
-            // ❌ Nếu trạng thái không phải Approved, không xử lý
             // If status is not Approved, do not process
             if (!string.Equals(request.Status, "Approved", StringComparison.OrdinalIgnoreCase))
             {
@@ -402,7 +401,6 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("BloodRequestList");
             }
 
-            // Kiểm tra nếu nhóm máu được chọn tương hợp
             // Check if the selected blood type is compatible
             var compatibleTypes = GetCompatibleBloodTypes(request.BloodType?.Type);
             var selectedBloodType = _context.BloodTypes.FirstOrDefault(bt => bt.BloodTypeID == SelectedBloodTypeID);

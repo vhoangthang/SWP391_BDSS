@@ -471,7 +471,7 @@ namespace BloodDonation.Controllers
             return View();
         }
 
-        // POST: Xử lý thêm tin tức mới từ Ajax
+        // POST: Process new news from Ajax
         [HttpPost]
         public async Task<IActionResult> CreateNews(string Title, string Url)
         {
@@ -483,7 +483,7 @@ namespace BloodDonation.Controllers
                 return Json(new { success = false, message = "Bạn không có quyền thực hiện thao tác này." });
             }
 
-            // Kiểm tra dữ liệu đầu vào
+            // Check input data
             if (string.IsNullOrEmpty(Title) || string.IsNullOrEmpty(Url))
             {
                 return Json(new { success = false, message = "Tiêu đề và URL không được để trống." });
@@ -491,7 +491,7 @@ namespace BloodDonation.Controllers
 
             try
             {
-                // Tạo tin tức mới
+                // Create new news
                 var newNews = new News
                 {
                     Title = Title,
