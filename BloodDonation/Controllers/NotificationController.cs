@@ -230,7 +230,7 @@ namespace BloodDonation.Controllers
                     var staffNotification = new Notification
                     {
                         DonorID = notification.DonorID,
-                        Message = $"Donor {notification.Donor.Name} (ID: {notification.Donor.DonorID}, Blood Type: {notification.Donor.BloodType?.Type}) has rejected the donation invitation.",
+                        Message = $"Người hiến máu {notification.Donor.Name} (ID: {notification.Donor.DonorID}, Nhóm máu: {notification.Donor.BloodType?.Type}) đã từ chối lời mời hiến máu.",
                         SentAt = DateTime.Now,
                         IsRead = false,
                         Type = "DonorRejected",
