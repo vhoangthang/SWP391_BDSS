@@ -66,6 +66,7 @@
                                 <label>Đường dẫn</label>
                                 <input type="url" id="url" name="Url" class="form-control" required />
                             </div>
+                            <!-- Không cho chọn Type khi thêm mới -->
                             <button type="submit" class="btn btn-success">Lưu</button>
                             <button type="button" id="cancelAddNews" class="btn btn-secondary">Hủy</button>
                         </form>
@@ -80,6 +81,7 @@
                                     <tr>
                                         <th>Tiêu đề</th>
                                         <th>Liên kết</th>
+                                        <th>Loại</th>
                                         <th>Ngày tạo</th>
                                         <th>Thao tác</th>
                                     </tr>
@@ -90,6 +92,9 @@
                                         <tr>
                                             <td>@item.Title</td>
                                             <td><a href="@item.Url" target="_blank">Xem</a></td>
+                                            <td>
+                                                @(item.Type == "news" ? "Tin tức" : "Blogs")
+                                            </td>
                                             <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
                                             <td>
                                                 <a class="btn btn-sm btn-primary" href="@Url.Action("NewsManagement", new { editId = item.NewsId })">Sửa</a>

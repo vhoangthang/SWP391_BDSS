@@ -439,13 +439,6 @@ namespace BloodDonation.Controllers
         [HttpPost]
         public async Task<IActionResult> EditNews(News updatedNews)
         {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.NewsList = await _context.News.OrderByDescending(n => n.CreatedAt).ToListAsync();
-                ViewBag.EditingNews = updatedNews;
-                return View("NewsManagement", ViewBag.NewsList);
-            }
-
             var news = await _context.News.FindAsync(updatedNews.NewsId);
             if (news == null) return NotFound();
 
@@ -491,13 +484,14 @@ namespace BloodDonation.Controllers
 
             try
             {
-                // Create new news
+                // Create new news, always set Type = 'news'
                 var newNews = new News
                 {
                     Title = Title,
                     Url = Url,
                     CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
+                    UpdatedAt = DateTime.Now,
+                    Type = "news"
                 };
 
                 _context.News.Add(newNews);
