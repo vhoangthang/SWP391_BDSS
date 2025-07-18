@@ -34,12 +34,16 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
-            // Add badge logic
+            // Đồng bộ logic badge: lấy tổng số thông báo chưa đọc của tất cả account thuộc Medical Center
             var medicalCenterAccount = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "medicalcenter");
             int unreadCount = 0;
             if (medicalCenterAccount != null)
             {
-                unreadCount = _context.Notifications.Count(n => n.AccountID == medicalCenterAccount.AccountID && !n.IsRead);
+                var accountIds = _context.Accounts
+                    .Where(a => a.MedicalCenterID == medicalCenterAccount.MedicalCenterID && a.Role.ToLower() == "medicalcenter")
+                    .Select(a => a.AccountID)
+                    .ToList();
+                unreadCount = _context.Notifications.Count(n => accountIds.Contains((int)n.AccountID) && !n.IsRead);
             }
             ViewBag.UnreadNotificationCount = unreadCount;
 
@@ -139,11 +143,26 @@ namespace BloodDonation.Controllers
         public IActionResult BloodRequestList()
         {
             var medicalCenterId = HttpContext.Session.GetInt32("MedicalCenterID");
+            var username = HttpContext.Session.GetString("Username");
             if (!medicalCenterId.HasValue)
             {
                 _logger.LogWarning("MedicalCenterID not found in session, redirecting to login");
                 return RedirectToAction("Index", "Login");
             }
+
+            // Tính badge
+            var medicalCenterAccount = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "medicalcenter");
+            int unreadCount = 0;
+            if (medicalCenterAccount != null)
+            {
+                var accountIds = _context.Accounts
+                    .Where(a => a.MedicalCenterID == medicalCenterAccount.MedicalCenterID && a.Role.ToLower() == "medicalcenter")
+                    .Select(a => a.AccountID)
+                    .ToList();
+                unreadCount = _context.Notifications.Count(n => accountIds.Contains((int)n.AccountID) && !n.IsRead);
+            }
+            ViewBag.UnreadNotificationCount = unreadCount;
+
             var requests = _context.BloodRequests
                 .Include(r => r.BloodType)
                 .Where(r => r.MedicalCenterID == medicalCenterId.Value)
