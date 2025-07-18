@@ -1,6 +1,7 @@
 ﻿@model List<BloodDonation.Models.News>
 @{
     Layout = null;
+    var editingNews = ViewBag.EditingNews as BloodDonation.Models.News;
 }
 
 <!DOCTYPE html>
@@ -91,13 +92,36 @@
                                             <td><a href="@item.Url" target="_blank">Xem</a></td>
                                             <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
                                             <td>
-                                                <button class="btn btn-sm btn-primary">Sửa</button>
+                                                <a class="btn btn-sm btn-primary" href="@Url.Action("NewsManagement", new { editId = item.NewsId })">Sửa</a>
                                             </td>
                                         </tr>
                                     }
                                 </tbody>
                             </table>
                         </div>
+                        <div class="dropdown-divider"></div>
+                        <!-- Form Edit -->
+                        <div class="col-md-12">
+                            <br />
+                            @if (editingNews != null)
+                            {
+                                <h4>Chỉnh sửa tin: @editingNews.Title</h4>
+                                <form asp-action="EditNews" method="post">
+                                    <input type="hidden" name="NewsId" value="@editingNews.NewsId" />
+                                    <div class="mb-3">
+                                        <label>Tiêu đề</label>
+                                        <input name="Title" class="form-control" value="@editingNews.Title" required />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Đường dẫn</label>
+                                        <input name="Url" class="form-control" value="@editingNews.Url" required />
+                                    </div>
+                                    <button type="submit" class="btn btn-success">Lưu</button>
+                                    <a href="@Url.Action("NewsManagement")" class="btn btn-secondary">Hủy</a>
+                                </form>
+                            }
+                        </div>
+                    </div>
                     </div>
                 </div>
             </div>
