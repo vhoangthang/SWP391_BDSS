@@ -1,7 +1,9 @@
 ﻿# Team7_SE1837_SWP391_BDSS
  Leader: Vo Hoang Thang
+ 
  Member: Le Vu Van, Nguyen Tuan Kiet, Quan Ba Thanh, Nguyen Viet Huy
-Topic: Blood Donation Support System
+ 
+ Topic: Blood Donation Support System
 
 A - System Design:
 1. Architecture:
