@@ -49,12 +49,12 @@
                         </div>
                     </div>
 
-                    <!-- Nút Thêm Tin Tức -->
+                    <!-- Add News Button -->
                     <div class="mb-3">
                         <button class="btn btn-success" id="addNewsBtn">Thêm tin tức</button>
                     </div>
 
-                    <!-- Form nhập tin tức mới -->
+                    <!-- New news input form -->
                     <div class="mb-3" id="addNewsForm" style="display:none;">
                         <h4>Thêm tin tức mới</h4>
                         <form id="newNewsForm">
@@ -66,14 +66,14 @@
                                 <label>Đường dẫn</label>
                                 <input type="url" id="url" name="Url" class="form-control" required />
                             </div>
-                            <!-- Không cho chọn Type khi thêm mới -->
+                            <!-- Do not select Type when adding new -->
                             <button type="submit" class="btn btn-success">Lưu</button>
                             <button type="button" id="cancelAddNews" class="btn btn-secondary">Hủy</button>
                         </form>
                     </div>
 
                     <div class="row">
-                        <!-- Danh sách tin tức -->
+                        <!-- News List -->
                         <div class="col-md-12">
                             <h4>Danh sách tin</h4>
                             <table class="table table-bordered table-striped">
@@ -131,32 +131,31 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Script Ajax -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         $(document).ready(function () {
-            // Hiển thị form thêm tin tức khi nhấn nút Thêm tin tức
+            // Show the add news form when clicking the Add news button
             $("#addNewsBtn").click(function () {
                 $("#addNewsForm").show();
             });
 
-            // Hủy form thêm tin tức
+            // Cancel the add news form
             $("#cancelAddNews").click(function () {
                 $("#addNewsForm").hide();
             });
 
-            // Gửi form thêm tin tức mới qua Ajax
+            // Submit form to add new news via Ajax
             $("#newNewsForm").submit(function (e) {
                 e.preventDefault();
 
                 var title = $("#title").val();
                 var url = $("#url").val();
 
-                // Gửi dữ liệu qua Ajax
+                // Send data via Ajax
                 $.ajax({
-                    url: '@Url.Action("CreateNews", "Admin")',  // Đảm bảo action URL là đúng
+                    url: '@Url.Action("CreateNews", "Admin")', // Make sure the action URL is correct
                     type: 'POST',
                     data: {
                         Title: title,
@@ -164,11 +163,11 @@
                     },
                     success: function (response) {
                         if (response.success) {
-                            // Thêm tin tức vào danh sách mà không reload trang
+                            // Add news to list without reloading page
                             var newRow = '<tr><td>' + title + '</td><td><a href="' + url + '" target="_blank">Xem</a></td><td>' + new Date().toLocaleDateString() + '</td><td><button class="btn btn-sm btn-primary">Sửa</button></td></tr>';
                             $("#newsList").prepend(newRow);
 
-                            // Ẩn form và reset form
+                            // Hide form and reset form
                             $("#addNewsForm").hide();
                             $("#newNewsForm")[0].reset();
                         } else {
