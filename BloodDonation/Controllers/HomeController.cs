@@ -36,6 +36,13 @@ namespace BloodDonation.Controllers
             }
             ViewBag.UnreadNotificationCount = unreadCount;
 
+            // Get TeamMember News with Type = "blogs"
+            var teamMembers = _context.News
+                .Where(n => n.Type == "blogs")
+                .OrderByDescending(n => n.CreatedAt)
+                .ToList();
+            ViewBag.TeamMembers = teamMembers;
+
             return View();
         }
 

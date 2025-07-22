@@ -18,6 +18,7 @@ namespace BloodDonation.Controllers
         public async Task<IActionResult> Index()
         {
             var newsList = await _context.News
+                .Where(n => n.Type == "news")
                 .OrderByDescending(n => n.CreatedAt)
                 .ToListAsync();
 

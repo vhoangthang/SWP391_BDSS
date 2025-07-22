@@ -84,6 +84,36 @@
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('form').forEach(function(form) {
+                form.addEventListener('submit', function (e) {
+                    const btn = e.submitter;
+                    if (btn && btn.type === 'submit') {
+                        let msg = '';
+                        switch (btn.value) {
+                            case 'completed':
+                            case 'complete':
+                                msg = 'Bạn có chắc chắn muốn đánh dấu đơn này là HOÀN THÀNH?';
+                                break;
+                            case 'reject':
+                                msg = 'Bạn có chắc chắn muốn TỪ CHỐI đơn hiến máu này?';
+                                break;
+                            case 'confirm':
+                                msg = 'Bạn có chắc chắn muốn XÁC NHẬN đơn hiến máu này?';
+                                break;
+                            case 'cancel':
+                                msg = 'Bạn có chắc chắn muốn HỦY đơn nhận máu này?';
+                                break;
+                        }
+                        if (msg && !confirm(msg)) {
+                            e.preventDefault();
+                        }
+                    }
+                });
+            });
+        });
+    </script>
     @RenderSection("Modal", required: false)
     @RenderSection("Scripts", required: false)
     <script src="~/js/donation-list.js"></script>

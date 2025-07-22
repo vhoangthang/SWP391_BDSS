@@ -439,13 +439,6 @@ namespace BloodDonation.Controllers
         [HttpPost]
         public async Task<IActionResult> EditNews(News updatedNews)
         {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.NewsList = await _context.News.OrderByDescending(n => n.CreatedAt).ToListAsync();
-                ViewBag.EditingNews = updatedNews;
-                return View("NewsManagement", ViewBag.NewsList);
-            }
-
             var news = await _context.News.FindAsync(updatedNews.NewsId);
             if (news == null) return NotFound();
 
@@ -458,6 +451,59 @@ namespace BloodDonation.Controllers
             return RedirectToAction("NewsManagement");
         }
 
+        public IActionResult CreateNews()
+        {
+            var username = HttpContext.Session.GetString("Username");
+            var role = HttpContext.Session.GetString("Role");
+
+            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            return View();
+        }
+
+        // POST: Process new news from Ajax
+        [HttpPost]
+        public async Task<IActionResult> CreateNews(string Title, string Url)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            var role = HttpContext.Session.GetString("Role");
+
+            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
+            {
+                return Json(new { success = false, message = "Bạn không có quyền thực hiện thao tác này." });
+            }
+
+            // Check input data
+            if (string.IsNullOrEmpty(Title) || string.IsNullOrEmpty(Url))
+            {
+                return Json(new { success = false, message = "Tiêu đề và URL không được để trống." });
+            }
+
+            try
+            {
+                // Create new news, always set Type = 'news'
+                var newNews = new News
+                {
+                    Title = Title,
+                    Url = Url,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    Type = "news"
+                };
+
+                _context.News.Add(newNews);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra khi thêm tin tức: " + ex.Message });
+            }
+        }
 
     }
 }

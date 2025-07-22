@@ -324,49 +324,25 @@
             <h1 class="display-5 mb-4">Y Bác Sĩ & Tình Nguyện Viên</h1>
             <p class="mb-4">Đội ngũ y bác sĩ tận tâm, các tình nguyện viên nhiệt huyết luôn đồng hành cùng bạn trong mỗi chương trình hiến máu.</p>
         </div>
-        <div class="row g-4">
-            <div class="col-md-6 col-lg-3">
-                <div class="team-item text-center p-4 border rounded h-100" data-href="http://www.thiduakhenthuongvn.org.vn/dien-hinh-tien-tien/bac-si-hon-30-nam-gan-bo-voi-nganh-truyen-mau">
-                    <img src="~/img/team-1.jpg" class="img-fluid rounded-circle mb-3" alt="">
-                    <h5>BS. Phạm Tuấn Dương</h5>
-                    <p>Bác sĩ huyết học</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="team-item text-center p-4 border rounded h-100" data-href="https://suckhoedoisong.vn/bac-si-tre-hon-40-lan-hien-mau-169240724154313626.htm">
-                    <img src="~/img/team-2.jpg" class="img-fluid rounded-circle mb-3" alt="">
-                    <h5>BS. Nguyễn Thanh Hưng</h5>
-                    <p>Bác sĩ huyết học</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="team-item text-center p-4 border rounded h-100" data-href="https://hienmaunhandao.org.vn/blogs/guong-hien-mau-tieu-bieu/16-nam-53-lan-hien-mau">
-                    <img src="~/img/team-3.jpg" class="img-fluid rounded-circle mb-3" alt="">
-                    <h5>Chú Ngô Quốc Tùng</h5>
-                    <p>Tình nguyện viên</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="team-item text-center p-4 border rounded h-100" data-href="https://hienmaunhandao.org.vn/blogs/guong-hien-mau-tieu-bieu/cu-ong-nguoi-anh-hien-hon-60-lit-mau-cuu-nguoi">
-                    <img src="~/img/team-4.jpg" class="img-fluid rounded-circle mb-3" alt="">
-                    <h5>Ông Rodger Webster</h5>
-                    <p>Tình nguyện viên</p>
-                </div>
-            </div>
+        <div class="row g-4 justify-content-center">
+            @if (ViewBag.TeamMembers != null && ViewBag.TeamMembers.Count > 0)
+            {
+                foreach (var member in ViewBag.TeamMembers)
+                {
+                    <div class="col-md-6 col-lg-3">
+                        <div class="team-item text-center p-4 border rounded h-100">
+                            <a href="@member.Url" target="_blank" style="text-decoration:none;">
+                                <h5>@member.Title</h5>
+                            </a>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center text-muted">Chưa có thành viên đội ngũ nào được hiển thị.</div>
+            }
         </div>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('.team-item[data-href]').forEach(function(item) {
-                    item.style.cursor = 'pointer';
-                    item.addEventListener('click', function(e) {
-                        var link = item.getAttribute('data-href');
-                        if (link && link !== '#') {
-                            window.open(link, '_blank');
-                        }
-                    });
-                });
-            });
-        </script>
     </div>
 </div>
 <!-- Team End -->

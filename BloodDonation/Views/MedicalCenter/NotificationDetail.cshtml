@@ -60,4 +60,18 @@
         </div>
     }
     <a href="@Url.Action("MedicalCenterNotifications", "MedicalCenter")" class="btn btn-secondary">Quay lại danh sách thông báo</a>
-</div> 
+</div>
+@section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form[asp-action="ConfirmAppointmentCompletion"]');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                if (!confirm('Bạn có chắc chắn muốn xác nhận hoàn thành và cấp chứng chỉ cho đơn này?')) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+</script>
+} 

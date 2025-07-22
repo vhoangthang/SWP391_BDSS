@@ -21,5 +21,9 @@ namespace BloodDonation.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public DateTime? UpdatedAt { get; set; }
+
+        // blogs & news
+        [StringLength(50)]
+        public string Type { get; set; }
     }
 }
