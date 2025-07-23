@@ -44,7 +44,7 @@
                 alert("Lỗi: " + data.message);
                 if (data.code === "NO_DONOR") {
                     window.location.href = '/';
-                } else if (data.message && data.message.includes("14 ngày")) {
+                } else if (data.message && data.message.includes("12 tuần")) {
                     window.location.href = '/';
                 }
             }
