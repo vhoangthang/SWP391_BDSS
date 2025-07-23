@@ -22,11 +22,13 @@ namespace BloodDonation.Models
         [ForeignKey("BloodTypeID")]
         public BloodType? BloodType { get; set; }
 
+        [Required(ErrorMessage = "Họ và tên không được để trống.")]
         [MaxLength(255)]
         public string? Name { get; set; }
 
         public DateTime? DateOfBirth { get; set; }
 
+        [RegularExpression("^[0-9]*$", ErrorMessage = "Số điện thoại chỉ được chứa số.")]
         [MaxLength(20)]
         public string? ContactNumber { get; set; }
 
@@ -38,6 +40,7 @@ namespace BloodDonation.Models
 
         public bool? IsAvailable { get; set; }
 
+        [RegularExpression("^[0-9]*$", ErrorMessage = "CCCD chỉ được chứa số.")]
         [MaxLength(50)]
         public string? CCCD { get; set; }
 

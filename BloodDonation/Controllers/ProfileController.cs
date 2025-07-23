@@ -78,8 +78,35 @@ namespace BloodDonation.Controllers
 
             if (!ModelState.IsValid)
             {
+                var donorInDb = _context.Donors.FirstOrDefault(d => d.AccountID == donor.AccountID);
+                bool canEditIsAvailable = false;
+                if (donorInDb != null)
+                {
+                    canEditIsAvailable = _context.DonationAppointments.Any(a => a.DonorID == donorInDb.DonorID && (a.Status == "Pending" || a.Status == "Confirmed"));
+                }
+                ViewBag.CanEditIsAvailable = canEditIsAvailable;
                 ViewBag.BloodTypes = new SelectList(_context.BloodTypes.ToList(), "BloodTypeID", "Type", donor.BloodTypeID);
                 return View(donor);
+            }
+
+            if (donor.DateOfBirth.HasValue)
+            {
+                var today = DateTime.Today;
+                int age = today.Year - donor.DateOfBirth.Value.Year;
+                if (donor.DateOfBirth.Value.Date > today.AddYears(-age)) age--;
+                if (age < 18 || age > 60)
+                {
+                    var donorInDb = _context.Donors.FirstOrDefault(d => d.AccountID == donor.AccountID);
+                    bool canEditIsAvailable = false;
+                    if (donorInDb != null)
+                    {
+                        canEditIsAvailable = _context.DonationAppointments.Any(a => a.DonorID == donorInDb.DonorID && (a.Status == "Pending" || a.Status == "Confirmed"));
+                    }
+                    ViewBag.CanEditIsAvailable = canEditIsAvailable;
+                    ModelState.AddModelError("DateOfBirth", "Bạn phải từ 18 đến 60 tuổi mới có thể đăng ký hiến máu.");
+                    ViewBag.BloodTypes = new SelectList(_context.BloodTypes.ToList(), "BloodTypeID", "Type", donor.BloodTypeID);
+                    return View(donor);
+                }
             }
 
             var existingDonor = _context.Donors.FirstOrDefault(d => d.AccountID == donor.AccountID);
@@ -100,7 +127,23 @@ namespace BloodDonation.Controllers
                 existingDonor.CCCD = donor.CCCD;
                 existingDonor.BloodTypeID = donor.BloodTypeID;
             }
-            _context.SaveChanges();
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                var donorInDb = _context.Donors.FirstOrDefault(d => d.AccountID == donor.AccountID);
+                bool canEditIsAvailable = false;
+                if (donorInDb != null)
+                {
+                    canEditIsAvailable = _context.DonationAppointments.Any(a => a.DonorID == donorInDb.DonorID && (a.Status == "Pending" || a.Status == "Confirmed"));
+                }
+                ViewBag.CanEditIsAvailable = canEditIsAvailable;
+                ViewBag.BloodTypes = new SelectList(_context.BloodTypes.ToList(), "BloodTypeID", "Type", donor.BloodTypeID);
+                ModelState.AddModelError(string.Empty, "Có lỗi xảy ra khi lưu dữ liệu. Vui lòng kiểm tra lại và thử lại!");
+                return View(donor);
+            }
             return RedirectToAction("Index");
         }
     }
