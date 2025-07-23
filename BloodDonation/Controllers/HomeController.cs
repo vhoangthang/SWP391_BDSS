@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using BloodDonation.Models;
 using Microsoft.AspNetCore.Mvc;
 using BloodDonation.Data;
@@ -35,6 +35,20 @@ namespace BloodDonation.Controllers
                 }
             }
             ViewBag.UnreadNotificationCount = unreadCount;
+
+            string userDisplayName = "Người mới";
+            if (!string.IsNullOrEmpty(username))
+            {
+                var donor = _context.Donors
+                    .Include(d => d.Account)
+                    .FirstOrDefault(d => d.Account.Username == username);
+                if (donor != null && !string.IsNullOrWhiteSpace(donor.Name))
+                {
+                    userDisplayName = donor.Name;
+                }
+            }
+            ViewBag.UserDisplayName = userDisplayName;
+
 
             // Get TeamMember News with Type = "blogs"
             var teamMembers = _context.News
