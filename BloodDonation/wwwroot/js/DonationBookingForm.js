@@ -3,19 +3,19 @@
     const formData = {};
     const form = e.target;
 
-    // Lấy tất cả input radio đã chọn
+    // Get all selected radio inputs
     const checkedInputs = form.querySelectorAll('input[type="radio"]:checked');
     checkedInputs.forEach(input => {
         formData[input.name] = input.value;
     });
 
-    // Lấy tất cả input checkbox đã chọn
+    // Get all selected checkboxes
     const checkedCheckboxes = form.querySelectorAll('input[type="checkbox"]:checked');
     checkedCheckboxes.forEach(input => {
         formData[input.name] = input.value;
     });
 
-    // Kiểm tra các trường hợp không đủ điều kiện hiến máu
+    // Check cases where the donor is not eligible to donate blood
     if (
         formData["3_TruocDayAnhChiCoMacCacBenhLietKeKhong"] === "true" ||
         formData["4_KhoiBenhSauMacCacBenh12Thang"] === "true" ||

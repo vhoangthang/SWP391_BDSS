@@ -18,10 +18,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const newContent = doc.querySelector(".main").innerHTML;
             main.innerHTML = newContent;
             history.pushState({}, "", this.href);
-            // Cập nhật active link
+            // Update active link
             links.forEach((l) => l.classList.remove("active"));
             this.classList.add("active");
-            // Thông báo nội dung đã load xong để các script khác khởi tạo lại
+            // Notify that content has loaded so other scripts can re-initialize
             const event = new Event("ajaxContentLoaded");
             document.dispatchEvent(event);
           })
@@ -42,14 +42,14 @@ document.addEventListener("DOMContentLoaded", function () {
         const doc = parser.parseFromString(html, "text/html");
         const newContent = doc.querySelector(".main").innerHTML;
         document.querySelector(".main").innerHTML = newContent;
-        bindAjaxLinks(); // Gán lại sự kiện
-        // Thông báo nội dung đã load xong để các script khác khởi tạo lại
+        bindAjaxLinks(); // Re-assign event
+        // Notify that content has loaded so other scripts can re-initialize
         const event = new Event("ajaxContentLoaded");
         document.dispatchEvent(event);
       });
   });
 
-  // Sửa lỗi addEventListener trên phần tử null (dòng 67)
+  // Fix addEventListener on null element (line 67)
   var modal = document.getElementById("healthHistoryModal");
   if (modal) {
     modal.addEventListener("shown.bs.modal", function () {
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Khi vào trang lần đầu, cũng dispatch ajaxContentLoaded để các script search/filter luôn khởi tạo
+  // When entering the page for the first time, also dispatch ajaxContentLoaded so search/filter scripts always initialize
   const event = new Event("ajaxContentLoaded");
   document.dispatchEvent(event);
 });

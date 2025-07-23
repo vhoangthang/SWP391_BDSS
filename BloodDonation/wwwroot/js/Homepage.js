@@ -1,4 +1,4 @@
-// Hiệu ứng click vào team-item để mở link mới
+// Click effect on team-item to open a new link
 window.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.team-item[data-href]').forEach(function(item) {
         item.style.cursor = 'pointer';
@@ -47,7 +47,7 @@ window.addEventListener('DOMContentLoaded', function() {
             path.style.strokeDashoffset = 0;
         }, 10);
     }
-    // Bảng tương thích nhóm máu
+    // Blood type compatibility table
     const bloodCompat = {
         'A': ['A', 'AB'],
         'B': ['B', 'AB'],
