@@ -322,11 +322,6 @@ namespace BloodDonation.Controllers
             return false;
         }
 
-        public class DeleteUserRequest
-        {
-            public int id { get; set; }
-        }
-
         [HttpPost]
         public async Task<IActionResult> DeleteUser([FromBody] DeleteUserRequest req)
         {
@@ -398,13 +393,6 @@ namespace BloodDonation.Controllers
             _context.Accounts.Remove(user);
             await _context.SaveChangesAsync();
             return Json(new { success = true, message = "Xóa tài khoản thành công." });
-        }
-
-        public class ChangeRoleRequest
-        {
-            public int id { get; set; }
-            public string newRole { get; set; }
-            public int? medicalCenterId { get; set; }
         }
 
         [HttpPost]
@@ -515,7 +503,7 @@ namespace BloodDonation.Controllers
             return View();
         }
 
-        // POST: Process new news from Ajax
+        // Process new news from Ajax
         [HttpPost]
         public async Task<IActionResult> CreateNews(string Title, string Url)
         {
