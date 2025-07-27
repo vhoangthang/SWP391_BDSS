@@ -26,18 +26,6 @@ function filterUserTable() {
     }
 }
 
-function editUser(userId) {
-    // TODO: Implement edit user functionality
-    alert('Chức năng chỉnh sửa người dùng sẽ được phát triển sau');
-}
-
-function deleteUser(userId) {
-    if (confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-        // TODO: Implement delete user functionality
-        alert('Chức năng xóa người dùng sẽ được phát triển sau');
-    }
-}
-
 // Search functionality for Blood Request Management page
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
