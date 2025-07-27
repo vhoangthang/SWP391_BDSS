@@ -25,6 +25,7 @@
                 <option value="approved">Đã duyệt</option>
                 <option value="completed">Hoàn thành</option>
                 <option value="rejected">Từ chối</option>
+                <option value="cancelled">Đã hủy</option>
             </select>
         </div>
     </div>
@@ -70,6 +71,9 @@
                                     ; break;
                                 case "rejected":
                                     <span class="bdss-badge-soft bdss-badge-soft-danger"><span style="font-size:1.1em;">&#x2716;</span> Từ chối</span>
+                                    ; break;
+                                case "cancelled":
+                                    <span class="bdss-badge-soft bdss-badge-soft-cancelled"><span style="font-size:1.1em;">&#x2716;</span> Đã hủy</span>
                                     ; break;
                                 default:
                                     <span class="bdss-badge-soft bdss-badge-soft-secondary">@item.Status</span>

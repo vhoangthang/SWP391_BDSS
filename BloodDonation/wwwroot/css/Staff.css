@@ -253,6 +253,11 @@ h4 {
     color: #2563eb;
 }
 
+.bdss-badge-soft-cancelled {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
 .bdss-badge-soft-info {
     background: #e0f2fe;
     color: #0284c7;
