@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using BloodDonation.Data; // namespace have AppDbContext
+using BloodDonation.Data;
 using BloodDonation.Repositories.Interfaces;
 using BloodDonation.Repositories;
+using BloodDonation.Models;
 
 namespace BloodDonation
 {
@@ -25,6 +26,17 @@ namespace BloodDonation
                 options.IdleTimeout = TimeSpan.FromMinutes(30); // Session timeout
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
+            });
+
+            // Add SMTP settings manually
+            builder.Services.Configure<SmtpSettings>(options =>
+            {
+                options.Host = "smtp.gmail.com";
+                options.Port = 587;
+                options.EnableSsl = true;
+                options.UserName = "vohoangthang2004@gmail.com";
+                options.Password = "lwvgdgghfyorgabk";
+                options.DisplayName = "BloodDonation";
             });
 
             // Add MVC
