@@ -3,7 +3,7 @@
 @{
     Layout = "~/Views/Shared/_LayoutStaff.cshtml";
     ViewData["Title"] = "Đăng ký hiến máu";
-    var sortedModel = Model.OrderBy(x => x.AppointmentID).ToList();
+    var sortedModel = Model.OrderByDescending(x => x.AppointmentID).ToList();
 }
 
 

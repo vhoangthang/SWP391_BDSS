@@ -11,6 +11,10 @@
         <div class="card-body">
             <p>@Model.Message</p>
             <p><b>Thời gian:</b> @Model.SentAt.ToString("dd/MM/yyyy HH:mm")</p>
+            @if (Model.BloodRequest != null)
+            {
+                <p><b>ID yêu cầu nhận máu:</b> @Model.BloodRequest.BloodRequestID</p>
+            }
         </div>
     </div>
     @if (donor != null)

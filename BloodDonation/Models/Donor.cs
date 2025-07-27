@@ -24,6 +24,7 @@ namespace BloodDonation.Models
 
         [Required(ErrorMessage = "Họ và tên không được để trống.")]
         [MaxLength(255)]
+        [RegularExpression(@"^[a-zA-ZÀ-ỹ\s]+$", ErrorMessage = "Họ và tên chỉ được chứa chữ cái và dấu cách, không chứa số hoặc ký tự đặc biệt.")]
         public string? Name { get; set; }
 
         public DateTime? DateOfBirth { get; set; }
