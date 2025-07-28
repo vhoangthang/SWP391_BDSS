@@ -1,4 +1,4 @@
-// Chức năng search/filter cho danh sách đăng ký hiến máu
+// Search/filter functionality for the blood donation registration list
 function initDonationListFilter() {
   console.log("initDonationListFilter run");
   const searchInput = document.getElementById("searchInput");
@@ -42,7 +42,7 @@ function initDonationListFilter() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Gọi ngay, nếu chưa đủ phần tử thì thử lại sau 100ms
+  // Call immediately, if not enough elements then try again after 100ms
   if (
     !document.getElementById("searchInput") ||
     !document.getElementById("statusFilter") ||

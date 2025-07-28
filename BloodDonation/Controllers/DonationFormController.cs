@@ -46,7 +46,7 @@ namespace BloodDonation.Controllers
             var donor = _context.Donors.FirstOrDefault(d => d.AccountID == account.AccountID);
 
             if (donor == null)
-                return Json(new { success = false, message = "Không tìm thấy thông tin người hiến máu", code = "NO_DONOR" });
+                return Json(new { success = false, message = "Không tìm thấy thông tin người hiến máu, vui lòng cập nhật hồ sơ", code = "NO_DONOR" });
 
             // If question 10 is 'true' and the current status is false or null, update to true
             if (model.Answers.TryGetValue("10_AnhChiSanSangHienMauNeuDuDieuKien", out var q10))
@@ -65,10 +65,10 @@ namespace BloodDonation.Controllers
 
             if (lastAppointment != null)
             {
-                var nextEligibleDate = lastAppointment.AppointmentDate.AddDays(14);
+                var nextEligibleDate = lastAppointment.AppointmentDate.AddDays(84);
                 if (now < nextEligibleDate)
                 {
-                    return Json(new { success = false, message = $"Bạn chỉ có thể đăng ký hiến máu lại sau 14 ngày kể từ lần đăng ký gần nhất! (sau ngày {nextEligibleDate:dd/MM/yyyy})" });
+                    return Json(new { success = false, message = $"Bạn chỉ có thể đăng ký hiến máu lại sau 12 tuần kể từ lần đăng ký gần nhất! (sau ngày {nextEligibleDate:dd/MM/yyyy})" });
                 }
             }
 

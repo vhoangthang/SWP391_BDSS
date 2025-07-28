@@ -64,6 +64,11 @@
                     @{
                         var username = Context.Session.GetString("Username");
                         var isLoggedIn = !string.IsNullOrEmpty(username);
+                        string userDisplayName = "Người mới";
+                        if (isLoggedIn && ViewBag.UserDisplayName != null)
+                        {
+                            userDisplayName = ViewBag.UserDisplayName;
+                        }
                     }
                     @if (isLoggedIn)
                     {
@@ -79,7 +84,7 @@
                         </a>
                         <div class="dropdown">
                             <a href="#" class="dropdown-toggle text-dark" data-bs-toggle="dropdown">
-                                <small><i class="fa fa-home text-danger me-2"></i> Xin chào, @username!</small>
+                                <small><i class="fa fa-home text-danger me-2"></i> Xin chào, @userDisplayName!</small>
                             </a>
                             <div class="dropdown-menu rounded">
                                 <div class="dropdown-divider"></div>

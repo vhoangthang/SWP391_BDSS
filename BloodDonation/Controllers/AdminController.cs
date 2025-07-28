@@ -45,7 +45,9 @@ namespace BloodDonation.Controllers
                 {
                     month = new DateTime(2025, g.Key, 1).ToString("MMM"),
                     donations = g.Count(a => a.Status == "Completed"),
-                    requests = g.Count(a => a.Status == "Requested")
+                    requests = _context.BloodRequests
+                        .Where(br => br.RequestDate.Month == g.Key && br.Status == "Completed")
+                        .Count()
                 }).ToListAsync();
 
             var bloodTypes = new[] { "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-" };
@@ -76,6 +78,55 @@ namespace BloodDonation.Controllers
             ViewBag.BloodTypeDistribution = bloodTypeDistribution;
 
             return View();
+        }
+
+        // Temporary action to add test data for BloodRequests
+        public async Task<IActionResult> AddTestBloodRequests()
+        {
+            var username = HttpContext.Session.GetString("Username");
+            var role = HttpContext.Session.GetString("Role");
+
+            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            // Add some test blood requests
+            var testRequests = new List<BloodRequest>
+            {
+                new BloodRequest
+                {
+                    MedicalCenterID = 1,
+                    BloodTypeID = 1, // A+
+                    Reason = "Test request 1",
+                    RequestDate = DateTime.Now.AddMonths(-2),
+                    Quantity = 500,
+                    Status = "Pending"
+                },
+                new BloodRequest
+                {
+                    MedicalCenterID = 1,
+                    BloodTypeID = 2, // A-
+                    Reason = "Test request 2",
+                    RequestDate = DateTime.Now.AddMonths(-1),
+                    Quantity = 300,
+                    Status = "Completed"
+                },
+                new BloodRequest
+                {
+                    MedicalCenterID = 1,
+                    BloodTypeID = 3, // B+
+                    Reason = "Test request 3",
+                    RequestDate = DateTime.Now,
+                    Quantity = 400,
+                    Status = "Pending"
+                }
+            };
+
+            _context.BloodRequests.AddRange(testRequests);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
         }
 
         public async Task<IActionResult> DonationHistory()
@@ -271,11 +322,6 @@ namespace BloodDonation.Controllers
             return false;
         }
 
-        public class DeleteUserRequest
-        {
-            public int id { get; set; }
-        }
-
         [HttpPost]
         public async Task<IActionResult> DeleteUser([FromBody] DeleteUserRequest req)
         {
@@ -347,13 +393,6 @@ namespace BloodDonation.Controllers
             _context.Accounts.Remove(user);
             await _context.SaveChangesAsync();
             return Json(new { success = true, message = "Xóa tài khoản thành công." });
-        }
-
-        public class ChangeRoleRequest
-        {
-            public int id { get; set; }
-            public string newRole { get; set; }
-            public int? medicalCenterId { get; set; }
         }
 
         [HttpPost]
@@ -464,7 +503,7 @@ namespace BloodDonation.Controllers
             return View();
         }
 
-        // POST: Process new news from Ajax
+        // Process new news from Ajax
         [HttpPost]
         public async Task<IActionResult> CreateNews(string Title, string Url)
         {

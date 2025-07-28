@@ -3,6 +3,7 @@
 @{
     Layout = "~/Views/Shared/_LayoutStaff.cshtml";
     ViewData["Title"] = "Yêu cầu nhận máu";
+    var sortedModel = Model.OrderByDescending(x => x.BloodRequestID).ToList();
 }
 
 <link href="~/css/Staff.css" rel="stylesheet" />
@@ -42,7 +43,7 @@
                 </tr>
             </thead>
             <tbody id="bloodRequestTableBody">
-                @foreach (var req in Model)
+                @foreach (var req in sortedModel)
                 {
     if (req.Status == "Approved" || req.Status == "Completed")
     {
