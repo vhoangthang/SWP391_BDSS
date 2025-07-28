@@ -163,13 +163,8 @@
                     },
                     success: function (response) {
                         if (response.success) {
-                            // Add news to list without reloading page
-                            var newRow = '<tr><td>' + title + '</td><td><a href="' + url + '" target="_blank">Xem</a></td><td>' + new Date().toLocaleDateString() + '</td><td><button class="btn btn-sm btn-primary">Sửa</button></td></tr>';
-                            $("#newsList").prepend(newRow);
-
-                            // Hide form and reset form
-                            $("#addNewsForm").hide();
-                            $("#newNewsForm")[0].reset();
+                            alert("Thêm tin tức thành công!");
+                            location.reload();
                         } else {
                             alert(response.message || "Có lỗi xảy ra khi thêm tin tức.");
                         }
