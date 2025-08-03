@@ -100,6 +100,14 @@ namespace BloodDonation.Controllers
                     {
                         _context.HealthSurveys.RemoveRange(surveys);
                     }
+                       
+                    var donor = _context.Donors.FirstOrDefault(d => d.DonorID == appointment.DonorID);
+                    if (donor != null && donor.IsAvailable == true)
+                    {
+                        donor.IsAvailable = false;
+                        _context.SaveChanges();
+                    }
+                    
                     _context.DonationAppointments.Remove(appointment);
                     _context.SaveChanges();
                 }

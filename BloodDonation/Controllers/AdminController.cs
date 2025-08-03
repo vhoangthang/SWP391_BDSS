@@ -78,56 +78,7 @@ namespace BloodDonation.Controllers
             ViewBag.BloodTypeDistribution = bloodTypeDistribution;
 
             return View();
-        }
-
-        // Temporary action to add test data for BloodRequests
-        public async Task<IActionResult> AddTestBloodRequests()
-        {
-            var username = HttpContext.Session.GetString("Username");
-            var role = HttpContext.Session.GetString("Role");
-
-            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
-            // Add some test blood requests
-            var testRequests = new List<BloodRequest>
-            {
-                new BloodRequest
-                {
-                    MedicalCenterID = 1,
-                    BloodTypeID = 1, // A+
-                    Reason = "Test request 1",
-                    RequestDate = DateTime.Now.AddMonths(-2),
-                    Quantity = 500,
-                    Status = "Pending"
-                },
-                new BloodRequest
-                {
-                    MedicalCenterID = 1,
-                    BloodTypeID = 2, // A-
-                    Reason = "Test request 2",
-                    RequestDate = DateTime.Now.AddMonths(-1),
-                    Quantity = 300,
-                    Status = "Completed"
-                },
-                new BloodRequest
-                {
-                    MedicalCenterID = 1,
-                    BloodTypeID = 3, // B+
-                    Reason = "Test request 3",
-                    RequestDate = DateTime.Now,
-                    Quantity = 400,
-                    Status = "Pending"
-                }
-            };
-
-            _context.BloodRequests.AddRange(testRequests);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Index");
-        }
+        }    
 
         public async Task<IActionResult> DonationHistory()
         {
