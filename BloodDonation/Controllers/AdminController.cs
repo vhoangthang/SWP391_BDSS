@@ -8,21 +8,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-
-
 namespace BloodDonation.Controllers
 {
-    public class AdminController : Controller
+    public class AdminController(AppDbContext context, ILogger<AdminController> logger) : Controller
     {
-        private readonly AppDbContext _context;
-        private readonly ILogger<AdminController> _logger;
-
-        public AdminController(AppDbContext context, ILogger<AdminController> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
-
         public async Task<IActionResult> Index()
         {
             var username = HttpContext.Session.GetString("Username");
@@ -30,30 +19,28 @@ namespace BloodDonation.Controllers
 
             if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
             {
-                _logger.LogWarning($"Unauthorized access attempt: Username={username}, Role={role}");
+                logger.LogWarning($"Unauthorized access attempt: Username={username}, Role={role}");
                 return RedirectToAction("Index", "Login");
             }
 
-            var totalUsers = await _context.Accounts.CountAsync();
-            var totalBloodRequests = await _context.BloodRequests.CountAsync();
-            var totalBloodInventory = await _context.BloodInventories.SumAsync(bi => bi.Quantity);
-            //var donorCount = await _context.Donors.CountAsync();
+            var totalUsers = await context.Accounts.CountAsync();
+            var totalBloodRequests = await context.BloodRequests.CountAsync();
+            var totalBloodInventory = await context.BloodInventories.SumAsync(bi => bi.Quantity);
 
-            var donationTrends = await _context.DonationAppointments
+            var donationTrends = await context.DonationAppointments
                 .GroupBy(a => a.AppointmentDate.Month)
                 .Select(g => new
                 {
                     month = new DateTime(2025, g.Key, 1).ToString("MMM"),
                     donations = g.Count(a => a.Status == "Completed"),
-                    requests = _context.BloodRequests
+                    requests = context.BloodRequests
                         .Where(br => br.RequestDate.Month == g.Key && br.Status == "Completed")
                         .Count()
                 }).ToListAsync();
 
             var bloodTypes = new[] { "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-" };
 
-            // Successfull donation volume
-            var completedDonations = await _context.DonationAppointments
+            var completedDonations = await context.DonationAppointments
                 .Where(a => a.Status == "Completed" && a.BloodType != null)
                 .GroupBy(a => a.BloodType.Type)
                 .Select(g => new
@@ -62,7 +49,6 @@ namespace BloodDonation.Controllers
                     count = g.Count()
                 }).ToListAsync();
 
-            // If there are no bloodTypes, count = 0
             var bloodTypeDistribution = bloodTypes
                 .Select(bt => new
                 {
@@ -73,7 +59,6 @@ namespace BloodDonation.Controllers
             ViewBag.TotalUsers = totalUsers;
             ViewBag.TotalBloodRequests = totalBloodRequests;
             ViewBag.TotalBloodInventory = totalBloodInventory;
-            //ViewBag.AvailableDonors = donorCount;
             ViewBag.DonationTrends = donationTrends;
             ViewBag.BloodTypeDistribution = bloodTypeDistribution;
 
@@ -82,19 +67,10 @@ namespace BloodDonation.Controllers
 
         public async Task<IActionResult> DonationHistory()
         {
-            var username = HttpContext.Session.GetString("Username");
-            var role = HttpContext.Session.GetString("Role");
-
-            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
-            var donationHistory = await _context.DonationAppointments
+            var donationHistory = await context.DonationAppointments
                 .Include(a => a.Donor)
-                    .ThenInclude(d => d.Account)
-                .Include(a => a.BloodType)        // Needed to display blood type
-                       
+                .ThenInclude(d => d.Account)
+                .Include(a => a.BloodType)
                 .Where(a => a.Status == "Completed")
                 .OrderByDescending(a => a.AppointmentDate)
                 .ToListAsync();
@@ -105,20 +81,12 @@ namespace BloodDonation.Controllers
 
         public async Task<IActionResult> UserManagement()
         {
-            var username = HttpContext.Session.GetString("Username");
-            var role = HttpContext.Session.GetString("Role");
-
-            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
-            var users = await _context.Accounts
+            var users = await context.Accounts
                 .Include(a => a.MedicalCenter)
                 .OrderBy(a => a.Username)
                 .ToListAsync();
 
-            var medicalCenters = await _context.MedicalCenters.ToListAsync();
+            var medicalCenters = await context.MedicalCenters.ToListAsync();
             ViewBag.MedicalCenters = medicalCenters;
 
             return View(users);
@@ -126,22 +94,13 @@ namespace BloodDonation.Controllers
 
         public async Task<IActionResult> BloodRequestManagement()
         {
-            var username = HttpContext.Session.GetString("Username");
-            var role = HttpContext.Session.GetString("Role");
-
-            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
-            var bloodRequests = await _context.BloodRequests
+            var bloodRequests = await context.BloodRequests
                 .Include(br => br.MedicalCenter)
                 .Include(br => br.BloodType)
                 .OrderByDescending(br => br.RequestDate)
                 .ToListAsync();
 
-            // Get the list of blood types available in inventory
-            var availableBloodTypes = await _context.BloodInventories
+            var availableBloodTypes = await context.BloodInventories
                 .Include(b => b.BloodType)
                 .Where(b => b.Quantity > 0)
                 .Select(b => b.BloodType.Type)
@@ -152,22 +111,13 @@ namespace BloodDonation.Controllers
 
         public async Task<IActionResult> BloodInventoryManagement()
         {
-            var username = HttpContext.Session.GetString("Username");
-            var role = HttpContext.Session.GetString("Role");
-
-            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
-            var bloodInventory = await _context.BloodInventories
+            var bloodInventory = await context.BloodInventories
                 .Include(bi => bi.BloodType)
                 .Include(bi => bi.BloodBank)
                 .OrderBy(bi => bi.BloodType.Type)
                 .ToListAsync();
 
-            // Add all blood types to ViewBag for selection
-            var allBloodTypes = await _context.BloodTypes.ToListAsync();
+            var allBloodTypes = await context.BloodTypes.ToListAsync();
             ViewBag.AllBloodTypes = allBloodTypes;
 
             return View(bloodInventory);
@@ -177,28 +127,20 @@ namespace BloodDonation.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateBloodRequestStatus(int requestId, string status)
         {
-            var username = HttpContext.Session.GetString("Username");
-            var role = HttpContext.Session.GetString("Role");
-
-            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
-            {
-                return Json(new { success = false, message = "Unauthorized" });
-            }
-
             try
             {
-                var bloodRequest = await _context.BloodRequests.FindAsync(requestId);
+                var bloodRequest = await context.BloodRequests.FindAsync(requestId);
                 if (bloodRequest != null)
                 {
                     bloodRequest.Status = status;
-                    await _context.SaveChangesAsync();
+                    await context.SaveChangesAsync();
                     return Json(new { success = true, message = "Cập nhật thành công" });
                 }
                 return Json(new { success = false, message = "Không tìm thấy yêu cầu" });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error updating blood request status: {ex.Message}");
+                logger.LogError($"Error updating blood request status: {ex.Message}");
                 return Json(new { success = false, message = "Có lỗi xảy ra" });
             }
         }
@@ -207,22 +149,13 @@ namespace BloodDonation.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateBloodInventory(int bloodTypeId, decimal quantity, string operation)
         {
-            var username = HttpContext.Session.GetString("Username");
-            var role = HttpContext.Session.GetString("Role");
-
-            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
-            {
-                return Json(new { success = false, message = "Unauthorized" });
-            }
-
             try
             {
                 const int bloodBankId = 1;
 
-                var bloodInventory = await _context.BloodInventories
+                var bloodInventory = await context.BloodInventories
                     .FirstOrDefaultAsync(i => i.BloodTypeID == bloodTypeId && i.BloodBankID == bloodBankId);
 
-                // Determine the change amount based on admin button selection
                 decimal change = operation == "subtract" ? -quantity : quantity;
 
                 if (bloodInventory != null)
@@ -232,7 +165,7 @@ namespace BloodDonation.Controllers
                         bloodInventory.Quantity = 0;
 
                     bloodInventory.LastUpdated = DateTime.Now;
-                    _context.Update(bloodInventory);
+                    context.Update(bloodInventory);
                 }
                 else
                 {
@@ -243,16 +176,16 @@ namespace BloodDonation.Controllers
                         Quantity = change < 0 ? 0 : change,
                         LastUpdated = DateTime.Now
                     };
-                    _context.Add(newInventory);
+                    context.Add(newInventory);
                 }
 
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
                 TempData["Message"] = "Cập nhật kho máu thành công!";
                 return RedirectToAction("BloodInventoryManagement");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error updating blood inventory: {ex.Message}");
+                logger.LogError($"Error updating blood inventory: {ex.Message}");
                 TempData["Error"] = "Có lỗi xảy ra khi cập nhật kho máu.";
                 return RedirectToAction("BloodInventoryManagement");
             }
@@ -284,17 +217,16 @@ namespace BloodDonation.Controllers
                 return Json(new { success = false, message = "Bạn không có quyền thực hiện thao tác này." });
             }
 
-            // Delete null appointment
-            var nullAppointments = _context.DonationAppointments
+            var nullAppointments = context.DonationAppointments
                 .Where(a => a.Status == null || a.HealthSurvey == null)
                 .ToList();
             if (nullAppointments.Any())
             {
-                _context.DonationAppointments.RemoveRange(nullAppointments);
-                await _context.SaveChangesAsync();
+                context.DonationAppointments.RemoveRange(nullAppointments);
+                await context.SaveChangesAsync();
             }
 
-            var user = await _context.Accounts.FindAsync(req.id);
+            var user = await context.Accounts.FindAsync(req.id);
             if (user == null)
             {
                 return Json(new { success = false, message = "Không tìm thấy tài khoản." });
@@ -305,8 +237,7 @@ namespace BloodDonation.Controllers
                 return Json(new { success = false, message = "Không thể xóa tài khoản admin hoặc chính bạn." });
             }
 
-            // Delete donor
-            var donor = await _context.Donors
+            var donor = await context.Donors
                 .Include(d => d.DonorBloodRequests)
                 .Include(d => d.DonationAppointments)
                 .Include(d => d.Notifications)
@@ -316,33 +247,28 @@ namespace BloodDonation.Controllers
             {
                 if (donor.DonationAppointments != null)
                 {
-                    // Delete appointment
                     var validAppointments = donor.DonationAppointments
-                        .Where(a => a.Status != null && a.HealthSurvey != null)
-                        .ToList();
+                        .Where(a => a.Status != null && a.HealthSurvey != null).ToList();
                     var appointmentIds = validAppointments.Select(a => a.AppointmentID).ToList();
 
-                    // Delete healthsurvey
-                    var surveys = _context.HealthSurveys.Where(s => appointmentIds.Contains(s.AppointmentID));
-                    _context.HealthSurveys.RemoveRange(surveys);
+                    var surveys = context.HealthSurveys.Where(s => appointmentIds.Contains(s.AppointmentID));
+                    context.HealthSurveys.RemoveRange(surveys);
 
-                    // Delete certificate
-                    var certificates = _context.DonationCertificates.Where(c => appointmentIds.Contains(c.AppointmentID));
-                    _context.DonationCertificates.RemoveRange(certificates);
+                    var certificates = context.DonationCertificates.Where(c => appointmentIds.Contains(c.AppointmentID));
+                    context.DonationCertificates.RemoveRange(certificates);
 
-                    // Delete another appointment
-                    _context.DonationAppointments.RemoveRange(validAppointments);
+                    context.DonationAppointments.RemoveRange(validAppointments);
                 }
                 if (donor.DonorBloodRequests != null)
-                    _context.DonorBloodRequests.RemoveRange(donor.DonorBloodRequests);
+                    context.DonorBloodRequests.RemoveRange(donor.DonorBloodRequests);
                 if (donor.Notifications != null)
-                    _context.Notifications.RemoveRange(donor.Notifications);
+                    context.Notifications.RemoveRange(donor.Notifications);
 
-                _context.Donors.Remove(donor);
+                context.Donors.Remove(donor);
             }
 
-            _context.Accounts.Remove(user);
-            await _context.SaveChangesAsync();
+            context.Accounts.Remove(user);
+            await context.SaveChangesAsync();
             return Json(new { success = true, message = "Xóa tài khoản thành công." });
         }
 
@@ -357,7 +283,7 @@ namespace BloodDonation.Controllers
                 return Json(new { success = false, message = "Bạn không có quyền thực hiện thao tác này." });
             }
 
-            var user = await _context.Accounts.FindAsync(req.id);
+            var user = await context.Accounts.FindAsync(req.id);
             if (user == null)
             {
                 return Json(new { success = false, message = "Không tìm thấy tài khoản." });
@@ -375,7 +301,6 @@ namespace BloodDonation.Controllers
             else
                 user.MedicalCenterID = null;
 
-            // Update permission
             switch (req.newRole.ToLower())
             {
                 case "donor":
@@ -396,27 +321,19 @@ namespace BloodDonation.Controllers
                     break;
             }
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return Json(new { success = true, message = "Cập nhật vai trò thành công." });
         }
 
         public async Task<IActionResult> NewsManagement(int? editId = null)
         {
-            var username = HttpContext.Session.GetString("Username");
-            var role = HttpContext.Session.GetString("Role");
-
-            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
-            var newsList = await _context.News
+            var newsList = await context.News
                 .OrderByDescending(n => n.CreatedAt)
                 .ToListAsync();
 
             if (editId.HasValue)
             {
-                var editingNews = await _context.News.FindAsync(editId.Value);
+                var editingNews = await context.News.FindAsync(editId.Value);
                 if (editingNews != null)
                 {
                     ViewBag.EditingNews = editingNews;
@@ -429,32 +346,18 @@ namespace BloodDonation.Controllers
         [HttpPost]
         public async Task<IActionResult> EditNews(News updatedNews)
         {
-            var news = await _context.News.FindAsync(updatedNews.NewsId);
+            var news = await context.News.FindAsync(updatedNews.NewsId);
             if (news == null) return NotFound();
 
             news.Title = updatedNews.Title;
             news.Url = updatedNews.Url;
             news.UpdatedAt = DateTime.Now;
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             TempData["Success"] = "Cập nhật tin tức thành công!";
             return RedirectToAction("NewsManagement");
         }
 
-        public IActionResult CreateNews()
-        {
-            var username = HttpContext.Session.GetString("Username");
-            var role = HttpContext.Session.GetString("Role");
-
-            if (string.IsNullOrEmpty(username) || role?.ToLower() != "admin")
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
-            return View();
-        }
-
-        // Process new news from Ajax
         [HttpPost]
         public async Task<IActionResult> CreateNews(string Title, string Url)
         {
@@ -466,7 +369,6 @@ namespace BloodDonation.Controllers
                 return Json(new { success = false, message = "Bạn không có quyền thực hiện thao tác này." });
             }
 
-            // Check input data
             if (string.IsNullOrEmpty(Title) || string.IsNullOrEmpty(Url))
             {
                 return Json(new { success = false, message = "Tiêu đề và URL không được để trống." });
@@ -474,7 +376,6 @@ namespace BloodDonation.Controllers
 
             try
             {
-                // Create new news, always set Type = 'news'
                 var newNews = new News
                 {
                     Title = Title,
@@ -484,8 +385,8 @@ namespace BloodDonation.Controllers
                     Type = "news"
                 };
 
-                _context.News.Add(newNews);
-                await _context.SaveChangesAsync();
+                context.News.Add(newNews);
+                await context.SaveChangesAsync();
 
                 return Json(new { success = true });
             }
