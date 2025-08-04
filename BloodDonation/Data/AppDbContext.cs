@@ -5,14 +5,8 @@ using BloodDonation.Models;
 
 namespace BloodDonation.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options)
-            : base(options)
-        {
-        }
-
-        //DB information here
         public DbSet<BloodBank> BloodBanks { get; set; }
         public DbSet<MedicalCenter> MedicalCenters { get; set; }
         public DbSet<BloodType> BloodTypes { get; set; }
@@ -25,16 +19,12 @@ namespace BloodDonation.Data
         public DbSet<BloodInventory> BloodInventories { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<HealthSurvey> HealthSurveys { get; set; }
-
         public DbSet<News> News { get; set; }
-
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Optional: Fluent API configs can go here if needed
             modelBuilder.Entity<Account>()
                 .HasOne(a => a.Donor)
                 .WithOne(d => d.Account)
