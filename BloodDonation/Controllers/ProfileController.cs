@@ -1,11 +1,9 @@
 using BloodDonation.Data;
 using BloodDonation.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-using BloodDonation.Models;
 
 
 namespace BloodDonation.Controllers

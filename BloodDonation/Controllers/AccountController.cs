@@ -3,7 +3,6 @@ using BloodDonation.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mail;
 using System.Net;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace BloodDonation.Controllers

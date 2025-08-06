@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using BloodDonation.Data;
 using BloodDonation.Models;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BloodDonation.Controllers
@@ -34,7 +33,7 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
-            // Đồng bộ logic badge: lấy tổng số thông báo chưa đọc của tất cả account thuộc Medical Center
+            
             var medicalCenterAccount = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "medicalcenter");
             int unreadCount = 0;
             if (medicalCenterAccount != null)
@@ -132,7 +131,8 @@ namespace BloodDonation.Controllers
                 }
             }
             else
-            {
+            {   
+                // Get all errors from ModelState and log them
                 _logger.LogWarning($"ModelState is invalid: {string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage))}");
             }
 
@@ -150,7 +150,7 @@ namespace BloodDonation.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
-            // Tính badge
+            // Count badge
             var medicalCenterAccount = _context.Accounts.FirstOrDefault(a => a.Username == username && a.Role.ToLower() == "medicalcenter");
             int unreadCount = 0;
             if (medicalCenterAccount != null)

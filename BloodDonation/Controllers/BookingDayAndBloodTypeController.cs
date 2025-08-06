@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using BloodDonation.Data;
-using System.Linq;
 
 namespace BloodDonation.Controllers
 {

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BloodDonation.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System;
 using BloodDonation.Models;
 

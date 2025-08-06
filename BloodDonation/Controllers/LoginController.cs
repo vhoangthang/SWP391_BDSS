@@ -3,7 +3,6 @@ using BloodDonation.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Linq;
 
 namespace BloodDonation.Controllers
 {
