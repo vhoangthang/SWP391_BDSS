@@ -5,8 +5,13 @@ using BloodDonation.Models;
 
 namespace BloodDonation.Data
 {
-    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+    public class AppDbContext : DbContext
     {
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options)
+        {
+        }
+
         public DbSet<BloodBank> BloodBanks { get; set; }
         public DbSet<MedicalCenter> MedicalCenters { get; set; }
         public DbSet<BloodType> BloodTypes { get; set; }
@@ -20,6 +25,7 @@ namespace BloodDonation.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<HealthSurvey> HealthSurveys { get; set; }
         public DbSet<News> News { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
