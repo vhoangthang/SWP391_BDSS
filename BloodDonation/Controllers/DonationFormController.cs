@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using BloodDonation.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace BloodDonation.Controllers
 {
@@ -97,7 +96,7 @@ namespace BloodDonation.Controllers
                 BloodTypeID = bloodTypeId.Value,
                 MedicalCenterID = medicalCenterId,
                 Status = "Pending",
-                HealthSurvey = JsonConvert.SerializeObject(model.Answers) // Save JSON
+                HealthSurvey = JsonConvert.SerializeObject(model.Answers) // Save JSON (Dictionary to JSON string)
             };
 
             _context.DonationAppointments.Add(appointment);

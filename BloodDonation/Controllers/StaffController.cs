@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using BloodDonation.Data;
 using BloodDonation.Models;
 using System;
-using System.Linq;
 using System.Text.Json;
 using System.Net.Http;
 using System.Text.Json.Nodes;
@@ -198,7 +196,7 @@ namespace BloodDonation.Controllers
                             _context.BloodInventories.Add(newInventory);
                         }
 
-                        // *** CREATE CERTIFICATE ***
+                        //  CREATE CERTIFICATE 
                         var existingCertificate = _context.DonationCertificates
                             .FirstOrDefault(c => c.AppointmentID == appointment.AppointmentID);
                         if (existingCertificate == null)
